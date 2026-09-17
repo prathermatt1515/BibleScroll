@@ -1008,6 +1008,15 @@
           ${days.map(d => `<div class="day-cell"><div class="day-letter">${d.letter}</div><div class="day-dot ${d.filled ? 'filled' : ''}">${d.filled ? '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 0 1-12 0c0-4 2-6 3-8 1-1.5 2-2.5 3-4z"/></svg>' : ''}</div></div>`).join('')}
         </div>
       </div>
+      <p style="font-size:13px; font-weight:500; color:var(--text-secondary); margin:20px 0 4px;">Your library</p>
+      <div class="book-row" id="lib-saved-row">
+        <span class="book-name">Saved verses</span>
+        <span class="book-pct">${Object.keys(saved).length}</span>
+      </div>
+      <div class="book-row" id="lib-notes-row">
+        <span class="book-name">Notes</span>
+        <span class="book-pct">${Object.keys(notes).length}</span>
+      </div>
       <p style="font-size:13px; font-weight:500; color:var(--text-secondary); margin:20px 0 4px;">Books of the Bible</p>
     `;
     BOOKS_66.forEach(book => {
@@ -1032,7 +1041,46 @@
     drawer.querySelectorAll('.book-row[data-book]').forEach(row => {
       row.onclick = () => openBookDetail(row.dataset.book);
     });
+    document.getElementById('lib-saved-row').onclick = () => openSavedBrowser();
+    document.getElementById('lib-notes-row').onclick = () => { closeDrawer('home-overlay'); openNotesBrowser(); };
     openDrawer('home-overlay');
+  }
+
+  function openSavedBrowser() {
+    const drawer = document.getElementById('home-drawer');
+    const byBook = {};
+    Object.keys(saved).forEach(key => {
+      const parts = key.split(':');
+      const book = parts[0], c = parseInt(parts[1]), v = parseInt(parts[2]);
+      byBook[book] = byBook[book] || [];
+      byBook[book].push({ c, v, key });
+    });
+    Object.keys(byBook).forEach(b => byBook[b].sort((a, b2) => a.c - b2.c || a.v - b2.v));
+
+    let html = `<div class="drawer-handle"></div><button class="back-btn" id="lib-back">‹ Back</button><p class="home-title">Saved verses</p>`;
+    const books = Object.keys(byBook);
+    if (books.length === 0) {
+      html += `<p class="study-body" style="text-align:center;">No saved verses yet. Tap the heart on any verse to save it.</p>`;
+    } else {
+      books.forEach(book => {
+        html += `<p style="font-size:13px; font-weight:500; color:var(--accent); margin:18px 0 6px;">${book} <span style="color:var(--text-secondary); font-weight:400;">(${byBook[book].length})</span></p>`;
+        byBook[book].forEach(n => {
+          const verseObj = ALL_VERSES.find(x => x.c === n.c && x.v === n.v);
+          html += `<div class="search-result" data-c="${n.c}" data-v="${n.v}">
+            <div class="sr-ref">${book} ${n.c}:${n.v}</div>
+            <div class="sr-text">${verseObj ? verseObj.kjv : ''}</div>
+          </div>`;
+        });
+      });
+    }
+    drawer.innerHTML = html;
+    document.getElementById('lib-back').onclick = () => openHome();
+    drawer.querySelectorAll('.search-result').forEach(el => {
+      el.onclick = () => {
+        closeDrawer('home-overlay');
+        goToChapter(parseInt(el.dataset.c), parseInt(el.dataset.v));
+      };
+    });
   }
 
   function openBookDetail(book) {
