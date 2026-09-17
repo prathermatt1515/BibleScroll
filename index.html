@@ -340,13 +340,15 @@
   "use strict";
 
   // ---------- State ----------
+  const ALL_VERSES = JAMES_VERSES;
   const state = {
     translation: localStorage.getItem('sj_translation') || 'kjv',
     theme: localStorage.getItem('sj_theme') || 'dark',
     chapter: 1,
-    verses: JAMES_VERSES,
+    verses: ALL_VERSES.filter(v => v.c === 1),
     liveTextCache: JSON.parse(localStorage.getItem('sj_livecache') || '{}')
   };
+  const TOTAL_CHAPTERS = 5;
   const saved = JSON.parse(localStorage.getItem('sj_saved') || '{}');
   const notes = JSON.parse(localStorage.getItem('sj_notes') || '{}');
 
@@ -373,7 +375,7 @@
     return v[trans];
   }
 
-  function renderFeed() {
+  function renderFeed(pulseFirst) {
     feed.innerHTML = '';
     state.verses.forEach((v, idx) => {
       const page = document.createElement('div');
@@ -397,20 +399,19 @@
       page.appendChild(textEl);
       page.appendChild(refEl);
 
-      const next = state.verses[idx + 1];
-      const isFirstOfChapter = idx > 0 && v.v === 1;
-      const isLastOfChapter = next && next.c !== v.c;
-
-      if (isFirstOfChapter) {
+      if (idx === 0) {
         const badge = document.createElement('div');
         badge.className = 'chapter-badge';
         badge.textContent = `JAMES ${v.c}`;
         page.insertBefore(badge, page.firstChild);
       }
-      if (isLastOfChapter) {
+      if (idx === state.verses.length - 1 && state.chapter < TOTAL_CHAPTERS) {
+        const nextC = state.chapter + 1;
         const hint = document.createElement('div');
         hint.className = 'next-chapter-hint';
-        hint.innerHTML = `<span>James ${next.c} next</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12l-7 7-7-7M12 19V5"/></svg>`;
+        hint.innerHTML = `<span>James ${nextC} next</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12l-7 7-7-7M12 19V5"/></svg>`;
+        hint.style.cursor = 'pointer';
+        hint.onclick = () => goToChapter(nextC, 1);
         page.appendChild(hint);
       }
       feed.appendChild(page);
@@ -418,6 +419,26 @@
     loadVisibleText();
     updateChapterLabel();
     buildTicks();
+    if (pulseFirst) {
+      const first = feed.querySelector('.verse-page[data-index="0"]');
+      if (first) {
+        first.classList.add('chapter-pulse');
+        setTimeout(() => first.classList.remove('chapter-pulse'), 700);
+      }
+    }
+  }
+
+  function goToChapter(c, verseNum) {
+    if (c < 1 || c > TOTAL_CHAPTERS) return;
+    state.chapter = c;
+    state.verses = ALL_VERSES.filter(v => v.c === c);
+    renderFeed(true);
+    feed.scrollTop = 0;
+    if (verseNum && verseNum > 1) {
+      const idx = state.verses.findIndex(v => v.v === verseNum);
+      if (idx > 0) setTimeout(() => { feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' }); loadVisibleText(); updateThumbFromScroll(); refreshRailState(); }, 30);
+    }
+    setTimeout(() => { updateThumbFromScroll(); refreshRailState(); }, 60);
   }
 
   async function getVerseText(idx) {
@@ -482,21 +503,8 @@
     return Math.round(scrollTop / h);
   }
 
-  let lastSeenChapter = 1;
   function updateChapterLabel() {
-    const idx = currentIndex();
-    const v = state.verses[idx];
-    if (v) {
-      document.getElementById('chapter-num').textContent = v.c;
-      if (v.c !== lastSeenChapter && v.v === 1) {
-        const page = feed.querySelector(`.verse-page[data-index="${idx}"]`);
-        if (page) {
-          page.classList.add('chapter-pulse');
-          setTimeout(() => page.classList.remove('chapter-pulse'), 700);
-        }
-      }
-      lastSeenChapter = v.c;
-    }
+    document.getElementById('chapter-num').textContent = state.chapter;
   }
 
   let scrollTimeout;
@@ -612,10 +620,8 @@
       btn.className = 'menu-item';
       btn.textContent = `James ${c}`;
       btn.onclick = () => {
-        const idx = state.verses.findIndex(v => v.c === c);
-        feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
+        goToChapter(c, 1);
         closeDrawer('chapter-overlay');
-        setTimeout(() => { loadVisibleText(); updateChapterLabel(); updateThumbFromScroll(); }, 50);
       };
       list.appendChild(btn);
     }
@@ -917,12 +923,8 @@
     drawer.querySelectorAll('.search-result').forEach(el => {
       el.onclick = () => {
         const c = parseInt(el.dataset.c), v = parseInt(el.dataset.v);
-        const idx = state.verses.findIndex(x => x.c === c && x.v === v);
-        if (idx >= 0) {
-          feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
-          closeDrawer('notes-browser-overlay');
-          setTimeout(() => { loadVisibleText(); updateChapterLabel(); updateThumbFromScroll(); refreshRailState(); }, 50);
-        }
+        closeDrawer('notes-browser-overlay');
+        goToChapter(c, v);
       };
     });
     openDrawer('notes-browser-overlay');
@@ -947,19 +949,17 @@
     if (refMatch) {
       const c = parseInt(refMatch[1]);
       const vnum = refMatch[2] ? parseInt(refMatch[2]) : null;
-      matches = state.verses.filter((v, i) => v.c === c && (vnum === null || v.v === vnum));
+      matches = ALL_VERSES.filter(v => v.c === c && (vnum === null || v.v === vnum));
     } else {
-      matches = state.verses.filter(v => v.kjv.toLowerCase().includes(q) || v.web.toLowerCase().includes(q));
+      matches = ALL_VERSES.filter(v => v.kjv.toLowerCase().includes(q) || v.web.toLowerCase().includes(q));
     }
     matches.slice(0, 25).forEach(v => {
-      const idx = state.verses.findIndex(x => x.c === v.c && x.v === v.v);
       const div = document.createElement('div');
       div.className = 'search-result';
       div.innerHTML = `<div class="sr-ref">James ${v.c}:${v.v}</div><div class="sr-text">${v.kjv}</div>`;
       div.onclick = () => {
-        feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
         closeDrawer('search-overlay');
-        setTimeout(() => { loadVisibleText(); updateChapterLabel(); updateThumbFromScroll(); refreshRailState(); }, 50);
+        goToChapter(v.c, v.v);
       };
       results.appendChild(div);
     });
