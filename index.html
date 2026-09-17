@@ -808,21 +808,26 @@
     ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
   });
 
-  // ---------- Chapter picker ----------
+  // ---------- Book picker ----------
   document.getElementById('chapter-pill').onclick = () => {
     const list = document.getElementById('chapter-list');
     list.innerHTML = '';
-    const totalChapters = CHAPTER_COUNTS[state.book].length;
-    for (let c = 1; c <= totalChapters; c++) {
+    BOOKS_66.forEach(book => {
       const btn = document.createElement('button');
       btn.className = 'menu-item';
-      btn.textContent = `${state.book} ${c}`;
-      btn.onclick = () => {
-        goToChapter(c, 1);
-        closeDrawer('chapter-overlay');
-      };
+      const isCurrent = book === state.book;
+      if (CONTENT_AVAILABLE.includes(book)) {
+        btn.innerHTML = `${book}${isCurrent ? ' <span style="color:var(--accent); font-size:12px;">(current)</span>' : ''}`;
+        btn.onclick = () => {
+          closeDrawer('chapter-overlay');
+          switchToBook(book, 1, 1);
+        };
+      } else {
+        btn.innerHTML = `<span style="color:var(--text-tertiary);">${book}</span>`;
+        btn.style.cursor = 'default';
+      }
       list.appendChild(btn);
-    }
+    });
     openDrawer('chapter-overlay');
   };
 
