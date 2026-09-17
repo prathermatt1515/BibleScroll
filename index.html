@@ -314,7 +314,7 @@
 
   <div id="topbar">
     <button class="pill" id="translation-pill">KJV</button>
-    <button class="pill" id="chapter-pill">James <span id="chapter-num">1</span> ▾</button>
+    <button class="pill" id="chapter-pill"><span id="book-name-label">James</span> <span id="chapter-num">1</span> ▾</button>
   </div>
   <button id="search-btn" aria-label="Search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -420,12 +420,16 @@
   "use strict";
 
   // ---------- State ----------
-  const ALL_VERSES = JAMES_VERSES;
+  const BOOK_VERSES = { James: JAMES_VERSES };
+  const BOOK_STUDY = { James: STUDY_DATA };
+  const CONTENT_AVAILABLE = ['James', 'Matthew', 'Mark', 'Luke', 'John'];
+  const BOOK_CODES = { James: 'JAS', Matthew: 'MAT', Mark: 'MRK', Luke: 'LUK', John: 'JHN' };
   const state = {
     translation: localStorage.getItem('sj_translation') || 'kjv',
     theme: localStorage.getItem('sj_theme') || 'dark',
+    book: 'James',
     chapter: 1,
-    verses: ALL_VERSES,
+    verses: JAMES_VERSES,
     liveTextCache: JSON.parse(localStorage.getItem('sj_livecache') || '{}')
   };
   const TOTAL_CHAPTERS = 5;
@@ -434,7 +438,13 @@
   const notes = JSON.parse(localStorage.getItem('sj_notes') || '{}');
 
   const BOOKS_66 = ["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi","Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
-  const CHAPTER_COUNTS = { James: [27,26,18,17,20] };
+  const CHAPTER_COUNTS = {
+    James: [27,26,18,17,20],
+    Matthew: [25,23,17,25,48,34,29,34,38,42,30,50,58,36,39,28,27,35,30,34,46,46,39,51,46,75,66,20],
+    Mark: [45,28,35,41,43,56,37,38,50,52,33,44,37,72,47,20],
+    Luke: [80,52,38,44,39,49,50,56,62,42,54,59,35,35,32,31,37,43,48,47,38,71,56,53],
+    John: [51,25,36,54,47,71,53,59,41,42,57,50,38,31,27,33,26,40,42,31,25]
+  };
 
   const API_BIBLE_KEY = "mSiigwn6LhcbU2ZwR3nc5";
   const BIBLE_ID_CACHE_KEY = 'sj_bible_ids';
@@ -510,7 +520,7 @@
       textEl.textContent = '…';
       const refEl = document.createElement('p');
       refEl.className = 'verse-ref';
-      refEl.textContent = `James ${v.c}:${v.v}`;
+      refEl.textContent = `${state.book} ${v.c}:${v.v}`;
       refEl.onclick = () => openStudy(idx);
       page.appendChild(textEl);
       page.appendChild(refEl);
@@ -522,13 +532,13 @@
       if (isFirstOfChapter) {
         const badge = document.createElement('div');
         badge.className = 'chapter-badge';
-        badge.textContent = `JAMES ${v.c}`;
+        badge.textContent = `${state.book.toUpperCase()} ${v.c}`;
         page.insertBefore(badge, page.firstChild);
       }
       if (isLastOfChapter) {
         const hint = document.createElement('div');
         hint.className = 'next-chapter-hint';
-        hint.innerHTML = `<span>James ${next.c} next</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12l-7 7-7-7M12 19V5"/></svg>`;
+        hint.innerHTML = `<span>${state.book} ${next.c} next</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12l-7 7-7-7M12 19V5"/></svg>`;
         page.appendChild(hint);
       }
       feed.appendChild(page);
@@ -538,8 +548,37 @@
     buildTicks();
   }
 
+  // ---------- Cross-book loading and navigation ----------
+  function ensureBookLoaded(book, callback) {
+    if (BOOK_VERSES[book]) { callback(); return; }
+    showToast(`Loading ${book}…`);
+    Promise.all([
+      fetch(`data/verses_${book}.json`).then(r => r.json()),
+      fetch(`data/study_${book}.json`).then(r => r.json())
+    ]).then(([verses, study]) => {
+      BOOK_VERSES[book] = verses;
+      BOOK_STUDY[book] = study;
+      callback();
+    }).catch(() => showToast('Could not load ' + book));
+  }
+
+  function switchToBook(book, chapterNum, verseNum) {
+    ensureBookLoaded(book, () => {
+      state.book = book;
+      state.chapter = chapterNum || 1;
+      state.verses = BOOK_VERSES[book];
+      renderFeed();
+      const idx = state.verses.findIndex(v => v.c === (chapterNum || 1) && v.v === (verseNum || 1));
+      feed.scrollTop = 0;
+      if (idx > 0) {
+        setTimeout(() => { feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' }); loadVisibleText(); updateThumbFromScroll(); refreshRailState(); }, 30);
+      }
+      setTimeout(() => { updateThumbFromScroll(); positionBounds(); refreshRailState(); }, 60);
+    });
+  }
+
   function goToChapter(c, verseNum) {
-    if (c < 1 || c > TOTAL_CHAPTERS) return;
+    if (c < 1 || c > CHAPTER_COUNTS[state.book].length) return;
     const idx = state.verses.findIndex(v => v.c === c && v.v === (verseNum || 1));
     if (idx < 0) return;
     feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
@@ -584,7 +623,7 @@
     const ids = await resolveBibleIds();
     const bibleId = ids[trans];
     if (!bibleId) throw new Error('No bible id for ' + trans);
-    const verseId = `JAS.${chapter}.${verse}`;
+    const verseId = `${BOOK_CODES[state.book]}.${chapter}.${verse}`;
     const res = await fetch(`https://api.scripture.api.bible/v1/bibles/${bibleId}/verses/${verseId}?content-type=text&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=false&include-verse-spans=false`, {
       headers: { 'api-key': API_BIBLE_KEY }
     });
@@ -614,9 +653,10 @@
     const v = state.verses[idx];
     if (v) {
       document.getElementById('chapter-num').textContent = v.c;
+      document.getElementById('book-name-label').textContent = state.book;
       const chapterChanged = v.c !== state.chapter;
       state.chapter = v.c;
-      const rKey = `${BOOK_NAME}:${v.c}:${v.v}`;
+      const rKey = `${state.book}:${v.c}:${v.v}`;
       if (!readVerses[rKey]) {
         readVerses[rKey] = true;
         localStorage.setItem('sj_read', JSON.stringify(readVerses));
@@ -650,7 +690,7 @@
   const thumb = document.getElementById('scrollbar-thumb');
 
   function chapterStartIndex(c) { return state.verses.findIndex(v => v.c === c); }
-  function chapterLength(c) { return CHAPTER_COUNTS[BOOK_NAME][c - 1]; }
+  function chapterLength(c) { return CHAPTER_COUNTS[state.book][c - 1]; }
 
   function buildTicks() {
     track.innerHTML = '';
@@ -753,10 +793,11 @@
   document.getElementById('chapter-pill').onclick = () => {
     const list = document.getElementById('chapter-list');
     list.innerHTML = '';
-    for (let c = 1; c <= 5; c++) {
+    const totalChapters = CHAPTER_COUNTS[state.book].length;
+    for (let c = 1; c <= totalChapters; c++) {
       const btn = document.createElement('button');
       btn.className = 'menu-item';
-      btn.textContent = `James ${c}`;
+      btn.textContent = `${state.book} ${c}`;
       btn.onclick = () => {
         goToChapter(c, 1);
         closeDrawer('chapter-overlay');
@@ -792,8 +833,7 @@
   };
 
   // ---------- Save / Note / Share / Screenshot ----------
-  const BOOK_NAME = 'James';
-  function verseKey(idx) { const v = state.verses[idx]; return `${BOOK_NAME}:${v.c}:${v.v}`; }
+  function verseKey(idx) { const v = state.verses[idx]; return `${state.book}:${v.c}:${v.v}`; }
 
   function refreshRailState() {
     const idx = currentIndex();
@@ -814,7 +854,7 @@
     const idx = currentIndex();
     const key = verseKey(idx);
     const v = state.verses[idx];
-    document.getElementById('note-ref').textContent = `James ${v.c}:${v.v}`;
+    document.getElementById('note-ref').textContent = `${state.book} ${v.c}:${v.v}`;
     document.getElementById('note-textarea').value = notes[key] || '';
     document.getElementById('note-textarea').dataset.key = key;
     openDrawer('note-overlay');
@@ -832,7 +872,7 @@
     const idx = currentIndex();
     const v = state.verses[idx];
     const text = await getVerseText(idx);
-    const shareText = `"${text}"\nJames ${v.c}:${v.v}`;
+    const shareText = `"${text}"\n${state.book} ${v.c}:${v.v}`;
     if (navigator.share) {
       try { await navigator.share({ text: shareText }); } catch (e) {}
     } else {
@@ -869,7 +909,7 @@
     lines.forEach((line, i) => ctx.fillText(line, W / 2, startY + i * lineHeight));
     ctx.font = '28px -apple-system, sans-serif';
     ctx.fillStyle = isDark ? '#8a8a85' : '#6B6B66';
-    ctx.fillText(`James ${v.c}:${v.v}`, W / 2, startY + lines.length * lineHeight + 50);
+    ctx.fillText(`${state.book} ${v.c}:${v.v}`, W / 2, startY + lines.length * lineHeight + 50);
 
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
@@ -895,7 +935,7 @@
     const drawer = document.getElementById('study-drawer');
     drawer.innerHTML = `
       <div class="drawer-handle"></div>
-      <p class="drawer-ref">James ${v.c}:${v.v}</p>
+      <p class="drawer-ref">${state.book} ${v.c}:${v.v}</p>
       <p class="drawer-verse">${v.kjv}</p>
       <button class="menu-item" data-opt="explain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Explain easier</button>
       <button class="menu-item" data-opt="original"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg>Original language</button>
@@ -911,7 +951,7 @@
   function renderStudyResult(idx, opt) {
     const v = state.verses[idx];
     const key = studyKey(idx);
-    const data = STUDY_DATA[key] || {};
+    const data = (BOOK_STUDY[state.book] || {})[key] || {};
     const drawer = document.getElementById('study-drawer');
     const titles = { explain: 'Explain easier', original: 'Original language', deeper: 'Deeper study', related: 'Related verses' };
 
@@ -938,7 +978,7 @@
       <div class="drawer-handle"></div>
       <button class="back-btn" id="study-back">‹ Back</button>
       <p class="study-title">${titles[opt]}</p>
-      <p class="drawer-ref">James ${v.c}:${v.v}</p>
+      <p class="drawer-ref">${state.book} ${v.c}:${v.v}</p>
       ${body}
       ${showCards ? `
         <div class="study-card">
@@ -1062,7 +1102,7 @@
       <p style="font-size:13px; font-weight:500; color:var(--text-secondary); margin:20px 0 4px;">Books of the Bible</p>
     `;
     BOOKS_66.forEach(book => {
-      if (book === BOOK_NAME) {
+      if (CONTENT_AVAILABLE.includes(book)) {
         const counts = CHAPTER_COUNTS[book];
         const total = counts.reduce((a, b) => a + b, 0);
         let readCount = 0;
@@ -1108,8 +1148,8 @@
       books.forEach(book => {
         html += `<p style="font-size:13px; font-weight:500; color:var(--accent); margin:18px 0 6px;">${book} <span style="color:var(--text-secondary); font-weight:400;">(${byBook[book].length})</span></p>`;
         byBook[book].forEach(n => {
-          const verseObj = ALL_VERSES.find(x => x.c === n.c && x.v === n.v);
-          html += `<div class="search-result" data-c="${n.c}" data-v="${n.v}">
+          const verseObj = (BOOK_VERSES[book] || []).find(x => x.c === n.c && x.v === n.v);
+          html += `<div class="search-result" data-book="${book}" data-c="${n.c}" data-v="${n.v}">
             <div class="sr-ref">${book} ${n.c}:${n.v}</div>
             <div class="sr-text">${verseObj ? verseObj.kjv : ''}</div>
           </div>`;
@@ -1121,7 +1161,7 @@
     drawer.querySelectorAll('.search-result').forEach(el => {
       el.onclick = () => {
         hideHomePage();
-        goToChapter(parseInt(el.dataset.c), parseInt(el.dataset.v));
+        switchToBook(el.dataset.book, parseInt(el.dataset.c), parseInt(el.dataset.v));
       };
     });
   }
@@ -1146,7 +1186,7 @@
     drawer.querySelectorAll('.verse-box').forEach(box => {
       box.onclick = () => {
         hideHomePage();
-        goToChapter(parseInt(box.dataset.c), 1);
+        switchToBook(book, parseInt(box.dataset.c), 1);
       };
     });
   }
@@ -1186,7 +1226,7 @@
       el.onclick = () => {
         const c = parseInt(el.dataset.c), v = parseInt(el.dataset.v);
         closeDrawer('notes-browser-overlay');
-        goToChapter(c, v);
+        switchToBook(el.dataset.book, c, v);
       };
     });
     openDrawer('notes-browser-overlay');
@@ -1195,6 +1235,7 @@
   // ---------- Search ----------
   document.getElementById('search-btn').onclick = () => {
     openDrawer('search-overlay');
+    document.getElementById('search-input').placeholder = `Search ${state.book}, e.g. 1:5 or wisdom`;
     document.getElementById('search-input').value = '';
     document.getElementById('search-results').innerHTML = '';
     setTimeout(() => document.getElementById('search-input').focus(), 100);
@@ -1206,19 +1247,19 @@
     results.innerHTML = '';
     if (!q) return;
 
-    const refMatch = q.match(/^(?:james\s*)?(\d)[:\s]*(\d+)?$/);
+    const refMatch = q.match(/^(?:\w+\s*)?(\d+)[:\s]*(\d+)?$/);
     let matches = [];
     if (refMatch) {
       const c = parseInt(refMatch[1]);
       const vnum = refMatch[2] ? parseInt(refMatch[2]) : null;
-      matches = ALL_VERSES.filter(v => v.c === c && (vnum === null || v.v === vnum));
+      matches = state.verses.filter(v => v.c === c && (vnum === null || v.v === vnum));
     } else {
-      matches = ALL_VERSES.filter(v => v.kjv.toLowerCase().includes(q) || v.web.toLowerCase().includes(q));
+      matches = state.verses.filter(v => v.kjv.toLowerCase().includes(q) || v.web.toLowerCase().includes(q));
     }
     matches.slice(0, 25).forEach(v => {
       const div = document.createElement('div');
       div.className = 'search-result';
-      div.innerHTML = `<div class="sr-ref">James ${v.c}:${v.v}</div><div class="sr-text">${v.kjv}</div>`;
+      div.innerHTML = `<div class="sr-ref">${state.book} ${v.c}:${v.v}</div><div class="sr-text">${v.kjv}</div>`;
       div.onclick = () => {
         closeDrawer('search-overlay');
         goToChapter(v.c, v.v);
