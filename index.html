@@ -235,6 +235,26 @@
 
   .loading-dots { text-align: center; color: var(--text-secondary); font-size: 14px; padding: 20px 0; }
 
+  /* Home full page */
+  #home-page {
+    position: fixed; inset: 0; background: var(--bg); z-index: 150;
+    transform: translateY(100%); transition: transform 0.28s ease-out;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  #home-page.open { transform: translateY(0); }
+  #home-page-header {
+    position: sticky; top: 0; background: var(--bg); z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px 12px; border-bottom: 0.5px solid var(--border);
+  }
+  #home-page-title { font-size: 17px; font-weight: 500; color: var(--text-primary); }
+  #home-close-btn {
+    background: var(--bg-pill); border: none; border-radius: 999px; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer;
+  }
+  #home-close-btn svg { width: 15px; height: 15px; }
+  #home-content { padding: 20px; }
+
   /* Home / tracker */
   .home-title { font-size: 18px; font-weight: 500; text-align: center; margin: 0 0 18px; color: var(--text-primary); }
   .tracker-card {
@@ -368,9 +388,13 @@
   </div>
 </div>
 
-<!-- Home / tracker drawer -->
-<div class="drawer-overlay" id="home-overlay">
-  <div class="drawer" id="home-drawer" style="max-height:88vh;"></div>
+<!-- Home / tracker full page -->
+<div id="home-page">
+  <div id="home-page-header">
+    <span id="home-page-title">Home</span>
+    <button id="home-close-btn" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div id="home-content"></div>
 </div>
 
 <!-- My notes browser drawer -->
@@ -990,15 +1014,19 @@
   });
 
   // ---------- Home / tracker ----------
+  function showHomePage() { document.getElementById('home-page').classList.add('open'); }
+  function hideHomePage() { document.getElementById('home-page').classList.remove('open'); }
   document.getElementById('home-btn').onclick = () => openHome();
+  document.getElementById('home-close-btn').onclick = () => hideHomePage();
+
+  function setHomeTitle(t) { document.getElementById('home-page-title').textContent = t; }
 
   function openHome() {
-    const drawer = document.getElementById('home-drawer');
+    setHomeTitle('Home');
+    const drawer = document.getElementById('home-content');
     const streak = computeStreak();
     const days = last7Days();
     let html = `
-      <div class="drawer-handle"></div>
-      <p class="home-title">Your progress</p>
       <div class="tracker-card">
         <div class="streak-row">
           <div class="streak-flame"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 0 1-12 0c0-4 2-6 3-8 1-1.5 2-2.5 3-4z"/></svg></div>
@@ -1042,12 +1070,13 @@
       row.onclick = () => openBookDetail(row.dataset.book);
     });
     document.getElementById('lib-saved-row').onclick = () => openSavedBrowser();
-    document.getElementById('lib-notes-row').onclick = () => { closeDrawer('home-overlay'); openNotesBrowser(); };
-    openDrawer('home-overlay');
+    document.getElementById('lib-notes-row').onclick = () => openNotesBrowser();
+    showHomePage();
   }
 
   function openSavedBrowser() {
-    const drawer = document.getElementById('home-drawer');
+    setHomeTitle('Saved verses');
+    const drawer = document.getElementById('home-content');
     const byBook = {};
     Object.keys(saved).forEach(key => {
       const parts = key.split(':');
@@ -1057,7 +1086,7 @@
     });
     Object.keys(byBook).forEach(b => byBook[b].sort((a, b2) => a.c - b2.c || a.v - b2.v));
 
-    let html = `<div class="drawer-handle"></div><button class="back-btn" id="lib-back">‹ Back</button><p class="home-title">Saved verses</p>`;
+    let html = `<button class="back-btn" id="lib-back">‹ Back to home</button>`;
     const books = Object.keys(byBook);
     if (books.length === 0) {
       html += `<p class="study-body" style="text-align:center;">No saved verses yet. Tap the heart on any verse to save it.</p>`;
@@ -1077,16 +1106,17 @@
     document.getElementById('lib-back').onclick = () => openHome();
     drawer.querySelectorAll('.search-result').forEach(el => {
       el.onclick = () => {
-        closeDrawer('home-overlay');
+        hideHomePage();
         goToChapter(parseInt(el.dataset.c), parseInt(el.dataset.v));
       };
     });
   }
 
   function openBookDetail(book) {
-    const drawer = document.getElementById('home-drawer');
+    setHomeTitle(book);
+    const drawer = document.getElementById('home-content');
     const counts = CHAPTER_COUNTS[book];
-    let html = `<div class="drawer-handle"></div><button class="back-btn" id="home-back">‹ Back</button><p class="home-title">${book}</p><div class="verse-grid" style="grid-template-columns:repeat(5,1fr);">`;
+    let html = `<button class="back-btn" id="home-back">‹ Back to home</button><div class="verse-grid" style="grid-template-columns:repeat(5,1fr);">`;
     counts.forEach((count, ci) => {
       const chapterNum = ci + 1;
       let readCount = 0;
@@ -1101,7 +1131,7 @@
     document.getElementById('home-back').onclick = () => openHome();
     drawer.querySelectorAll('.verse-box').forEach(box => {
       box.onclick = () => {
-        closeDrawer('home-overlay');
+        hideHomePage();
         goToChapter(parseInt(box.dataset.c), 1);
       };
     });
