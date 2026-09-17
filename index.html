@@ -479,9 +479,12 @@
   function last7Days() {
     const set = new Set(openDates);
     const out = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
+    const today = new Date();
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - today.getDay());
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(sunday);
+      d.setDate(sunday.getDate() + i);
       out.push({ letter: 'SMTWTFS'[d.getDay()], filled: set.has(todayStr(d)) });
     }
     return out;
