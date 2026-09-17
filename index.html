@@ -614,11 +614,17 @@
     const v = state.verses[idx];
     if (v) {
       document.getElementById('chapter-num').textContent = v.c;
+      const chapterChanged = v.c !== state.chapter;
       state.chapter = v.c;
       const rKey = `${BOOK_NAME}:${v.c}:${v.v}`;
       if (!readVerses[rKey]) {
         readVerses[rKey] = true;
         localStorage.setItem('sj_read', JSON.stringify(readVerses));
+      }
+      if (chapterChanged) {
+        buildTicks();
+        positionBounds();
+        updateThumbFromScroll();
       }
       if (v.c !== lastSeenChapter && v.v === 1) {
         const page = feed.querySelector(`.verse-page[data-index="${idx}"]`);
@@ -639,13 +645,16 @@
     scrollTimeout = setTimeout(() => { loadVisibleText(); updateChapterLabel(); }, 80);
   });
 
-  // ---------- Left scrollbar ----------
+  // ---------- Left scrollbar (chapter-scoped, even though feed scrolls continuously) ----------
   const track = document.getElementById('scrollbar-track');
   const thumb = document.getElementById('scrollbar-thumb');
 
+  function chapterStartIndex(c) { return state.verses.findIndex(v => v.c === c); }
+  function chapterLength(c) { return CHAPTER_COUNTS[BOOK_NAME][c - 1]; }
+
   function buildTicks() {
     track.innerHTML = '';
-    const count = state.verses.length;
+    const count = chapterLength(state.chapter);
     const step = Math.max(1, Math.floor(count / 40));
     for (let i = 0; i < count; i += step) {
       const t = document.createElement('div');
@@ -656,7 +665,10 @@
 
   function updateThumbFromScroll() {
     const idx = currentIndex();
-    const pct = idx / Math.max(1, state.verses.length - 1);
+    const start = chapterStartIndex(state.chapter);
+    const len = chapterLength(state.chapter);
+    const localIdx = idx - start;
+    const pct = localIdx / Math.max(1, len - 1);
     const trackRect = track.getBoundingClientRect();
     const usable = trackRect.height - 30;
     thumb.style.top = (trackRect.top + pct * usable) + 'px';
@@ -671,8 +683,7 @@
     const trackRect = track.getBoundingClientRect();
     document.getElementById('scrollbar-top-bound').style.top = (trackRect.top - 18) + 'px';
     const bottomEl = document.getElementById('scrollbar-bottom-bound');
-    const lastVerse = state.verses[state.verses.length - 1];
-    bottomEl.textContent = lastVerse.v;
+    bottomEl.textContent = chapterLength(state.chapter);
     bottomEl.style.top = (trackRect.bottom + 4) + 'px';
   }
 
@@ -694,7 +705,10 @@
     const trackRect = track.getBoundingClientRect();
     let pct = (clientY - trackRect.top) / trackRect.height;
     pct = Math.max(0, Math.min(1, pct));
-    const idx = Math.round(pct * (state.verses.length - 1));
+    const start = chapterStartIndex(state.chapter);
+    const len = chapterLength(state.chapter);
+    const localIdx = Math.round(pct * (len - 1));
+    const idx = start + localIdx;
     feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
     updateThumbFromScroll();
   }
