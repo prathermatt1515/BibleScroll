@@ -911,12 +911,22 @@
     ctx.fillStyle = isDark ? '#8a8a85' : '#6B6B66';
     ctx.fillText(`${state.book} ${v.c}:${v.v}`, W / 2, startY + lines.length * lineHeight + 50);
 
-    canvas.toBlob(blob => {
+    canvas.toBlob(async blob => {
+      const filename = `${state.book}-${v.c}-${v.v}.png`;
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file] });
+          return;
+        } catch (e) {
+          // user cancelled the share sheet, or share failed — fall through to download
+        }
+      }
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = `james-${v.c}-${v.v}.png`;
+      a.href = url; a.download = filename;
       a.click();
-      showToast('Image saved');
+      showToast('Image downloaded');
     });
   };
 
