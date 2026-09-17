@@ -82,6 +82,11 @@
     font-size: 13px; color: var(--text-secondary); text-align: center; margin-top: 16px;
     cursor: pointer;
   }
+  .note-indicator {
+    display: flex; align-items: center; gap: 5px; justify-content: center;
+    font-size: 11px; color: var(--accent); margin-top: 10px;
+  }
+  .note-indicator svg { width: 8px; height: 8px; }
   .next-chapter-hint {
     font-size: 12px; color: var(--text-tertiary); text-align: center; margin-top: 26px;
     display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -423,6 +428,11 @@
   <div class="drawer">
     <div class="drawer-handle"></div>
     <p class="drawer-ref" id="note-ref"></p>
+    <div id="note-range-row" style="display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:14px;">
+      <button id="note-range-minus" class="rail-btn" style="background:var(--bg-pill); border-radius:999px; width:32px; height:32px;" aria-label="Fewer verses">−</button>
+      <span id="note-range-label" style="font-size:13px; color:var(--text-secondary); min-width:150px; text-align:center;"></span>
+      <button id="note-range-plus" class="rail-btn" style="background:var(--bg-pill); border-radius:999px; width:32px; height:32px;" aria-label="More verses">+</button>
+    </div>
     <textarea id="note-textarea" placeholder="Write a note on this verse..."></textarea>
     <button class="save-note-btn" id="save-note-confirm">Save note</button>
   </div>
@@ -543,6 +553,16 @@
       refEl.onclick = () => openStudy(idx);
       page.appendChild(textEl);
       page.appendChild(refEl);
+
+      const noteKey = `${state.book}:${v.c}:${v.v}`;
+      if (notes[noteKey]) {
+        const dot = document.createElement('span');
+        dot.className = 'note-indicator';
+        dot.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="4"/></svg> has a note';
+        dot.style.cursor = 'pointer';
+        dot.onclick = () => openNoteEditor(idx);
+        page.appendChild(dot);
+      }
 
       const next = state.verses[idx + 1];
       const isFirstOfChapter = idx > 0 && v.v === 1;
@@ -874,22 +894,103 @@
     refreshRailState();
   };
 
-  document.getElementById('note-btn').onclick = () => {
-    const idx = currentIndex();
+  // ---------- Notes: helpers for multi-verse ranges ----------
+  function getNoteEntry(key) {
+    const raw = notes[key];
+    if (!raw) return null;
+    if (typeof raw === 'string') return { text: raw, span: 1, startKey: key };
+    if (raw.ref) {
+      const start = notes[raw.ref];
+      if (!start) return null;
+      return { text: start.text, span: start.span || 1, startKey: raw.ref };
+    }
+    return { text: raw.text, span: raw.span || 1, startKey: key };
+  }
+
+  function clearNoteRange(startKey, span) {
+    const parts = startKey.split(':');
+    const book = parts[0], c = parseInt(parts[1]), v = parseInt(parts[2]);
+    const arr = BOOK_VERSES[book];
+    if (!arr) { delete notes[startKey]; return; }
+    const startIdx = arr.findIndex(x => x.c === c && x.v === v);
+    if (startIdx < 0) { delete notes[startKey]; return; }
+    for (let i = 0; i < span; i++) {
+      const vv = arr[startIdx + i];
+      if (vv) delete notes[`${book}:${vv.c}:${vv.v}`];
+    }
+  }
+
+  let noteEditState = { idx: 0, span: 1, maxSpan: 1 };
+
+  function renderNoteRangeLabel() {
+    const idx = noteEditState.idx;
+    const startV = state.verses[idx];
+    const endV = state.verses[idx + noteEditState.span - 1];
+    const label = noteEditState.span === 1
+      ? `${state.book} ${startV.c}:${startV.v}`
+      : `${state.book} ${startV.c}:${startV.v} – ${endV.c}:${endV.v}`;
+    document.getElementById('note-range-label').textContent = label;
+    document.getElementById('note-ref').textContent = label;
+  }
+
+  function openNoteEditor(idx) {
     const key = verseKey(idx);
-    const v = state.verses[idx];
-    document.getElementById('note-ref').textContent = `${state.book} ${v.c}:${v.v}`;
-    document.getElementById('note-textarea').value = notes[key] || '';
+    const existing = getNoteEntry(key);
+    noteEditState.idx = idx;
+    noteEditState.span = existing ? existing.span : 1;
+    noteEditState.maxSpan = Math.min(12, state.verses.length - idx);
+    document.getElementById('note-textarea').value = existing ? existing.text : '';
     document.getElementById('note-textarea').dataset.key = key;
+    renderNoteRangeLabel();
     openDrawer('note-overlay');
+  }
+
+  document.getElementById('note-range-minus').onclick = () => {
+    if (noteEditState.span > 1) { noteEditState.span--; renderNoteRangeLabel(); }
   };
+  document.getElementById('note-range-plus').onclick = () => {
+    if (noteEditState.span < noteEditState.maxSpan) { noteEditState.span++; renderNoteRangeLabel(); }
+  };
+
+  document.getElementById('note-btn').onclick = () => openNoteEditor(currentIndex());
+
+  function refreshNoteIndicatorForIdx(idx) {
+    const page = feed.querySelector(`.verse-page[data-index="${idx}"]`);
+    if (!page) return;
+    const existingDot = page.querySelector('.note-indicator');
+    const v = state.verses[idx];
+    const key = `${state.book}:${v.c}:${v.v}`;
+    if (notes[key] && !existingDot) {
+      const dot = document.createElement('span');
+      dot.className = 'note-indicator';
+      dot.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="4"/></svg> has a note';
+      dot.style.cursor = 'pointer';
+      dot.onclick = () => openNoteEditor(idx);
+      page.appendChild(dot);
+    } else if (!notes[key] && existingDot) {
+      existingDot.remove();
+    }
+  }
+
   document.getElementById('save-note-confirm').onclick = () => {
     const key = document.getElementById('note-textarea').dataset.key;
+    const existing = getNoteEntry(key);
+    const oldSpan = existing ? existing.span : 0;
+    const oldIdx = noteEditState.idx;
+    if (existing) clearNoteRange(existing.startKey, existing.span);
     const val = document.getElementById('note-textarea').value.trim();
-    if (val) notes[key] = val; else delete notes[key];
+    if (val) {
+      notes[key] = { text: val, span: noteEditState.span };
+      for (let i = 1; i < noteEditState.span; i++) {
+        const vv = state.verses[noteEditState.idx + i];
+        if (vv) notes[`${state.book}:${vv.c}:${vv.v}`] = { ref: key };
+      }
+    }
     localStorage.setItem('sj_notes', JSON.stringify(notes));
     closeDrawer('note-overlay');
     showToast('Note saved');
+    const affected = Math.max(oldSpan, noteEditState.span);
+    for (let i = 0; i < affected; i++) refreshNoteIndicatorForIdx(oldIdx + i);
   };
 
   document.getElementById('share-btn').onclick = async () => {
@@ -1129,6 +1230,15 @@
 
   function setHomeTitle(t) { document.getElementById('home-page-title').textContent = t; }
 
+  function countDistinctNotes() {
+    const seen = new Set();
+    Object.keys(notes).forEach(key => {
+      const entry = getNoteEntry(key);
+      if (entry) seen.add(entry.startKey);
+    });
+    return seen.size;
+  }
+
   function openHome() {
     setHomeTitle('Home');
     const drawer = document.getElementById('home-content');
@@ -1158,7 +1268,7 @@
         <div class="library-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
         <div class="library-text">
           <div class="library-title">Notes</div>
-          <div class="library-subtitle">${Object.keys(notes).length === 0 ? 'No notes yet' : Object.keys(notes).length + ' note' + (Object.keys(notes).length === 1 ? '' : 's')}</div>
+          <div class="library-subtitle">${countDistinctNotes() === 0 ? 'No notes yet' : countDistinctNotes() + ' note' + (countDistinctNotes() === 1 ? '' : 's')}</div>
         </div>
         <div class="library-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
@@ -1261,14 +1371,27 @@
     setHomeTitle('Notes');
     const drawer = document.getElementById('home-content');
     const byBook = {};
+    const seenStarts = new Set();
     Object.keys(notes).forEach(key => {
-      const parts = key.split(':');
+      const entry = getNoteEntry(key);
+      if (!entry) return;
+      const signature = `${entry.startKey}`;
+      if (seenStarts.has(signature)) return;
+      seenStarts.add(signature);
+      const parts = entry.startKey.split(':');
       const book = parts[0];
-      const c = parts[1], v = parts[2];
+      const startC = parseInt(parts[1]), startV = parseInt(parts[2]);
+      const arr = BOOK_VERSES[book];
+      let endC = startC, endV = startV;
+      if (arr && entry.span > 1) {
+        const startIdx = arr.findIndex(x => x.c === startC && x.v === startV);
+        const endVerse = arr[startIdx + entry.span - 1];
+        if (endVerse) { endC = endVerse.c; endV = endVerse.v; }
+      }
       byBook[book] = byBook[book] || [];
-      byBook[book].push({ c: parseInt(c), v: parseInt(v), text: notes[key], key });
+      byBook[book].push({ startC, startV, endC, endV, span: entry.span, text: entry.text });
     });
-    Object.keys(byBook).forEach(b => byBook[b].sort((a, b2) => a.c - b2.c || a.v - b2.v));
+    Object.keys(byBook).forEach(b => byBook[b].sort((a, b2) => a.startC - b2.startC || a.startV - b2.startV));
 
     let html = `<button class="back-btn" id="notes-back">‹ Back to home</button>`;
     const books = Object.keys(byBook);
@@ -1278,8 +1401,9 @@
       books.forEach(book => {
         html += `<p style="font-size:13px; font-weight:500; color:var(--accent); margin:18px 0 6px;">${book} <span style="color:var(--text-secondary); font-weight:400;">(${byBook[book].length})</span></p>`;
         byBook[book].forEach(n => {
-          html += `<div class="search-result" data-book="${book}" data-c="${n.c}" data-v="${n.v}">
-            <div class="sr-ref">${book} ${n.c}:${n.v}</div>
+          const refLabel = n.span > 1 ? `${book} ${n.startC}:${n.startV} – ${n.endC}:${n.endV}` : `${book} ${n.startC}:${n.startV}`;
+          html += `<div class="search-result" data-book="${book}" data-c="${n.startC}" data-v="${n.startV}">
+            <div class="sr-ref">${refLabel}</div>
             <div class="sr-text">${n.text.length > 90 ? n.text.slice(0, 90) + '…' : n.text}</div>
           </div>`;
         });
