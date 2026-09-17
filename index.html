@@ -895,42 +895,62 @@
     const isDark = state.theme === 'dark';
     ctx.fillStyle = isDark ? '#121212' : '#FAF9F6';
     ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = isDark ? '#f5f5f0' : '#1A1A1A';
-    ctx.font = '48px Georgia, serif';
-    ctx.textAlign = 'center';
-    const text = textEl.textContent;
-    const words = text.split(' ');
-    let lines = [], cur = '';
-    words.forEach(w => {
-      const test = cur ? cur + ' ' + w : w;
-      if (ctx.measureText(test).width > W - 160) { lines.push(cur); cur = w; }
-      else cur = test;
-    });
-    if (cur) lines.push(cur);
-    const lineHeight = 64;
-    const startY = H / 2 - (lines.length * lineHeight) / 2;
-    lines.forEach((line, i) => ctx.fillText(line, W / 2, startY + i * lineHeight));
-    ctx.font = '28px -apple-system, sans-serif';
-    ctx.fillStyle = isDark ? '#8a8a85' : '#6B6B66';
-    ctx.fillText(`${state.book} ${v.c}:${v.v}`, W / 2, startY + lines.length * lineHeight + 50);
 
-    canvas.toBlob(async blob => {
-      const filename = `${state.book}-${v.c}-${v.v}.png`;
-      const file = new File([blob], filename, { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file] });
-          return;
-        } catch (e) {
-          // user cancelled the share sheet, or share failed — fall through to download
-        }
+    const logo = new Image();
+    logo.crossOrigin = 'anonymous';
+    logo.onload = () => drawRest();
+    logo.onerror = () => drawRest();
+    logo.src = 'cross.png';
+
+    function drawRest() {
+      const text = textEl.textContent;
+      ctx.font = '48px Georgia, serif';
+      ctx.textAlign = 'center';
+      const words = text.split(' ');
+      let lines = [], cur = '';
+      words.forEach(w => {
+        const test = cur ? cur + ' ' + w : w;
+        if (ctx.measureText(test).width > W - 160) { lines.push(cur); cur = w; }
+        else cur = test;
+      });
+      if (cur) lines.push(cur);
+      const lineHeight = 64;
+
+      const logoSize = 130;
+      const blockHeight = logoSize + 40 + (lines.length * lineHeight) + 70;
+      let cursorY = H / 2 - blockHeight / 2;
+
+      if (logo.complete && logo.naturalWidth > 0) {
+        ctx.drawImage(logo, W / 2 - logoSize / 2, cursorY, logoSize, logoSize);
       }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename;
-      a.click();
-      showToast('Image downloaded');
-    });
+      cursorY += logoSize + 40;
+
+      ctx.fillStyle = isDark ? '#f5f5f0' : '#1A1A1A';
+      lines.forEach((line, i) => ctx.fillText(line, W / 2, cursorY + i * lineHeight));
+      cursorY += lines.length * lineHeight;
+
+      ctx.font = '28px -apple-system, sans-serif';
+      ctx.fillStyle = isDark ? '#8a8a85' : '#6B6B66';
+      ctx.fillText(`${state.book} ${v.c}:${v.v}`, W / 2, cursorY + 50);
+
+      canvas.toBlob(async blob => {
+        const filename = `${state.book}-${v.c}-${v.v}.png`;
+        const file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file] });
+            return;
+          } catch (e) {
+            // user cancelled the share sheet, or share failed — fall through to download
+          }
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        a.click();
+        showToast('Image downloaded');
+      });
+    }
   };
 
   function showToast(msg) {
