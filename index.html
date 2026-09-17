@@ -350,7 +350,7 @@
     translation: localStorage.getItem('sj_translation') || 'kjv',
     theme: localStorage.getItem('sj_theme') || 'dark',
     chapter: 1,
-    verses: ALL_VERSES.filter(v => v.c === 1),
+    verses: ALL_VERSES,
     liveTextCache: JSON.parse(localStorage.getItem('sj_livecache') || '{}')
   };
   const TOTAL_CHAPTERS = 5;
@@ -380,7 +380,7 @@
     return v[trans];
   }
 
-  function renderFeed(pulseFirst) {
+  function renderFeed() {
     feed.innerHTML = '';
     state.verses.forEach((v, idx) => {
       const page = document.createElement('div');
@@ -404,19 +404,20 @@
       page.appendChild(textEl);
       page.appendChild(refEl);
 
-      if (idx === 0) {
+      const next = state.verses[idx + 1];
+      const isFirstOfChapter = idx > 0 && v.v === 1;
+      const isLastOfChapter = next && next.c !== v.c;
+
+      if (isFirstOfChapter) {
         const badge = document.createElement('div');
         badge.className = 'chapter-badge';
         badge.textContent = `JAMES ${v.c}`;
         page.insertBefore(badge, page.firstChild);
       }
-      if (idx === state.verses.length - 1 && state.chapter < TOTAL_CHAPTERS) {
-        const nextC = state.chapter + 1;
+      if (isLastOfChapter) {
         const hint = document.createElement('div');
         hint.className = 'next-chapter-hint';
-        hint.innerHTML = `<span>James ${nextC} next</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12l-7 7-7-7M12 19V5"/></svg>`;
-        hint.style.cursor = 'pointer';
-        hint.onclick = () => goToChapter(nextC, 1);
+        hint.innerHTML = `<span>James ${next.c} next</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12l-7 7-7-7M12 19V5"/></svg>`;
         page.appendChild(hint);
       }
       feed.appendChild(page);
@@ -424,26 +425,14 @@
     loadVisibleText();
     updateChapterLabel();
     buildTicks();
-    if (pulseFirst) {
-      const first = feed.querySelector('.verse-page[data-index="0"]');
-      if (first) {
-        first.classList.add('chapter-pulse');
-        setTimeout(() => first.classList.remove('chapter-pulse'), 950);
-      }
-    }
   }
 
   function goToChapter(c, verseNum) {
     if (c < 1 || c > TOTAL_CHAPTERS) return;
-    state.chapter = c;
-    state.verses = ALL_VERSES.filter(v => v.c === c);
-    renderFeed(true);
-    feed.scrollTop = 0;
-    if (verseNum && verseNum > 1) {
-      const idx = state.verses.findIndex(v => v.v === verseNum);
-      if (idx > 0) setTimeout(() => { feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' }); loadVisibleText(); updateThumbFromScroll(); refreshRailState(); }, 30);
-    }
-    setTimeout(() => { updateThumbFromScroll(); refreshRailState(); }, 60);
+    const idx = state.verses.findIndex(v => v.c === c && v.v === (verseNum || 1));
+    if (idx < 0) return;
+    feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
+    setTimeout(() => { loadVisibleText(); updateChapterLabel(); updateThumbFromScroll(); refreshRailState(); }, 60);
   }
 
   async function getVerseText(idx) {
@@ -508,8 +497,22 @@
     return Math.round(scrollTop / h);
   }
 
+  let lastSeenChapter = 1;
   function updateChapterLabel() {
-    document.getElementById('chapter-num').textContent = state.chapter;
+    const idx = currentIndex();
+    const v = state.verses[idx];
+    if (v) {
+      document.getElementById('chapter-num').textContent = v.c;
+      state.chapter = v.c;
+      if (v.c !== lastSeenChapter && v.v === 1) {
+        const page = feed.querySelector(`.verse-page[data-index="${idx}"]`);
+        if (page) {
+          page.classList.add('chapter-pulse');
+          setTimeout(() => page.classList.remove('chapter-pulse'), 950);
+        }
+      }
+      lastSeenChapter = v.c;
+    }
   }
 
   let scrollTimeout;
