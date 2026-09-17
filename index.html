@@ -498,7 +498,7 @@
   const feed = document.getElementById('feed');
 
   function offlineText(v, trans) {
-    return v[trans];
+    return v[trans] || v.kjv;
   }
 
   function renderFeed() {
