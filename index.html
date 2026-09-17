@@ -259,12 +259,14 @@
 
   /* Home / tracker */
   .home-title { font-size: 18px; font-weight: 500; text-align: center; margin: 0 0 18px; color: var(--text-primary); }
+  .home-logo { display: block; width: 84px; height: 84px; margin: 4px auto 22px; object-fit: contain; }
   .tracker-card {
     background: var(--bg-card); border: 0.5px solid var(--border-strong); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
   }
   .streak-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
   .streak-flame {
-    width: 44px; height: 44px; border-radius: 50%; background: var(--accent-dim);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, #f5a742, #d8542b);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .streak-flame svg { width: 22px; height: 22px; color: #fff; }
@@ -278,8 +280,23 @@
     border: 0.5px solid var(--border-strong);
     display: flex; align-items: center; justify-content: center;
   }
-  .day-dot.filled { background: var(--accent-dim); border-color: var(--accent-dim); }
+  .day-dot.filled { background: linear-gradient(135deg, #f5a742, #d8542b); border-color: transparent; }
   .day-dot svg { width: 13px; height: 13px; color: #fff; }
+
+  .library-row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 4px;
+    border-bottom: 0.5px solid var(--border); cursor: pointer;
+  }
+  .library-icon {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--bg-pill);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--text-primary);
+  }
+  .library-icon svg { width: 18px; height: 18px; }
+  .library-text { flex: 1; }
+  .library-title { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+  .library-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+  .library-chevron { color: var(--text-tertiary); flex-shrink: 0; }
+  .library-chevron svg { width: 16px; height: 16px; }
 
   .book-row {
     display: flex; align-items: center; justify-content: space-between; padding: 12px 4px;
@@ -401,10 +418,6 @@
 </div>
 
 <!-- My notes browser drawer -->
-<div class="drawer-overlay" id="notes-browser-overlay">
-  <div class="drawer" id="notes-browser-drawer" style="max-height:85vh;"></div>
-</div>
-
 <!-- Note drawer -->
 <div class="drawer-overlay" id="note-overlay">
   <div class="drawer">
@@ -1117,6 +1130,7 @@
     const streak = computeStreak();
     const days = last7Days();
     let html = `
+      <img src="cross.png" class="home-logo" alt="">
       <div class="tracker-card">
         <div class="streak-row">
           <div class="streak-flame"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 0 1-12 0c0-4 2-6 3-8 1-1.5 2-2.5 3-4z"/></svg></div>
@@ -1127,13 +1141,21 @@
         </div>
       </div>
       <p style="font-size:13px; font-weight:500; color:var(--text-secondary); margin:20px 0 4px;">Your library</p>
-      <div class="book-row" id="lib-saved-row">
-        <span class="book-name">Saved verses</span>
-        <span class="book-pct">${Object.keys(saved).length}</span>
+      <div class="library-row" id="lib-saved-row">
+        <div class="library-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <div class="library-text">
+          <div class="library-title">Saved verses</div>
+          <div class="library-subtitle">${Object.keys(saved).length === 0 ? 'No saved verses yet' : Object.keys(saved).length + ' verse' + (Object.keys(saved).length === 1 ? '' : 's')}</div>
+        </div>
+        <div class="library-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
-      <div class="book-row" id="lib-notes-row">
-        <span class="book-name">Notes</span>
-        <span class="book-pct">${Object.keys(notes).length}</span>
+      <div class="library-row" id="lib-notes-row">
+        <div class="library-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="library-text">
+          <div class="library-title">Notes</div>
+          <div class="library-subtitle">${Object.keys(notes).length === 0 ? 'No notes yet' : Object.keys(notes).length + ' note' + (Object.keys(notes).length === 1 ? '' : 's')}</div>
+        </div>
+        <div class="library-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
       <p style="font-size:13px; font-weight:500; color:var(--text-secondary); margin:20px 0 4px;">Books of the Bible</p>
     `;
@@ -1228,10 +1250,11 @@
   }
 
   // ---------- My notes browser ----------
-  document.getElementById('notes-list-btn').onclick = () => openNotesBrowser();
+  document.getElementById('notes-list-btn').onclick = () => { showHomePage(); openNotesBrowser(); };
 
   function openNotesBrowser() {
-    const drawer = document.getElementById('notes-browser-drawer');
+    setHomeTitle('Notes');
+    const drawer = document.getElementById('home-content');
     const byBook = {};
     Object.keys(notes).forEach(key => {
       const parts = key.split(':');
@@ -1242,7 +1265,7 @@
     });
     Object.keys(byBook).forEach(b => byBook[b].sort((a, b2) => a.c - b2.c || a.v - b2.v));
 
-    let html = `<div class="drawer-handle"></div><p class="study-title" style="margin-bottom:16px;">My notes</p>`;
+    let html = `<button class="back-btn" id="notes-back">‹ Back to home</button>`;
     const books = Object.keys(byBook);
     if (books.length === 0) {
       html += `<p class="study-body" style="text-align:center;">No notes yet. Tap the note icon on any verse to add one.</p>`;
@@ -1258,14 +1281,14 @@
       });
     }
     drawer.innerHTML = html;
+    document.getElementById('notes-back').onclick = () => openHome();
     drawer.querySelectorAll('.search-result').forEach(el => {
       el.onclick = () => {
         const c = parseInt(el.dataset.c), v = parseInt(el.dataset.v);
-        closeDrawer('notes-browser-overlay');
+        hideHomePage();
         switchToBook(el.dataset.book, c, v);
       };
     });
-    openDrawer('notes-browser-overlay');
   }
 
   // ---------- Search ----------
