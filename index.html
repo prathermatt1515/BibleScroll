@@ -1218,6 +1218,9 @@
   setTimeout(() => { updateThumbFromScroll(); positionBounds(); refreshRailState(); }, 100);
   window.addEventListener('resize', positionBounds);
   feed.addEventListener('scroll', () => setTimeout(refreshRailState, 90));
+  openHome();
+  document.getElementById('home-page').style.transition = 'none';
+  requestAnimationFrame(() => { document.getElementById('home-page').style.transition = ''; });
 
 })();
 </script>
