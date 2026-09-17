@@ -235,6 +235,49 @@
 
   .loading-dots { text-align: center; color: var(--text-secondary); font-size: 14px; padding: 20px 0; }
 
+  /* Home / tracker */
+  .home-title { font-size: 18px; font-weight: 500; text-align: center; margin: 0 0 18px; color: var(--text-primary); }
+  .tracker-card {
+    background: var(--study-bg); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
+  }
+  .streak-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .streak-flame {
+    width: 44px; height: 44px; border-radius: 50%; background: var(--accent-dim);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .streak-flame svg { width: 22px; height: 22px; color: #fff; }
+  .streak-num { font-size: 26px; font-weight: 500; color: var(--text-primary); line-height: 1.1; }
+  .streak-label { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.04em; }
+  .days-row { display: flex; justify-content: space-between; }
+  .day-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .day-letter { font-size: 11px; color: var(--text-tertiary); }
+  .day-dot {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--bg-pill);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .day-dot.filled { background: var(--accent-dim); }
+  .day-dot svg { width: 13px; height: 13px; color: #fff; }
+
+  .book-row {
+    display: flex; align-items: center; justify-content: space-between; padding: 12px 4px;
+    border-bottom: 0.5px solid var(--border); cursor: pointer;
+  }
+  .book-row.disabled { opacity: 0.4; cursor: default; }
+  .book-name { font-size: 14px; color: var(--text-primary); }
+  .book-progress-wrap { display: flex; align-items: center; gap: 8px; }
+  .book-progress-track { width: 60px; height: 4px; background: var(--bg-pill); border-radius: 2px; overflow: hidden; }
+  .book-progress-fill { height: 100%; background: var(--accent-dim); }
+  .book-pct { font-size: 11px; color: var(--text-secondary); min-width: 30px; text-align: right; }
+
+  .chapter-group-label { font-size: 12px; font-weight: 500; color: var(--accent); margin: 18px 0 8px; }
+  .verse-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .verse-box {
+    aspect-ratio: 1; border-radius: 6px; background: var(--bg-pill);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--text-secondary); cursor: pointer;
+  }
+  .verse-box.read { background: var(--accent-dim); color: #fff; }
+
   #toast {
     position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
     background: var(--bg-pill); color: var(--text-primary); padding: 10px 18px;
@@ -281,6 +324,9 @@
     <button class="rail-btn" id="notes-list-btn" aria-label="My notes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/><line x1="8" y1="7" x2="15" y2="7"/><line x1="8" y1="11" x2="15" y2="11"/></svg>
     </button>
+    <button class="rail-btn" id="home-btn" aria-label="Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+    </button>
   </div>
 
   <button id="theme-toggle" aria-label="Toggle theme">
@@ -322,6 +368,11 @@
   </div>
 </div>
 
+<!-- Home / tracker drawer -->
+<div class="drawer-overlay" id="home-overlay">
+  <div class="drawer" id="home-drawer" style="max-height:88vh;"></div>
+</div>
+
 <!-- My notes browser drawer -->
 <div class="drawer-overlay" id="notes-browser-overlay">
   <div class="drawer" id="notes-browser-drawer" style="max-height:85vh;"></div>
@@ -354,14 +405,50 @@
     liveTextCache: JSON.parse(localStorage.getItem('sj_livecache') || '{}')
   };
   const TOTAL_CHAPTERS = 5;
+  const readVerses = JSON.parse(localStorage.getItem('sj_read') || '{}');
   const saved = JSON.parse(localStorage.getItem('sj_saved') || '{}');
   const notes = JSON.parse(localStorage.getItem('sj_notes') || '{}');
+
+  const BOOKS_66 = ["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi","Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
+  const CHAPTER_COUNTS = { James: [27,26,18,17,20] };
 
   const API_BIBLE_KEY = "mSiigwn6LhcbU2ZwR3nc5";
   const BIBLE_ID_CACHE_KEY = 'sj_bible_ids';
   let bibleIds = JSON.parse(localStorage.getItem(BIBLE_ID_CACHE_KEY) || 'null');
 
   document.documentElement.setAttribute('data-theme', state.theme);
+
+  // ---------- Streak tracking ----------
+  function todayStr(d) { d = d || new Date(); return d.toISOString().slice(0, 10); }
+  function recordOpenToday() {
+    const dates = JSON.parse(localStorage.getItem('sj_open_dates') || '[]');
+    const t = todayStr();
+    if (!dates.includes(t)) dates.push(t);
+    localStorage.setItem('sj_open_dates', JSON.stringify(dates));
+    return dates;
+  }
+  const openDates = recordOpenToday();
+  function computeStreak() {
+    const set = new Set(openDates);
+    let count = 0;
+    let d = new Date();
+    if (!set.has(todayStr(d))) return 0;
+    while (set.has(todayStr(d))) {
+      count++;
+      d.setDate(d.getDate() - 1);
+    }
+    return count;
+  }
+  function last7Days() {
+    const set = new Set(openDates);
+    const out = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      out.push({ letter: 'SMTWTFS'[d.getDay()], filled: set.has(todayStr(d)) });
+    }
+    return out;
+  }
 
   // ---------- Icons ----------
   const ICONS = {
@@ -504,6 +591,11 @@
     if (v) {
       document.getElementById('chapter-num').textContent = v.c;
       state.chapter = v.c;
+      const rKey = `${BOOK_NAME}:${v.c}:${v.v}`;
+      if (!readVerses[rKey]) {
+        readVerses[rKey] = true;
+        localStorage.setItem('sj_read', JSON.stringify(readVerses));
+      }
       if (v.c !== lastSeenChapter && v.v === 1) {
         const page = feed.querySelector(`.verse-page[data-index="${idx}"]`);
         if (page) {
@@ -896,6 +988,75 @@
       }
     });
   });
+
+  // ---------- Home / tracker ----------
+  document.getElementById('home-btn').onclick = () => openHome();
+
+  function openHome() {
+    const drawer = document.getElementById('home-drawer');
+    const streak = computeStreak();
+    const days = last7Days();
+    let html = `
+      <div class="drawer-handle"></div>
+      <p class="home-title">Your progress</p>
+      <div class="tracker-card">
+        <div class="streak-row">
+          <div class="streak-flame"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 0 1-12 0c0-4 2-6 3-8 1-1.5 2-2.5 3-4z"/></svg></div>
+          <div><div class="streak-num">${streak}</div><div class="streak-label">DAY${streak === 1 ? '' : 'S'} IN A ROW</div></div>
+        </div>
+        <div class="days-row">
+          ${days.map(d => `<div class="day-cell"><div class="day-letter">${d.letter}</div><div class="day-dot ${d.filled ? 'filled' : ''}">${d.filled ? '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 0 1-12 0c0-4 2-6 3-8 1-1.5 2-2.5 3-4z"/></svg>' : ''}</div></div>`).join('')}
+        </div>
+      </div>
+      <p style="font-size:13px; font-weight:500; color:var(--text-secondary); margin:20px 0 4px;">Books of the Bible</p>
+    `;
+    BOOKS_66.forEach(book => {
+      if (book === BOOK_NAME) {
+        const counts = CHAPTER_COUNTS[book];
+        const total = counts.reduce((a, b) => a + b, 0);
+        let readCount = 0;
+        Object.keys(readVerses).forEach(k => { if (k.startsWith(book + ':')) readCount++; });
+        const pct = Math.round((readCount / total) * 100);
+        html += `<div class="book-row" data-book="${book}">
+          <span class="book-name">${book}</span>
+          <div class="book-progress-wrap">
+            <div class="book-progress-track"><div class="book-progress-fill" style="width:${pct}%;"></div></div>
+            <span class="book-pct">${pct}%</span>
+          </div>
+        </div>`;
+      } else {
+        html += `<div class="book-row disabled"><span class="book-name">${book}</span><span class="book-pct">—</span></div>`;
+      }
+    });
+    drawer.innerHTML = html;
+    drawer.querySelectorAll('.book-row[data-book]').forEach(row => {
+      row.onclick = () => openBookDetail(row.dataset.book);
+    });
+    openDrawer('home-overlay');
+  }
+
+  function openBookDetail(book) {
+    const drawer = document.getElementById('home-drawer');
+    const counts = CHAPTER_COUNTS[book];
+    let html = `<div class="drawer-handle"></div><button class="back-btn" id="home-back">‹ Back</button><p class="home-title">${book}</p>`;
+    counts.forEach((count, ci) => {
+      const chapterNum = ci + 1;
+      html += `<p class="chapter-group-label">Chapter ${chapterNum}</p><div class="verse-grid">`;
+      for (let v = 1; v <= count; v++) {
+        const isRead = !!readVerses[`${book}:${chapterNum}:${v}`];
+        html += `<div class="verse-box ${isRead ? 'read' : ''}" data-c="${chapterNum}" data-v="${v}">${v}</div>`;
+      }
+      html += `</div>`;
+    });
+    drawer.innerHTML = html;
+    document.getElementById('home-back').onclick = () => openHome();
+    drawer.querySelectorAll('.verse-box').forEach(box => {
+      box.onclick = () => {
+        closeDrawer('home-overlay');
+        goToChapter(parseInt(box.dataset.c), parseInt(box.dataset.v));
+      };
+    });
+  }
 
   // ---------- My notes browser ----------
   document.getElementById('notes-list-btn').onclick = () => openNotesBrowser();
