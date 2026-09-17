@@ -89,7 +89,7 @@
   }
   .tick { width: 4px; height: 2px; background: var(--border); border-radius: 1px; }
   #scrollbar-thumb {
-    position: absolute; left: -3px; width: 10px; height: 30px;
+    position: absolute; left: 18px; width: 10px; height: 30px;
     background: var(--accent-dim); border-radius: 5px; z-index: 16;
     touch-action: none;
   }
@@ -336,9 +336,13 @@
       const page = document.createElement('div');
       page.className = 'verse-page';
       page.dataset.index = idx;
-      if (idx === 0) {
-        page.innerHTML = `<img src="cross.png" class="verse-icon" alt="">`;
-      }
+      const iconEl = document.createElement('img');
+      iconEl.src = 'cross.png';
+      iconEl.className = 'verse-icon';
+      iconEl.alt = 'Open deep study';
+      iconEl.style.cursor = 'pointer';
+      iconEl.onclick = () => openStudy(idx);
+      page.appendChild(iconEl);
       const textEl = document.createElement('p');
       textEl.className = 'verse-text';
       textEl.id = `vtext-${idx}`;
