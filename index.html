@@ -16,6 +16,7 @@
     --accent-dim: #8B5A3C;
     --study-bg: #241d16;
     --border: #2a2a2a;
+    --border-strong: #45443f;
   }
   [data-theme="light"] {
     --bg: #FAF9F6;
@@ -28,6 +29,7 @@
     --accent-dim: #8B5A3C;
     --study-bg: #f3ece3;
     --border: #e3e0d8;
+    --border-strong: #c9c5ba;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -258,7 +260,7 @@
   /* Home / tracker */
   .home-title { font-size: 18px; font-weight: 500; text-align: center; margin: 0 0 18px; color: var(--text-primary); }
   .tracker-card {
-    background: var(--study-bg); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
+    background: var(--bg-card); border: 0.5px solid var(--border-strong); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
   }
   .streak-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
   .streak-flame {
@@ -270,12 +272,13 @@
   .streak-label { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.04em; }
   .days-row { display: flex; justify-content: space-between; }
   .day-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .day-letter { font-size: 11px; color: var(--text-tertiary); }
+  .day-letter { font-size: 11px; color: var(--text-secondary); }
   .day-dot {
     width: 26px; height: 26px; border-radius: 50%; background: var(--bg-pill);
+    border: 0.5px solid var(--border-strong);
     display: flex; align-items: center; justify-content: center;
   }
-  .day-dot.filled { background: var(--accent-dim); }
+  .day-dot.filled { background: var(--accent-dim); border-color: var(--accent-dim); }
   .day-dot svg { width: 13px; height: 13px; color: #fff; }
 
   .book-row {
