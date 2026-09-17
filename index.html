@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Scroll James</title>
+<style>
+  :root {
+    --bg: #121212;
+    --bg-card: #1a1a1a;
+    --bg-pill: #1f1f1f;
+    --text-primary: #f5f5f0;
+    --text-secondary: #8a8a85;
+    --text-tertiary: #5c5c58;
+    --accent: #c9a37a;
+    --accent-dim: #8B5A3C;
+    --study-bg: #241d16;
+    --border: #2a2a2a;
+  }
+  [data-theme="light"] {
+    --bg: #FAF9F6;
+    --bg-card: #ffffff;
+    --bg-pill: #eeece6;
+    --text-primary: #1A1A1A;
+    --text-secondary: #6B6B66;
+    --text-tertiary: #a3a39c;
+    --accent: #8B5A3C;
+    --accent-dim: #8B5A3C;
+    --study-bg: #f3ece3;
+    --border: #e3e0d8;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overscroll-behavior: none;
+  }
+  #app { position: relative; height: 100vh; height: 100dvh; overflow: hidden; }
+
+  /* Top bar */
+  #topbar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 16px 0;
+  }
+  .pill {
+    background: var(--bg-pill); border-radius: 999px; padding: 7px 14px;
+    font-size: 13px; color: var(--text-primary); border: none;
+    display: flex; align-items: center; gap: 4px; cursor: pointer;
+  }
+  #search-btn {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    background: var(--bg-pill); border-radius: 999px; width: 34px; height: 34px;
+    border: none; color: var(--text-secondary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 21;
+  }
+
+  /* Feed */
+  #feed {
+    height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  #feed::-webkit-scrollbar { display: none; }
+  .verse-page {
+    height: 100%; scroll-snap-align: start;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0 46px; position: relative;
+  }
+  .verse-icon {
+    width: 68px; height: 68px; margin-bottom: 28px; opacity: 0.92;
+    object-fit: contain;
+  }
+  .verse-text {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 21px; line-height: 1.65; text-align: center; color: var(--text-primary);
+    max-width: 520px;
+  }
+  .verse-ref {
+    font-size: 13px; color: var(--text-secondary); text-align: center; margin-top: 16px;
+    cursor: pointer;
+  }
+
+  /* Left scrollbar */
+  #scrollbar-track {
+    position: absolute; left: 10px; top: 92px; bottom: 100px; width: 4px;
+    z-index: 15; display: flex; flex-direction: column; justify-content: space-between;
+    touch-action: none;
+  }
+  .tick { width: 4px; height: 2px; background: var(--border); border-radius: 1px; }
+  #scrollbar-thumb {
+    position: absolute; left: -3px; width: 10px; height: 30px;
+    background: var(--accent-dim); border-radius: 5px; z-index: 16;
+    touch-action: none;
+  }
+
+  /* Right icon rail */
+  #icon-rail {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-10%);
+    z-index: 15; display: flex; flex-direction: column; gap: 24px; align-items: center;
+  }
+  .rail-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; }
+  .rail-btn.active { color: var(--accent); }
+  .rail-btn svg { width: 22px; height: 22px; display: block; }
+
+  /* Bottom-left theme toggle */
+  #theme-toggle {
+    position: absolute; bottom: 20px; left: 16px; z-index: 15;
+    background: var(--bg-pill); border: none; border-radius: 999px;
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); cursor: pointer;
+  }
+
+  /* Drawer (deep study, search, note) */
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100;
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .drawer-overlay.open { display: flex; }
+  .drawer {
+    background: var(--bg-card); width: 100%; max-width: 480px;
+    border-radius: 20px 20px 0 0; padding: 14px 20px 28px;
+    max-height: 82vh; overflow-y: auto;
+    animation: slideUp 0.22s ease-out;
+  }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
+  .drawer-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
+  .drawer-ref { font-size: 12px; color: var(--text-secondary); text-align: center; margin: 0 0 2px; }
+  .drawer-verse { font-family: Georgia, serif; font-size: 15px; color: var(--text-primary); text-align: center; margin: 0 0 18px; line-height: 1.5; }
+
+  .menu-item {
+    display: flex; align-items: center; gap: 12px; padding: 14px 4px;
+    border-bottom: 0.5px solid var(--border); cursor: pointer; background: none; border-left: none; border-right: none; border-top: none;
+    width: 100%; text-align: left; color: var(--text-primary); font-size: 14px; font-family: inherit;
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .back-btn {
+    background: var(--bg-pill); border: none; border-radius: 999px; padding: 6px 14px;
+    font-size: 13px; color: var(--text-primary); display: inline-flex; align-items: center; gap: 4px;
+    cursor: pointer; margin-bottom: 14px;
+  }
+  .study-title { font-size: 13px; font-weight: 500; text-align: center; margin: 0 0 2px; color: var(--text-primary); }
+  .study-body { font-size: 14px; line-height: 1.65; color: var(--text-secondary); margin: 14px 0; }
+  .study-body strong, .study-body b { color: var(--text-primary); }
+  .study-body em, .study-body i { color: var(--accent); font-style: normal; }
+  .study-card {
+    background: var(--study-bg); border-radius: 10px; padding: 13px 15px; margin-bottom: 10px;
+  }
+  .study-card-label {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
+    font-size: 11px; color: var(--accent); letter-spacing: 0.03em; font-weight: 500;
+  }
+  .study-card p { font-size: 13px; color: var(--text-primary); margin: 0; line-height: 1.5; }
+  .greek-word { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 0.5px solid var(--border); }
+  .greek-word:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
+  .greek-orig { font-size: 18px; color: var(--accent); margin-bottom: 2px; }
+  .greek-meaning { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .related-link {
+    display: block; padding: 10px 4px; border-bottom: 0.5px solid var(--border);
+    font-size: 14px; color: var(--text-primary); cursor: pointer;
+  }
+  .related-link:last-child { border-bottom: none; }
+
+  .bottom-row {
+    display: flex; justify-content: space-around; border-top: 0.5px solid var(--border);
+    padding-top: 14px; margin-top: 4px;
+  }
+  .bottom-row button { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; }
+  .bottom-row button.active { color: var(--accent); }
+  .bottom-row svg { width: 18px; height: 18px; display: block; }
+
+  /* Search drawer */
+  #search-input {
+    width: 100%; background: var(--bg-pill); border: none; border-radius: 10px;
+    padding: 12px 14px; font-size: 15px; color: var(--text-primary); margin-bottom: 14px; font-family: inherit;
+  }
+  #search-input:focus { outline: 1px solid var(--accent-dim); }
+  .search-result {
+    padding: 10px 4px; border-bottom: 0.5px solid var(--border); cursor: pointer;
+  }
+  .search-result:last-child { border-bottom: none; }
+  .search-result .sr-ref { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
+  .search-result .sr-text { font-size: 14px; color: var(--text-primary); }
+
+  /* Note textarea */
+  #note-textarea {
+    width: 100%; min-height: 120px; background: var(--bg-pill); border: none; border-radius: 10px;
+    padding: 12px 14px; font-size: 14px; color: var(--text-primary); font-family: inherit; resize: vertical;
+    margin-bottom: 14px;
+  }
+  #note-textarea:focus { outline: 1px solid var(--accent-dim); }
+  .save-note-btn {
+    width: 100%; background: var(--accent-dim); border: none; border-radius: 10px;
+    padding: 12px; font-size: 14px; color: #fff; cursor: pointer; font-family: inherit;
+  }
+
+  .loading-dots { text-align: center; color: var(--text-secondary); font-size: 14px; padding: 20px 0; }
+
+  #toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: var(--bg-pill); color: var(--text-primary); padding: 10px 18px;
+    border-radius: 999px; font-size: 13px; z-index: 200; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  #toast.show { opacity: 1; }
+
+  #screenshot-canvas-holder { position: fixed; top: -9999px; left: -9999px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="topbar">
+    <button class="pill" id="translation-pill">KJV</button>
+    <button class="pill" id="chapter-pill">James <span id="chapter-num">1</span> ▾</button>
+  </div>
+  <button id="search-btn" aria-label="Search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </button>
+
+  <div id="scrollbar-track"></div>
+  <div id="scrollbar-thumb"></div>
+
+  <div id="feed"></div>
+
+  <div id="icon-rail">
+    <button class="rail-btn" id="save-btn" aria-label="Save verse">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+    <button class="rail-btn" id="note-btn" aria-label="Note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <button class="rail-btn" id="share-btn" aria-label="Share">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    </button>
+    <button class="rail-btn" id="screenshot-btn" aria-label="Screenshot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </button>
+  </div>
+
+  <button id="theme-toggle" aria-label="Toggle theme">
+    <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17"></svg>
+  </button>
+
+</div>
+
+<!-- Chapter picker drawer -->
+<div class="drawer-overlay" id="chapter-overlay">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div id="chapter-list"></div>
+  </div>
+</div>
+
+<!-- Translation picker drawer -->
+<div class="drawer-overlay" id="translation-overlay">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <button class="menu-item" data-t="kjv">King James Version (offline)</button>
+    <button class="menu-item" data-t="web">World English Bible (offline)</button>
+    <button class="menu-item" data-t="niv">New International Version (online)</button>
+    <button class="menu-item" data-t="nlt">New Living Translation (online)</button>
+  </div>
+</div>
+
+<!-- Deep study drawer -->
+<div class="drawer-overlay" id="study-overlay">
+  <div class="drawer" id="study-drawer"></div>
+</div>
+
+<!-- Search drawer -->
+<div class="drawer-overlay" id="search-overlay">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <input id="search-input" placeholder="Search James, e.g. james 1:5 or wisdom" autocomplete="off">
+    <div id="search-results"></div>
+  </div>
+</div>
+
+<!-- Note drawer -->
+<div class="drawer-overlay" id="note-overlay">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <p class="drawer-ref" id="note-ref"></p>
+    <textarea id="note-textarea" placeholder="Write a note on this verse..."></textarea>
+    <button class="save-note-btn" id="save-note-confirm">Save note</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+(function() {
+  "use strict";
+
+  // ---------- State ----------
+  const state = {
+    translation: localStorage.getItem('sj_translation') || 'kjv',
+    theme: localStorage.getItem('sj_theme') || 'dark',
+    chapter: 1,
+    verses: JAMES_VERSES,
+    liveTextCache: JSON.parse(localStorage.getItem('sj_livecache') || '{}')
+  };
+  const saved = JSON.parse(localStorage.getItem('sj_saved') || '{}');
+  const notes = JSON.parse(localStorage.getItem('sj_notes') || '{}');
+
+  const API_BIBLE_KEY = "mSiigwn6LhcbU2ZwR3nc5";
+  const BIBLE_ID_CACHE_KEY = 'sj_bible_ids';
+  let bibleIds = JSON.parse(localStorage.getItem(BIBLE_ID_CACHE_KEY) || 'null');
+
+  document.documentElement.setAttribute('data-theme', state.theme);
+
+  // ---------- Icons ----------
+  const ICONS = {
+    sun: '<circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+    moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+  };
+  function renderThemeIcon() {
+    document.getElementById('theme-icon').innerHTML = state.theme === 'dark' ? ICONS.sun : ICONS.moon;
+  }
+  renderThemeIcon();
+
+  // ---------- Feed rendering ----------
+  const feed = document.getElementById('feed');
+
+  function offlineText(v, trans) {
+    return v[trans];
+  }
+
+  function renderFeed() {
+    feed.innerHTML = '';
+    state.verses.forEach((v, idx) => {
+      const page = document.createElement('div');
+      page.className = 'verse-page';
+      page.dataset.index = idx;
+      if (idx === 0) {
+        page.innerHTML = `<img src="cross.png" class="verse-icon" alt="">`;
+      }
+      const textEl = document.createElement('p');
+      textEl.className = 'verse-text';
+      textEl.id = `vtext-${idx}`;
+      textEl.textContent = '…';
+      const refEl = document.createElement('p');
+      refEl.className = 'verse-ref';
+      refEl.textContent = `James ${v.c}:${v.v}`;
+      refEl.onclick = () => openStudy(idx);
+      page.appendChild(textEl);
+      page.appendChild(refEl);
+      feed.appendChild(page);
+    });
+    loadVisibleText();
+    updateChapterLabel();
+    buildTicks();
+  }
+
+  async function getVerseText(idx) {
+    const v = state.verses[idx];
+    if (state.translation === 'kjv' || state.translation === 'web') {
+      return offlineText(v, state.translation);
+    }
+    const cacheKey = `${state.translation}:${v.c}:${v.v}`;
+    if (state.liveTextCache[cacheKey]) return state.liveTextCache[cacheKey];
+    try {
+      const text = await fetchLiveVerse(v.c, v.v, state.translation);
+      state.liveTextCache[cacheKey] = text;
+      localStorage.setItem('sj_livecache', JSON.stringify(state.liveTextCache));
+      return text;
+    } catch (e) {
+      return v.kjv + '  (offline fallback — could not reach translation service)';
+    }
+  }
+
+  async function resolveBibleIds() {
+    if (bibleIds) return bibleIds;
+    const res = await fetch('https://api.scripture.api.bible/v1/bibles', {
+      headers: { 'api-key': API_BIBLE_KEY }
+    });
+    const json = await res.json();
+    const ids = {};
+    (json.data || []).forEach(b => {
+      const abbr = (b.abbreviationLocal || b.abbreviation || '').toUpperCase();
+      if (abbr.includes('NIV') && !ids.niv) ids.niv = b.id;
+      if (abbr.includes('NLT') && !ids.nlt) ids.nlt = b.id;
+    });
+    bibleIds = ids;
+    localStorage.setItem(BIBLE_ID_CACHE_KEY, JSON.stringify(ids));
+    return ids;
+  }
+
+  async function fetchLiveVerse(chapter, verse, trans) {
+    const ids = await resolveBibleIds();
+    const bibleId = ids[trans];
+    if (!bibleId) throw new Error('No bible id for ' + trans);
+    const verseId = `JAS.${chapter}.${verse}`;
+    const res = await fetch(`https://api.scripture.api.bible/v1/bibles/${bibleId}/verses/${verseId}?content-type=text&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=false&include-verse-spans=false`, {
+      headers: { 'api-key': API_BIBLE_KEY }
+    });
+    const json = await res.json();
+    return (json.data && json.data.content ? json.data.content.trim() : '(unavailable)');
+  }
+
+  async function loadVisibleText() {
+    const idx = currentIndex();
+    for (let i = Math.max(0, idx - 1); i <= Math.min(state.verses.length - 1, idx + 1); i++) {
+      const el = document.getElementById(`vtext-${i}`);
+      if (el && el.textContent === '…') {
+        getVerseText(i).then(t => { if (el) el.textContent = t; });
+      }
+    }
+  }
+
+  function currentIndex() {
+    const scrollTop = feed.scrollTop;
+    const h = feed.clientHeight;
+    return Math.round(scrollTop / h);
+  }
+
+  function updateChapterLabel() {
+    const idx = currentIndex();
+    const v = state.verses[idx];
+    if (v) document.getElementById('chapter-num').textContent = v.c;
+  }
+
+  let scrollTimeout;
+  feed.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    updateThumbFromScroll();
+    scrollTimeout = setTimeout(() => { loadVisibleText(); updateChapterLabel(); }, 80);
+  });
+
+  // ---------- Left scrollbar ----------
+  const track = document.getElementById('scrollbar-track');
+  const thumb = document.getElementById('scrollbar-thumb');
+
+  function buildTicks() {
+    track.innerHTML = '';
+    const count = state.verses.length;
+    const step = Math.max(1, Math.floor(count / 40));
+    for (let i = 0; i < count; i += step) {
+      const t = document.createElement('div');
+      t.className = 'tick';
+      track.appendChild(t);
+    }
+  }
+
+  function updateThumbFromScroll() {
+    const idx = currentIndex();
+    const pct = idx / Math.max(1, state.verses.length - 1);
+    const trackRect = track.getBoundingClientRect();
+    const usable = trackRect.height - 30;
+    thumb.style.top = (trackRect.top + pct * usable) + 'px';
+  }
+  window.addEventListener('resize', updateThumbFromScroll);
+
+  let dragging = false;
+  function handleDrag(clientY) {
+    const trackRect = track.getBoundingClientRect();
+    let pct = (clientY - trackRect.top) / trackRect.height;
+    pct = Math.max(0, Math.min(1, pct));
+    const idx = Math.round(pct * (state.verses.length - 1));
+    feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
+    updateThumbFromScroll();
+  }
+  function startDrag(e) {
+    dragging = true;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    handleDrag(y);
+    e.preventDefault();
+  }
+  function moveDrag(e) {
+    if (!dragging) return;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    handleDrag(y);
+  }
+  function endDrag() { dragging = false; loadVisibleText(); }
+  [track, thumb].forEach(el => {
+    el.addEventListener('mousedown', startDrag);
+    el.addEventListener('touchstart', startDrag, { passive: false });
+  });
+  window.addEventListener('mousemove', moveDrag);
+  window.addEventListener('touchmove', moveDrag, { passive: false });
+  window.addEventListener('mouseup', endDrag);
+  window.addEventListener('touchend', endDrag);
+
+  // ---------- Drawers ----------
+  function openDrawer(id) { document.getElementById(id).classList.add('open'); }
+  function closeDrawer(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.drawer-overlay').forEach(ov => {
+    ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+  });
+
+  // ---------- Chapter picker ----------
+  document.getElementById('chapter-pill').onclick = () => {
+    const list = document.getElementById('chapter-list');
+    list.innerHTML = '';
+    for (let c = 1; c <= 5; c++) {
+      const btn = document.createElement('button');
+      btn.className = 'menu-item';
+      btn.textContent = `James ${c}`;
+      btn.onclick = () => {
+        const idx = state.verses.findIndex(v => v.c === c);
+        feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
+        closeDrawer('chapter-overlay');
+        setTimeout(() => { loadVisibleText(); updateChapterLabel(); updateThumbFromScroll(); }, 50);
+      };
+      list.appendChild(btn);
+    }
+    openDrawer('chapter-overlay');
+  };
+
+  // ---------- Translation picker ----------
+  function updateTranslationPill() {
+    document.getElementById('translation-pill').textContent = state.translation.toUpperCase();
+  }
+  document.getElementById('translation-pill').onclick = () => openDrawer('translation-overlay');
+  document.querySelectorAll('#translation-overlay .menu-item').forEach(btn => {
+    btn.onclick = () => {
+      state.translation = btn.dataset.t;
+      localStorage.setItem('sj_translation', state.translation);
+      updateTranslationPill();
+      closeDrawer('translation-overlay');
+      document.querySelectorAll('.verse-text').forEach(el => el.textContent = '…');
+      loadVisibleText();
+    };
+  });
+  updateTranslationPill();
+
+  // ---------- Theme toggle ----------
+  document.getElementById('theme-toggle').onclick = () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', state.theme);
+    localStorage.setItem('sj_theme', state.theme);
+    renderThemeIcon();
+  };
+
+  // ---------- Save / Note / Share / Screenshot ----------
+  function verseKey(idx) { const v = state.verses[idx]; return `${v.c}:${v.v}`; }
+
+  function refreshRailState() {
+    const idx = currentIndex();
+    const key = verseKey(idx);
+    document.getElementById('save-btn').classList.toggle('active', !!saved[key]);
+  }
+
+  document.getElementById('save-btn').onclick = () => {
+    const idx = currentIndex();
+    const key = verseKey(idx);
+    if (saved[key]) { delete saved[key]; showToast('Removed from saved'); }
+    else { saved[key] = true; showToast('Verse saved'); }
+    localStorage.setItem('sj_saved', JSON.stringify(saved));
+    refreshRailState();
+  };
+
+  document.getElementById('note-btn').onclick = () => {
+    const idx = currentIndex();
+    const key = verseKey(idx);
+    const v = state.verses[idx];
+    document.getElementById('note-ref').textContent = `James ${v.c}:${v.v}`;
+    document.getElementById('note-textarea').value = notes[key] || '';
+    document.getElementById('note-textarea').dataset.key = key;
+    openDrawer('note-overlay');
+  };
+  document.getElementById('save-note-confirm').onclick = () => {
+    const key = document.getElementById('note-textarea').dataset.key;
+    const val = document.getElementById('note-textarea').value.trim();
+    if (val) notes[key] = val; else delete notes[key];
+    localStorage.setItem('sj_notes', JSON.stringify(notes));
+    closeDrawer('note-overlay');
+    showToast('Note saved');
+  };
+
+  document.getElementById('share-btn').onclick = async () => {
+    const idx = currentIndex();
+    const v = state.verses[idx];
+    const text = await getVerseText(idx);
+    const shareText = `"${text}"\nJames ${v.c}:${v.v}`;
+    if (navigator.share) {
+      try { await navigator.share({ text: shareText }); } catch (e) {}
+    } else {
+      await navigator.clipboard.writeText(shareText);
+      showToast('Copied to clipboard');
+    }
+  };
+
+  document.getElementById('screenshot-btn').onclick = () => {
+    const idx = currentIndex();
+    const v = state.verses[idx];
+    const textEl = document.getElementById(`vtext-${idx}`);
+    const canvas = document.createElement('canvas');
+    const W = 1080, H = 1080;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const isDark = state.theme === 'dark';
+    ctx.fillStyle = isDark ? '#121212' : '#FAF9F6';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = isDark ? '#f5f5f0' : '#1A1A1A';
+    ctx.font = '48px Georgia, serif';
+    ctx.textAlign = 'center';
+    const text = textEl.textContent;
+    const words = text.split(' ');
+    let lines = [], cur = '';
+    words.forEach(w => {
+      const test = cur ? cur + ' ' + w : w;
+      if (ctx.measureText(test).width > W - 160) { lines.push(cur); cur = w; }
+      else cur = test;
+    });
+    if (cur) lines.push(cur);
+    const lineHeight = 64;
+    const startY = H / 2 - (lines.length * lineHeight) / 2;
+    lines.forEach((line, i) => ctx.fillText(line, W / 2, startY + i * lineHeight));
+    ctx.font = '28px -apple-system, sans-serif';
+    ctx.fillStyle = isDark ? '#8a8a85' : '#6B6B66';
+    ctx.fillText(`James ${v.c}:${v.v}`, W / 2, startY + lines.length * lineHeight + 50);
+
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `james-${v.c}-${v.v}.png`;
+      a.click();
+      showToast('Image saved');
+    });
+  };
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  // ---------- Deep study ----------
+  function studyKey(idx) { return verseKey(idx); }
+
+  function openStudy(idx) {
+    const v = state.verses[idx];
+    const drawer = document.getElementById('study-drawer');
+    drawer.innerHTML = `
+      <div class="drawer-handle"></div>
+      <p class="drawer-ref">James ${v.c}:${v.v}</p>
+      <p class="drawer-verse">${v.kjv}</p>
+      <button class="menu-item" data-opt="explain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Explain easier</button>
+      <button class="menu-item" data-opt="original"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg>Original language</button>
+      <button class="menu-item" data-opt="deeper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg>Deeper study</button>
+      <button class="menu-item" data-opt="related"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Related verses</button>
+    `;
+    drawer.querySelectorAll('[data-opt]').forEach(btn => {
+      btn.onclick = () => renderStudyResult(idx, btn.dataset.opt);
+    });
+    openDrawer('study-overlay');
+  }
+
+  function renderStudyResult(idx, opt) {
+    const v = state.verses[idx];
+    const key = studyKey(idx);
+    const data = STUDY_DATA[key] || {};
+    const drawer = document.getElementById('study-drawer');
+    const titles = { explain: 'Explain easier', original: 'Original language', deeper: 'Deeper study', related: 'Related verses' };
+
+    let body = '';
+    if (opt === 'explain') {
+      body = `<p class="study-body">${data.explain || 'No commentary available for this verse yet.'}</p>`;
+    } else if (opt === 'deeper') {
+      body = `<p class="study-body">${data.deeper || 'No deeper study available for this verse yet.'}</p>`;
+    } else if (opt === 'original') {
+      const words = data.greek || [];
+      body = words.map(w => `
+        <div class="greek-word">
+          <div class="greek-orig">${w.word} <span style="color:var(--text-secondary); font-size:13px;">— ${w.english}</span></div>
+          <div class="greek-meaning">${w.meaning}</div>
+        </div>
+      `).join('') || '<p class="study-body">No word data available for this verse.</p>';
+    } else if (opt === 'related') {
+      const refs = data.related || [];
+      body = refs.map(r => `<div class="related-link">${r}</div>`).join('') || '<p class="study-body">No related verses found.</p>';
+    }
+
+    const showCards = opt === 'explain' || opt === 'deeper';
+    drawer.innerHTML = `
+      <div class="drawer-handle"></div>
+      <button class="back-btn" id="study-back">‹ Back</button>
+      <p class="study-title">${titles[opt]}</p>
+      <p class="drawer-ref">James ${v.c}:${v.v}</p>
+      ${body}
+      ${showCards ? `
+        <div class="study-card">
+          <div class="study-card-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>KEY TAKEAWAY</div>
+          <p>${data.takeaway || ''}</p>
+        </div>
+        <div class="study-card">
+          <div class="study-card-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12h.01M12 3l1.9 1.9a1 1 0 0 0 .7.29H17a2 2 0 0 1 2 2v2.4a1 1 0 0 0 .29.7L21 12l-1.71 1.71a1 1 0 0 0-.29.7V17a2 2 0 0 1-2 2h-2.4a1 1 0 0 0-.7.29L12 21l-1.9-1.9a1 1 0 0 0-.7-.29H7a2 2 0 0 1-2-2v-2.4a1 1 0 0 0-.29-.7L3 12l1.71-1.71a1 1 0 0 0 .29-.7V7a2 2 0 0 1 2-2h2.4a1 1 0 0 0 .7-.29z"/></svg>APPLY IT</div>
+          <p>${data.apply || ''}</p>
+        </div>
+      ` : ''}
+      <div class="bottom-row">
+        <button id="sr-save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <button id="sr-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+        <button id="sr-copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+        <button id="sr-share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+      </div>
+    `;
+    document.getElementById('study-back').onclick = () => openStudy(idx);
+    document.getElementById('sr-save').onclick = () => { document.getElementById('save-btn').click(); document.getElementById('sr-save').classList.toggle('active', saved[key]); };
+    if (saved[key]) document.getElementById('sr-save').classList.add('active');
+    document.getElementById('sr-note').onclick = () => { closeDrawer('study-overlay'); document.getElementById('note-btn').click(); };
+    document.getElementById('sr-copy').onclick = async () => {
+      await navigator.clipboard.writeText(data.takeaway || data.explain || '');
+      showToast('Copied');
+    };
+    document.getElementById('sr-share').onclick = () => document.getElementById('share-btn').click();
+  }
+
+  // ---------- Search ----------
+  document.getElementById('search-btn').onclick = () => {
+    openDrawer('search-overlay');
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-results').innerHTML = '';
+    setTimeout(() => document.getElementById('search-input').focus(), 100);
+  };
+
+  document.getElementById('search-input').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    const results = document.getElementById('search-results');
+    results.innerHTML = '';
+    if (!q) return;
+
+    const refMatch = q.match(/^(?:james\s*)?(\d)[:\s]*(\d+)?$/);
+    let matches = [];
+    if (refMatch) {
+      const c = parseInt(refMatch[1]);
+      const vnum = refMatch[2] ? parseInt(refMatch[2]) : null;
+      matches = state.verses.filter((v, i) => v.c === c && (vnum === null || v.v === vnum));
+    } else {
+      matches = state.verses.filter(v => v.kjv.toLowerCase().includes(q) || v.web.toLowerCase().includes(q));
+    }
+    matches.slice(0, 25).forEach(v => {
+      const idx = state.verses.findIndex(x => x.c === v.c && x.v === v.v);
+      const div = document.createElement('div');
+      div.className = 'search-result';
+      div.innerHTML = `<div class="sr-ref">James ${v.c}:${v.v}</div><div class="sr-text">${v.kjv}</div>`;
+      div.onclick = () => {
+        feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
+        closeDrawer('search-overlay');
+        setTimeout(() => { loadVisibleText(); updateChapterLabel(); updateThumbFromScroll(); refreshRailState(); }, 50);
+      };
+      results.appendChild(div);
+    });
+  });
+
+  // ---------- Init ----------
+  renderFeed();
+  setTimeout(() => { updateThumbFromScroll(); refreshRailState(); }, 100);
+  feed.addEventListener('scroll', () => setTimeout(refreshRailState, 90));
+
+})();
+</script>
+</body>
+</html>
