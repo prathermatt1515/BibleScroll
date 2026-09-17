@@ -433,6 +433,7 @@
       <span id="note-range-label" style="font-size:13px; color:var(--text-secondary); min-width:150px; text-align:center;"></span>
       <button id="note-range-plus" class="rail-btn" style="background:var(--bg-pill); border-radius:999px; width:32px; height:32px;" aria-label="More verses">+</button>
     </div>
+    <p id="note-verse-preview" class="drawer-verse" style="max-height:120px; overflow-y:auto;"></p>
     <textarea id="note-textarea" placeholder="Write a note on this verse..."></textarea>
     <button class="save-note-btn" id="save-note-confirm">Save note</button>
   </div>
@@ -931,6 +932,12 @@
       : `${state.book} ${startV.c}:${startV.v} – ${endV.c}:${endV.v}`;
     document.getElementById('note-range-label').textContent = label;
     document.getElementById('note-ref').textContent = label;
+    const texts = [];
+    for (let i = 0; i < noteEditState.span; i++) {
+      const vv = state.verses[idx + i];
+      if (vv) texts.push(vv.kjv);
+    }
+    document.getElementById('note-verse-preview').textContent = texts.join(' ');
   }
 
   function openNoteEditor(idx) {
@@ -1383,13 +1390,18 @@
       const startC = parseInt(parts[1]), startV = parseInt(parts[2]);
       const arr = BOOK_VERSES[book];
       let endC = startC, endV = startV;
-      if (arr && entry.span > 1) {
+      let verseText = '';
+      if (arr) {
         const startIdx = arr.findIndex(x => x.c === startC && x.v === startV);
-        const endVerse = arr[startIdx + entry.span - 1];
-        if (endVerse) { endC = endVerse.c; endV = endVerse.v; }
+        if (startIdx >= 0) {
+          const chunk = arr.slice(startIdx, startIdx + entry.span);
+          verseText = chunk.map(x => x.kjv).join(' ');
+          const endVerse = chunk[chunk.length - 1];
+          if (endVerse) { endC = endVerse.c; endV = endVerse.v; }
+        }
       }
       byBook[book] = byBook[book] || [];
-      byBook[book].push({ startC, startV, endC, endV, span: entry.span, text: entry.text });
+      byBook[book].push({ startC, startV, endC, endV, span: entry.span, text: entry.text, verseText });
     });
     Object.keys(byBook).forEach(b => byBook[b].sort((a, b2) => a.startC - b2.startC || a.startV - b2.startV));
 
@@ -1402,8 +1414,10 @@
         html += `<p style="font-size:13px; font-weight:500; color:var(--accent); margin:18px 0 6px;">${book} <span style="color:var(--text-secondary); font-weight:400;">(${byBook[book].length})</span></p>`;
         byBook[book].forEach(n => {
           const refLabel = n.span > 1 ? `${book} ${n.startC}:${n.startV} – ${n.endC}:${n.endV}` : `${book} ${n.startC}:${n.startV}`;
+          const versePreview = n.verseText ? (n.verseText.length > 100 ? n.verseText.slice(0, 100) + '…' : n.verseText) : '';
           html += `<div class="search-result" data-book="${book}" data-c="${n.startC}" data-v="${n.startV}">
             <div class="sr-ref">${refLabel}</div>
+            ${versePreview ? `<div style="font-family:Georgia,serif; font-size:13px; color:var(--text-secondary); font-style:italic; margin:4px 0 6px;">"${versePreview}"</div>` : ''}
             <div class="sr-text">${n.text.length > 90 ? n.text.slice(0, 90) + '…' : n.text}</div>
           </div>`;
         });
