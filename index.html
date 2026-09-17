@@ -83,15 +83,19 @@
 
   /* Left scrollbar */
   #scrollbar-track {
-    position: absolute; left: 10px; top: 92px; bottom: 100px; width: 4px;
+    position: absolute; left: 4px; top: 92px; bottom: 100px; width: 24px;
     z-index: 15; display: flex; flex-direction: column; justify-content: space-between;
-    touch-action: none;
+    touch-action: none; padding: 0 10px; box-sizing: content-box;
   }
   .tick { width: 4px; height: 2px; background: var(--border); border-radius: 1px; }
   #scrollbar-thumb {
     position: absolute; left: 18px; width: 10px; height: 30px;
     background: var(--accent-dim); border-radius: 5px; z-index: 16;
-    touch-action: none;
+    touch-action: none; transition: width 0.15s, height 0.15s, left 0.15s, border-radius 0.15s;
+  }
+  #scrollbar-thumb.dragging {
+    width: 16px; height: 46px; left: 15px; border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
   /* Right icon rail */
@@ -478,6 +482,7 @@
   }
   function startDrag(e) {
     dragging = true;
+    thumb.classList.add('dragging');
     const y = e.touches ? e.touches[0].clientY : e.clientY;
     handleDrag(y);
     e.preventDefault();
@@ -487,7 +492,7 @@
     const y = e.touches ? e.touches[0].clientY : e.clientY;
     handleDrag(y);
   }
-  function endDrag() { dragging = false; loadVisibleText(); }
+  function endDrag() { dragging = false; thumb.classList.remove('dragging'); loadVisibleText(); }
   [track, thumb].forEach(el => {
     el.addEventListener('mousedown', startDrag);
     el.addEventListener('touchstart', startDrag, { passive: false });
