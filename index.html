@@ -128,7 +128,7 @@
     animation: slideUp 0.22s ease-out;
   }
   @keyframes slideUp { from { transform: translateY(30px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
-  .drawer-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
+  .drawer-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; cursor: grab; touch-action: none; padding: 10px 30px; background-clip: content-box; box-sizing: content-box; margin-top: -10px; }
   .drawer-ref { font-size: 12px; color: var(--text-secondary); text-align: center; margin: 0 0 2px; }
   .drawer-verse { font-family: Georgia, serif; font-size: 15px; color: var(--text-primary); text-align: center; margin: 0 0 18px; line-height: 1.5; }
 
@@ -729,6 +729,65 @@
     };
     document.getElementById('sr-share').onclick = () => document.getElementById('share-btn').click();
   }
+
+  // ---------- Draggable drawer handles (pull up to expand) ----------
+  let dragDrawer = null, dragStartY = 0, dragStartHeight = 0;
+  function drawerMaxPx() { return Math.round(window.innerHeight * 0.92); }
+
+  document.addEventListener('touchstart', e => {
+    const handle = e.target.closest('.drawer-handle');
+    if (!handle) return;
+    dragDrawer = handle.closest('.drawer');
+    dragStartY = e.touches[0].clientY;
+    dragStartHeight = dragDrawer.getBoundingClientRect().height;
+    dragDrawer.style.transition = 'none';
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!dragDrawer) return;
+    const dy = dragStartY - e.touches[0].clientY;
+    let newHeight = dragStartHeight + dy;
+    newHeight = Math.max(220, Math.min(drawerMaxPx(), newHeight));
+    dragDrawer.style.maxHeight = newHeight + 'px';
+    dragDrawer.style.height = newHeight + 'px';
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    if (dragDrawer) dragDrawer.style.transition = '';
+    dragDrawer = null;
+  });
+
+  // mouse support for desktop testing
+  document.addEventListener('mousedown', e => {
+    const handle = e.target.closest('.drawer-handle');
+    if (!handle) return;
+    dragDrawer = handle.closest('.drawer');
+    dragStartY = e.clientY;
+    dragStartHeight = dragDrawer.getBoundingClientRect().height;
+    dragDrawer.style.transition = 'none';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragDrawer) return;
+    const dy = dragStartY - e.clientY;
+    let newHeight = dragStartHeight + dy;
+    newHeight = Math.max(220, Math.min(drawerMaxPx(), newHeight));
+    dragDrawer.style.maxHeight = newHeight + 'px';
+    dragDrawer.style.height = newHeight + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (dragDrawer) dragDrawer.style.transition = '';
+    dragDrawer = null;
+  });
+
+  // reset any manually-set height each time a drawer opens fresh
+  document.querySelectorAll('.drawer-overlay').forEach(ov => {
+    ov.addEventListener('click', e => {
+      if (e.currentTarget === e.target) {
+        const d = ov.querySelector('.drawer');
+        if (d) { d.style.height = ''; d.style.maxHeight = ''; }
+      }
+    });
+  });
 
   // ---------- My notes browser ----------
   document.getElementById('notes-list-btn').onclick = () => openNotesBrowser();
