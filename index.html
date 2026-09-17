@@ -97,6 +97,16 @@
     width: 16px; height: 46px; left: 15px; border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
+  #scrollbar-label {
+    position: absolute; left: 30px; z-index: 17;
+    background: var(--bg-pill); color: var(--text-primary); font-size: 13px; font-weight: 500;
+    padding: 4px 9px; border-radius: 999px; opacity: 0; transition: opacity 0.15s;
+    pointer-events: none; white-space: nowrap;
+  }
+  #scrollbar-label.show { opacity: 1; }
+  .scrollbar-bound {
+    position: absolute; left: 18px; font-size: 11px; color: var(--text-tertiary); z-index: 14;
+  }
 
   /* Right icon rail */
   #icon-rail {
@@ -226,6 +236,9 @@
 
   <div id="scrollbar-track"></div>
   <div id="scrollbar-thumb"></div>
+  <div id="scrollbar-label"></div>
+  <div class="scrollbar-bound" id="scrollbar-top-bound">1</div>
+  <div class="scrollbar-bound" id="scrollbar-bottom-bound"></div>
 
   <div id="feed"></div>
 
@@ -444,6 +457,7 @@
   feed.addEventListener('scroll', () => {
     clearTimeout(scrollTimeout);
     updateThumbFromScroll();
+    showScrollActive();
     scrollTimeout = setTimeout(() => { loadVisibleText(); updateChapterLabel(); }, 80);
   });
 
@@ -468,8 +482,34 @@
     const trackRect = track.getBoundingClientRect();
     const usable = trackRect.height - 30;
     thumb.style.top = (trackRect.top + pct * usable) + 'px';
+    const label = document.getElementById('scrollbar-label');
+    const v = state.verses[idx];
+    if (v) label.textContent = v.v;
+    label.style.top = (trackRect.top + pct * usable - 5) + 'px';
   }
   window.addEventListener('resize', updateThumbFromScroll);
+
+  function positionBounds() {
+    const trackRect = track.getBoundingClientRect();
+    document.getElementById('scrollbar-top-bound').style.top = (trackRect.top - 18) + 'px';
+    const bottomEl = document.getElementById('scrollbar-bottom-bound');
+    const lastVerse = state.verses[state.verses.length - 1];
+    bottomEl.textContent = lastVerse.v;
+    bottomEl.style.top = (trackRect.bottom + 4) + 'px';
+  }
+
+  let scrollActiveTimeout;
+  function showScrollActive() {
+    thumb.classList.add('dragging');
+    document.getElementById('scrollbar-label').classList.add('show');
+    clearTimeout(scrollActiveTimeout);
+    scrollActiveTimeout = setTimeout(() => {
+      if (!dragging) {
+        thumb.classList.remove('dragging');
+        document.getElementById('scrollbar-label').classList.remove('show');
+      }
+    }, 500);
+  }
 
   let dragging = false;
   function handleDrag(clientY) {
@@ -483,6 +523,7 @@
   function startDrag(e) {
     dragging = true;
     thumb.classList.add('dragging');
+    document.getElementById('scrollbar-label').classList.add('show');
     const y = e.touches ? e.touches[0].clientY : e.clientY;
     handleDrag(y);
     e.preventDefault();
@@ -492,7 +533,14 @@
     const y = e.touches ? e.touches[0].clientY : e.clientY;
     handleDrag(y);
   }
-  function endDrag() { dragging = false; thumb.classList.remove('dragging'); loadVisibleText(); }
+  function endDrag() {
+    dragging = false;
+    loadVisibleText();
+    setTimeout(() => {
+      thumb.classList.remove('dragging');
+      document.getElementById('scrollbar-label').classList.remove('show');
+    }, 400);
+  }
   [track, thumb].forEach(el => {
     el.addEventListener('mousedown', startDrag);
     el.addEventListener('touchstart', startDrag, { passive: false });
@@ -873,7 +921,8 @@
 
   // ---------- Init ----------
   renderFeed();
-  setTimeout(() => { updateThumbFromScroll(); refreshRailState(); }, 100);
+  setTimeout(() => { updateThumbFromScroll(); positionBounds(); refreshRailState(); }, 100);
+  window.addEventListener('resize', positionBounds);
   feed.addEventListener('scroll', () => setTimeout(refreshRailState, 90));
 
 })();
