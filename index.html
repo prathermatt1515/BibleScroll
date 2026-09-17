@@ -1038,22 +1038,23 @@
   function openBookDetail(book) {
     const drawer = document.getElementById('home-drawer');
     const counts = CHAPTER_COUNTS[book];
-    let html = `<div class="drawer-handle"></div><button class="back-btn" id="home-back">‹ Back</button><p class="home-title">${book}</p>`;
+    let html = `<div class="drawer-handle"></div><button class="back-btn" id="home-back">‹ Back</button><p class="home-title">${book}</p><div class="verse-grid" style="grid-template-columns:repeat(5,1fr);">`;
     counts.forEach((count, ci) => {
       const chapterNum = ci + 1;
-      html += `<p class="chapter-group-label">Chapter ${chapterNum}</p><div class="verse-grid">`;
+      let readCount = 0;
       for (let v = 1; v <= count; v++) {
-        const isRead = !!readVerses[`${book}:${chapterNum}:${v}`];
-        html += `<div class="verse-box ${isRead ? 'read' : ''}" data-c="${chapterNum}" data-v="${v}">${v}</div>`;
+        if (readVerses[`${book}:${chapterNum}:${v}`]) readCount++;
       }
-      html += `</div>`;
+      const isComplete = readCount === count;
+      html += `<div class="verse-box ${isComplete ? 'read' : ''}" data-c="${chapterNum}" title="${readCount}/${count} read">${chapterNum}</div>`;
     });
+    html += `</div>`;
     drawer.innerHTML = html;
     document.getElementById('home-back').onclick = () => openHome();
     drawer.querySelectorAll('.verse-box').forEach(box => {
       box.onclick = () => {
         closeDrawer('home-overlay');
-        goToChapter(parseInt(box.dataset.c), parseInt(box.dataset.v));
+        goToChapter(parseInt(box.dataset.c), 1);
       };
     });
   }
