@@ -24,8 +24,10 @@ MIN_LEN, MAX_LEN = 30, 160
 # Second-person instruction, which the spec rules out. "remember to" only
 # counts as an imperative when it opens the line: the KJV's own "he did not
 # remember to shew mercy" is a report, not an exhortation.
-EXHORT = re.compile(r'\b(you should|you must|we should|we must|let us|ask '
-                    r'yourself)\b|^remember to\b', re.I)
+EXHORT = re.compile(r'\b(you should|you must|we should|we must|ask '
+                    r'yourself)\b'
+                    r'|(?:^|[.;:,]\s*)let us\b'
+                    r'|^remember to\b', re.I)
 FILLER = re.compile(r'^(this verse (?:shows|tells|teaches|reminds|says)'
                     r'|here we see|in this passage)', re.I)
 
