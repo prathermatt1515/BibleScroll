@@ -288,6 +288,25 @@
   .day-dot.filled { background: linear-gradient(135deg, #f5a742, #d8542b); border-color: transparent; }
   .day-dot svg { width: 13px; height: 13px; color: #fff; }
 
+  .account-row {
+    display: flex; align-items: center; gap: 12px; background: var(--bg-card);
+    border: 0.5px solid var(--border-strong); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px;
+  }
+  .account-avatar {
+    width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+  }
+  .account-avatar-fallback {
+    background: var(--bg-pill); display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 500; color: var(--text-primary);
+  }
+  .account-info { flex: 1; min-width: 0; }
+  .account-name { font-size: 14px; font-weight: 500; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .account-sub { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; }
+  .account-signout-btn {
+    background: var(--bg-pill); border: 0.5px solid var(--border-strong); border-radius: 999px;
+    padding: 7px 14px; font-size: 12px; color: var(--text-secondary); cursor: pointer; flex-shrink: 0;
+  }
+
   .library-row {
     display: flex; align-items: center; gap: 12px; padding: 12px 4px;
     border-bottom: 0.5px solid var(--border); cursor: pointer;
@@ -442,6 +461,20 @@
 <div id="toast"></div>
 
 <script src="data.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBIBiVhy2cL2HOVf11i5rJIXE_Uo4LsoJk",
+    authDomain: "bible-scroll-app-2aa4a.firebaseapp.com",
+    projectId: "bible-scroll-app-2aa4a",
+    storageBucket: "bible-scroll-app-2aa4a.firebasestorage.app",
+    messagingSenderId: "990856370382",
+    appId: "1:990856370382:web:af06a9d0fe04154a6f189f"
+  };
+  firebase.initializeApp(firebaseConfig);
+</script>
 <script>
 (function() {
   "use strict";
@@ -479,6 +512,69 @@
 
   document.documentElement.setAttribute('data-theme', state.theme);
 
+  // ---------- Firebase: auth + cloud sync ----------
+  let currentUser = null;
+  let cloudSyncTimer = null;
+
+  function cloudDocRef() {
+    return firebase.firestore().collection('users').doc(currentUser.uid);
+  }
+
+  function scheduleCloudSync() {
+    if (!currentUser) return;
+    clearTimeout(cloudSyncTimer);
+    cloudSyncTimer = setTimeout(() => {
+      cloudDocRef().set({
+        saved, notes, readVerses, openDates,
+        updatedAt: Date.now()
+      }, { merge: true }).catch(() => {});
+    }, 1200);
+  }
+
+  function refreshAllNoteIndicators() {
+    document.querySelectorAll('.verse-page').forEach(page => {
+      refreshNoteIndicatorForIdx(parseInt(page.dataset.index, 10));
+    });
+  }
+
+  function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider).catch(() => showToast('Sign-in failed'));
+  }
+
+  function signOutUser() {
+    firebase.auth().signOut();
+  }
+
+  firebase.auth().onAuthStateChanged(async (user) => {
+    currentUser = user;
+    if (user) {
+      try {
+        const snap = await cloudDocRef().get();
+        if (snap.exists) {
+          const data = snap.data() || {};
+          Object.assign(saved, data.saved || {});
+          Object.assign(notes, data.notes || {});
+          Object.assign(readVerses, data.readVerses || {});
+          (data.openDates || []).forEach(d => { if (!openDates.includes(d)) openDates.push(d); });
+          localStorage.setItem('sj_saved', JSON.stringify(saved));
+          localStorage.setItem('sj_notes', JSON.stringify(notes));
+          localStorage.setItem('sj_read', JSON.stringify(readVerses));
+          localStorage.setItem('sj_open_dates', JSON.stringify(openDates));
+          await cloudDocRef().set({ saved, notes, readVerses, openDates, updatedAt: Date.now() }, { merge: true });
+        } else {
+          await cloudDocRef().set({ saved, notes, readVerses, openDates, updatedAt: Date.now() });
+        }
+        showToast('Signed in as ' + (user.displayName || user.email));
+      } catch (e) {
+        showToast('Signed in, but sync failed');
+      }
+      refreshAllNoteIndicators();
+      refreshRailState();
+    }
+    if (typeof refreshHomeIfOpen === 'function') refreshHomeIfOpen();
+  });
+
   // ---------- Streak tracking ----------
   function todayStr(d) { d = d || new Date(); return d.toISOString().slice(0, 10); }
   function recordOpenToday() {
@@ -486,6 +582,7 @@
     const t = todayStr();
     if (!dates.includes(t)) dates.push(t);
     localStorage.setItem('sj_open_dates', JSON.stringify(dates));
+    scheduleCloudSync();
     return dates;
   }
   const openDates = recordOpenToday();
@@ -700,6 +797,7 @@
       if (!readVerses[rKey]) {
         readVerses[rKey] = true;
         localStorage.setItem('sj_read', JSON.stringify(readVerses));
+        scheduleCloudSync();
       }
       if (chapterChanged) {
         buildTicks();
@@ -892,6 +990,7 @@
     if (saved[key]) { delete saved[key]; showToast('Removed from saved'); }
     else { saved[key] = true; showToast('Verse saved'); }
     localStorage.setItem('sj_saved', JSON.stringify(saved));
+    scheduleCloudSync();
     refreshRailState();
   };
 
@@ -994,6 +1093,7 @@
       }
     }
     localStorage.setItem('sj_notes', JSON.stringify(notes));
+    scheduleCloudSync();
     closeDrawer('note-overlay');
     showToast('Note saved');
     const affected = Math.max(oldSpan, noteEditState.span);
@@ -1231,7 +1331,7 @@
 
   // ---------- Home / tracker ----------
   function showHomePage() { document.getElementById('home-page').classList.add('open'); }
-  function hideHomePage() { document.getElementById('home-page').classList.remove('open'); }
+  function hideHomePage() { document.getElementById('home-page').classList.remove('open'); homeIsOpen = false; }
   document.getElementById('home-btn').onclick = () => openHome();
   document.getElementById('home-close-btn').onclick = () => hideHomePage();
 
@@ -1246,13 +1346,55 @@
     return seen.size;
   }
 
+  function accountRowHtml() {
+    if (currentUser) {
+      const photo = currentUser.photoURL
+        ? `<img src="${currentUser.photoURL}" class="account-avatar" alt="">`
+        : `<div class="account-avatar account-avatar-fallback">${(currentUser.displayName || currentUser.email || '?').charAt(0).toUpperCase()}</div>`;
+      return `
+        <div class="account-row">
+          ${photo}
+          <div class="account-info">
+            <div class="account-name">${currentUser.displayName || currentUser.email}</div>
+            <div class="account-sub">Signed in &middot; synced</div>
+          </div>
+          <button class="account-signout-btn" id="account-signout-btn">Sign out</button>
+        </div>`;
+    }
+    return `
+      <div class="account-row" id="account-signin-row" style="cursor:pointer;">
+        <div class="account-avatar account-avatar-fallback">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z"/></svg>
+        </div>
+        <div class="account-info">
+          <div class="account-name">Sign in with Google</div>
+          <div class="account-sub">Keep notes and saves safe if you lose your phone</div>
+        </div>
+        <div class="library-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>`;
+  }
+
+  function wireAccountRow() {
+    const signinRow = document.getElementById('account-signin-row');
+    if (signinRow) signinRow.onclick = () => signInWithGoogle();
+    const signoutBtn = document.getElementById('account-signout-btn');
+    if (signoutBtn) signoutBtn.onclick = () => signOutUser();
+  }
+
+  let homeIsOpen = false;
+  function refreshHomeIfOpen() {
+    if (homeIsOpen) openHome();
+  }
+
   function openHome() {
+    homeIsOpen = true;
     setHomeTitle('Home');
     const drawer = document.getElementById('home-content');
     const streak = computeStreak();
     const days = last7Days();
     let html = `
       <img src="cross.png" class="home-logo" alt="">
+      ${accountRowHtml()}
       <div class="tracker-card">
         <div class="streak-row">
           <div class="streak-flame"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 0 1-12 0c0-4 2-6 3-8 1-1.5 2-2.5 3-4z"/></svg></div>
@@ -1305,6 +1447,7 @@
     });
     document.getElementById('lib-saved-row').onclick = () => openSavedBrowser();
     document.getElementById('lib-notes-row').onclick = () => openNotesBrowser();
+    wireAccountRow();
     showHomePage();
   }
 
