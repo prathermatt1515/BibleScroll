@@ -16,6 +16,19 @@ import re
 PILLAR = '/home/user/pillar/c'
 
 USFM = {
+    # Old Testament
+    'Genesis': 'GEN', 'Exodus': 'EXO', 'Leviticus': 'LEV', 'Numbers': 'NUM',
+    'Deuteronomy': 'DEU', 'Joshua': 'JOS', 'Judges': 'JDG', 'Ruth': 'RUT',
+    '1Samuel': '1SA', '2Samuel': '2SA', '1Kings': '1KI', '2Kings': '2KI',
+    '1Chronicles': '1CH', '2Chronicles': '2CH', 'Ezra': 'EZR',
+    'Nehemiah': 'NEH', 'Esther': 'EST', 'Job': 'JOB', 'Psalms': 'PSA',
+    'Proverbs': 'PRO', 'Ecclesiastes': 'ECC', 'SongofSolomon': 'SNG',
+    'Isaiah': 'ISA', 'Jeremiah': 'JER', 'Lamentations': 'LAM',
+    'Ezekiel': 'EZK', 'Daniel': 'DAN', 'Hosea': 'HOS', 'Joel': 'JOL',
+    'Amos': 'AMO', 'Obadiah': 'OBA', 'Jonah': 'JON', 'Micah': 'MIC',
+    'Nahum': 'NAM', 'Habakkuk': 'HAB', 'Zephaniah': 'ZEP',
+    'Haggai': 'HAG', 'Zechariah': 'ZEC', 'Malachi': 'MAL',
+    # New Testament
     'Matthew': 'MAT', 'Mark': 'MRK', 'Luke': 'LUK', 'John': 'JHN',
     'Acts': 'ACT', 'Romans': 'ROM', '1Corinthians': '1CO',
     '2Corinthians': '2CO', 'Galatians': 'GAL', 'Ephesians': 'EPH',

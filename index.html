@@ -1656,6 +1656,24 @@
     if (changed && typeof refreshHomeIfOpen === 'function') refreshHomeIfOpen();
   }
 
+  // ---------- Strong's lexicon ----------
+  // The same few thousand definitions repeat across 445,000 interlinear
+  // words, so they live in one file the app fetches once instead of being
+  // written into every verse. Fetched the first time the Original language
+  // tab is opened, not at startup.
+  let strongsLex = null;
+  let strongsPending = null;
+  function ensureStrongs(then) {
+    if (strongsLex) { then(); return; }
+    if (!strongsPending) {
+      strongsPending = fetch('data/strongs.json')
+        .then(r => r.json())
+        .then(j => { strongsLex = j; })
+        .catch(() => { strongsLex = {}; });
+    }
+    strongsPending.then(then);
+  }
+
   // ---------- Deep study ----------
   function studyKey(idx) { const v = state.verses[idx]; return `${v.c}:${v.v}`; }
 
@@ -1678,6 +1696,12 @@
   }
 
   function renderStudyResult(idx, opt) {
+    // Word meanings live in the shared lexicon, so the Original language tab
+    // cannot render until it has loaded. Fetch it once, then draw.
+    if (opt === 'original' && !strongsLex) {
+      ensureStrongs(() => renderStudyResult(idx, opt));
+      return;
+    }
     const v = state.verses[idx];
     const key = studyKey(idx);
     const data = (BOOK_STUDY[state.book] || {})[key] || {};
@@ -1693,12 +1717,15 @@
              + (data.deeper ? sourceNote(data.srcDeeper) : '');
     } else if (opt === 'original') {
       const words = data.greek || [];
-      body = words.map(w => `
+      body = words.map(w => {
+        const meaning = w.meaning || (strongsLex && strongsLex[w.strongs]) || '';
+        return `
         <div class="greek-word">
           <div class="greek-orig">${w.word} <span style="color:var(--text-secondary); font-size:13px;">— ${w.english}</span></div>
-          <div class="greek-meaning">${w.meaning}</div>
+          <div class="greek-meaning">${meaning}</div>
         </div>
-      `).join('') || '<p class="study-body">No word data available for this verse.</p>';
+      `;
+      }).join('') || '<p class="study-body">No word data available for this verse.</p>';
     } else if (opt === 'related') {
       const refs = data.related || [];
       // A cross-reference you cannot follow is a dead end in the one place a

@@ -26,10 +26,14 @@ DEEPER_MAX = 1200   # Deeper study is the long read; Explain stays short
 TAKEAWAY_MAX = 180
 
 # Book name -> (kjv file stem, web file stem, commentary stem, xref stem, interlinear key)
+# The interlinear keys one book under an older title than everything else.
+INTERLINEAR_ALIASES = {'Song of Solomon': "Solomon's Song"}
+
+
 def stems(book):
     squashed = book.replace(' ', '')
     return (squashed, squashed.lower(), book.replace(' ', '_').lower(),
-            book.replace(' ', '_'), book)
+            book.replace(' ', '_'), INTERLINEAR_ALIASES.get(book, book))
 
 
 # ---------- HTML-aware trimming ----------
@@ -177,11 +181,15 @@ def greek_for(book, c, v):
     entry = interlinear().get('%s:%d:%d' % (book, c, v))
     if not entry:
         return []
+    # Only word, english and the definition are ever rendered; transliteration
+    # is empty for every word in the source, and parsing/position are unused.
+    # The definition itself is not stored per word: the same few thousand
+    # Strong's entries repeat across 445,000 words, which is 32.5 MB of
+    # duplication against 0.7 MB for data/strongs.json, which the app loads
+    # once and looks up.
     return [{
         'word': w.get('original', ''),
-        'translit': w.get('transliteration', ''),
         'strongs': w.get('strongs', ''),
-        'meaning': w.get('definition', ''),
         'english': w.get('english', ''),
     } for w in entry]
 
@@ -207,7 +215,6 @@ def build(book):
         study['%d:%d' % (c, v)] = {
             'explain': explain,
             'deeper': deeper,
-            'questions': questions,
             'greek': greek_for(il_key, c, v),
             'related': xrefs.get((c, v), []),
             'takeaway': smart_trim(explain, TAKEAWAY_MAX),
