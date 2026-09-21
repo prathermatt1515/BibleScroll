@@ -232,6 +232,48 @@
   .search-result .sr-ref { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
   .search-result .sr-text { font-size: 14px; color: var(--text-primary); }
 
+  /* Rows in the Notes and Saved lists carry a delete button */
+  .list-row { position: relative; padding-right: 34px; }
+  .row-del {
+    position: absolute; top: 8px; right: 0;
+    width: 26px; height: 26px; padding: 0; border: none; border-radius: 50%;
+    background: transparent; color: var(--text-tertiary);
+    font-size: 17px; line-height: 26px; text-align: center; cursor: pointer;
+  }
+  .row-del:hover, .row-del:active { background: var(--bg-pill); color: var(--text-primary); }
+
+  /* Book filter above a list */
+  .list-filter {
+    width: 100%; margin: 4px 0 2px; padding: 9px 12px;
+    background: var(--bg-pill); color: var(--text-primary);
+    border: 0.5px solid var(--border); border-radius: 10px;
+    font-size: 14px; font-family: inherit; -webkit-appearance: none; appearance: none;
+  }
+
+  /* Confirm dialog */
+  #confirm-overlay {
+    /* Above the home page (150), which hosts the Notes and Saved lists the
+       delete buttons live in, but below the toast (200). */
+    position: fixed; inset: 0; z-index: 180; display: none;
+    align-items: center; justify-content: center; padding: 24px;
+    background: rgba(0,0,0,0.55);
+  }
+  #confirm-overlay.open { display: flex; }
+  .confirm-card {
+    width: 100%; max-width: 320px; background: var(--bg-card);
+    border: 0.5px solid var(--border); border-radius: 16px; padding: 20px;
+    text-align: center;
+  }
+  .confirm-title { font-size: 16px; color: var(--text-primary); margin: 0 0 6px; }
+  .confirm-body { font-size: 13px; color: var(--text-secondary); margin: 0 0 18px; line-height: 1.5; }
+  .confirm-actions { display: flex; gap: 10px; }
+  .confirm-actions button {
+    flex: 1; padding: 11px 0; border-radius: 10px; font-size: 14px;
+    font-family: inherit; cursor: pointer; border: 0.5px solid var(--border);
+  }
+  #confirm-cancel { background: var(--bg-pill); color: var(--text-primary); }
+  #confirm-ok { background: #8B3A3A; color: #fff; border-color: #8B3A3A; }
+
   /* Note textarea */
   #note-textarea {
     width: 100%; min-height: 120px; background: var(--bg-pill); border: none; border-radius: 10px;
@@ -462,6 +504,17 @@
   </div>
 </div>
 
+<div id="confirm-overlay">
+  <div class="confirm-card">
+    <p class="confirm-title" id="confirm-title">Delete?</p>
+    <p class="confirm-body" id="confirm-body"></p>
+    <div class="confirm-actions">
+      <button id="confirm-cancel">Cancel</button>
+      <button id="confirm-ok">Delete</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script src="data.js"></script>
@@ -588,10 +641,36 @@
     });
   }
 
+  // The app is served from github.io while Firebase auth runs on
+  // firebaseapp.com, so signInWithRedirect has to hand the session back across
+  // domains. Safari's tracking prevention (and Chrome's third-party cookie
+  // phase-out) block exactly that, which silently dropped the sign-in: the
+  // round trip completed but no user ever arrived. Prefer a popup, which keeps
+  // the exchange in one window, and keep redirect only as a fallback for
+  // browsers that block popups outright.
   function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithRedirect(provider).catch((e) => showToast('Sign-in failed: ' + (e && e.code ? e.code : 'unknown')));
+    provider.setCustomParameters({ prompt: 'select_account' });
+    firebase.auth().signInWithPopup(provider).catch((e) => {
+      const code = e && e.code ? e.code : '';
+      if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment'
+          || code === 'auth/cancelled-popup-request') {
+        firebase.auth().signInWithRedirect(provider)
+          .catch(err => showToast('Sign-in failed: ' + (err && err.code ? err.code : 'unknown')));
+        return;
+      }
+      if (code === 'auth/popup-closed-by-user') return;   // they changed their mind
+      showToast('Sign-in failed: ' + (code || 'unknown'));
+    });
   }
+
+  // Keep the session across app launches, and finish any redirect still in
+  // flight from a previous attempt. Without this a failed redirect leaves no
+  // trace at all, which is what made the problem look like a missing label.
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+  firebase.auth().getRedirectResult().catch((e) => {
+    if (e && e.code) showToast('Sign-in failed: ' + e.code);
+  });
 
   function signOutUser() {
     firebase.auth().signOut();
@@ -1198,13 +1277,19 @@
       const lineHeight = 64;
 
       const logoSize = 130;
-      const blockHeight = logoSize + 70 + (lines.length * lineHeight) + 70;
-      let cursorY = H / 2 - blockHeight / 2;
+      // Gap between the cross and the first line of verse text. The text is
+      // drawn on its alphabetic baseline, so roughly 35px of this is eaten by
+      // the ascenders — 150 leaves a visible gap rather than a crowded one.
+      const logoGap = 150;
+      const blockHeight = logoSize + logoGap + (lines.length * lineHeight) + 70;
+      // Sit the block a little above centre so the cross has room to breathe
+      // at the top of the image.
+      let cursorY = H / 2 - blockHeight / 2 - 40;
 
       if (logo.complete && logo.naturalWidth > 0) {
         ctx.drawImage(logo, W / 2 - logoSize / 2, cursorY, logoSize, logoSize);
       }
-      cursorY += logoSize + 70;
+      cursorY += logoSize + logoGap;
 
       ctx.fillStyle = isDark ? '#f5f5f0' : '#1A1A1A';
       lines.forEach((line, i) => ctx.fillText(line, W / 2, cursorY + i * lineHeight));
@@ -1513,6 +1598,75 @@
     showHomePage();
   }
 
+  // ---------- Confirm dialog ----------
+  // Used instead of window.confirm, which some mobile browsers suppress and
+  // which cannot be styled to match the app.
+  let confirmAction = null;
+  function askConfirm(title, body, onYes) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-body').textContent = body;
+    confirmAction = onYes;
+    document.getElementById('confirm-overlay').classList.add('open');
+  }
+  function closeConfirm() {
+    document.getElementById('confirm-overlay').classList.remove('open');
+    confirmAction = null;
+  }
+  document.getElementById('confirm-cancel').onclick = closeConfirm;
+  document.getElementById('confirm-ok').onclick = () => {
+    const act = confirmAction;
+    closeConfirm();
+    if (act) act();
+  };
+  document.getElementById('confirm-overlay').addEventListener('click', e => {
+    if (e.target.id === 'confirm-overlay') closeConfirm();
+  });
+
+  // ---------- Deleting notes and saved verses ----------
+  // A multi-verse note stores the text once under its start key and a {ref}
+  // pointer on every other verse it covers. Sweep by ref rather than by span,
+  // so a note deletes cleanly even when its book is not currently loaded.
+  function deleteNoteAt(startKey) {
+    delete notes[startKey];
+    Object.keys(notes).forEach(k => {
+      const raw = notes[k];
+      if (raw && raw.ref === startKey) delete notes[k];
+    });
+    localStorage.setItem('sj_notes', JSON.stringify(notes));
+    scheduleCloudSync();
+    refreshAllNoteIndicators();
+    refreshRailState();
+  }
+
+  function deleteSavedAt(key) {
+    delete saved[key];
+    localStorage.setItem('sj_saved', JSON.stringify(saved));
+    scheduleCloudSync();
+    refreshRailState();
+  }
+
+  // ---------- Book filter for the Notes and Saved lists ----------
+  const listFilter = { saved: 'all', notes: 'all' };
+
+  function filterSelectHtml(which, books, counts) {
+    const current = listFilter[which];
+    // A book that no longer has entries should not stay selected.
+    if (current !== 'all' && books.indexOf(current) === -1) listFilter[which] = 'all';
+    const total = books.reduce((n, b) => n + counts[b].length, 0);
+    let html = `<select class="list-filter" id="filter-${which}">`;
+    html += `<option value="all"${listFilter[which] === 'all' ? ' selected' : ''}>All books (${total})</option>`;
+    books.forEach(b => {
+      html += `<option value="${b}"${listFilter[which] === b ? ' selected' : ''}>${b} (${counts[b].length})</option>`;
+    });
+    return html + '</select>';
+  }
+
+  function wireFilter(which, rerender) {
+    const el = document.getElementById('filter-' + which);
+    if (!el) return;
+    el.onchange = () => { listFilter[which] = el.value; rerender(); };
+  }
+
   function openSavedBrowser() {
     setHomeTitle('Saved verses');
     const drawer = document.getElementById('home-content');
@@ -1530,19 +1684,36 @@
     if (books.length === 0) {
       html += `<p class="study-body" style="text-align:center;">No saved verses yet. Tap the heart on any verse to save it.</p>`;
     } else {
-      books.forEach(book => {
+      html += filterSelectHtml('saved', books, byBook);
+      const shown = listFilter.saved === 'all' ? books : books.filter(b => b === listFilter.saved);
+      shown.forEach(book => {
         html += `<p style="font-size:13px; font-weight:500; color:var(--accent); margin:18px 0 6px;">${book} <span style="color:var(--text-secondary); font-weight:400;">(${byBook[book].length})</span></p>`;
         byBook[book].forEach(n => {
           const verseObj = (BOOK_VERSES[book] || []).find(x => x.c === n.c && x.v === n.v);
-          html += `<div class="search-result" data-book="${book}" data-c="${n.c}" data-v="${n.v}">
+          html += `<div class="search-result list-row" data-book="${book}" data-c="${n.c}" data-v="${n.v}">
             <div class="sr-ref">${book} ${n.c}:${n.v}</div>
             <div class="sr-text">${verseObj ? verseObj.kjv : ''}</div>
+            <button class="row-del" data-del="${n.key}" aria-label="Remove saved verse">&times;</button>
           </div>`;
         });
       });
     }
     drawer.innerHTML = html;
     document.getElementById('lib-back').onclick = () => openHome();
+    wireFilter('saved', openSavedBrowser);
+    drawer.querySelectorAll('.row-del').forEach(btn => {
+      btn.onclick = e => {
+        e.stopPropagation();
+        const key = btn.dataset.del;
+        const parts = key.split(':');
+        const ref = parts[0] + ' ' + parts[1] + ':' + parts[2];
+        askConfirm('Remove saved verse?', ref + ' will be removed from your saved verses.', () => {
+          deleteSavedAt(key);
+          openSavedBrowser();
+          showToast('Removed from saved');
+        });
+      };
+    });
     drawer.querySelectorAll('.search-result').forEach(el => {
       el.onclick = () => {
         hideHomePage();
@@ -1615,21 +1786,35 @@
     if (books.length === 0) {
       html += `<p class="study-body" style="text-align:center;">No notes yet. Tap the note icon on any verse to add one.</p>`;
     } else {
-      books.forEach(book => {
+      html += filterSelectHtml('notes', books, byBook);
+      const shown = listFilter.notes === 'all' ? books : books.filter(b => b === listFilter.notes);
+      shown.forEach(book => {
         html += `<p style="font-size:13px; font-weight:500; color:var(--accent); margin:18px 0 6px;">${book} <span style="color:var(--text-secondary); font-weight:400;">(${byBook[book].length})</span></p>`;
         byBook[book].forEach(n => {
           const refLabel = n.span > 1 ? `${book} ${n.startC}:${n.startV} – ${n.endC}:${n.endV}` : `${book} ${n.startC}:${n.startV}`;
           const versePreview = n.verseText ? (n.verseText.length > 100 ? n.verseText.slice(0, 100) + '…' : n.verseText) : '';
-          html += `<div class="search-result" data-book="${book}" data-c="${n.startC}" data-v="${n.startV}">
+          html += `<div class="search-result list-row" data-book="${book}" data-c="${n.startC}" data-v="${n.startV}">
             <div class="sr-ref">${refLabel}</div>
             ${versePreview ? `<div style="font-family:Georgia,serif; font-size:13px; color:var(--text-secondary); font-style:italic; margin:4px 0 6px;">"${versePreview}"</div>` : ''}
             <div class="sr-text">${n.text.length > 90 ? n.text.slice(0, 90) + '…' : n.text}</div>
+            <button class="row-del" data-del="${book}:${n.startC}:${n.startV}" data-ref="${refLabel}" aria-label="Delete note">&times;</button>
           </div>`;
         });
       });
     }
     drawer.innerHTML = html;
     document.getElementById('notes-back').onclick = () => openHome();
+    wireFilter('notes', openNotesBrowser);
+    drawer.querySelectorAll('.row-del').forEach(btn => {
+      btn.onclick = e => {
+        e.stopPropagation();
+        askConfirm('Delete this note?', 'Your note on ' + btn.dataset.ref + ' will be deleted. This cannot be undone.', () => {
+          deleteNoteAt(btn.dataset.del);
+          openNotesBrowser();
+          showToast('Note deleted');
+        });
+      };
+    });
     drawer.querySelectorAll('.search-result').forEach(el => {
       el.onclick = () => {
         const c = parseInt(el.dataset.c), v = parseInt(el.dataset.v);
