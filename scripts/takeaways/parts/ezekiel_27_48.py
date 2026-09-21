@@ -317,3 +317,41 @@ TAKEAWAYS.update({
     '39:28': "They learn who God is from both halves of the record: he led them away and he brought them back.",
     '39:29': "\"Neither will I hide my face any more.\" The Spirit poured out is the end of the hiding.",
 })
+
+TAKEAWAYS.update({
+    # ---- Chapter 40 ----
+    '40:1': "The vision is dated twice over: by the years of the captivity and by the fall of the city.",
+    '40:2': "Set down on a very high mountain, and what he sees from it is the frame of a city.",
+    '40:3': "A man whose appearance is brass, with a line of flax and a measuring reed, standing in the gate.",
+    '40:4': "Behold, hear, set thine heart — and then declare it. He is a surveyor sent with an errand.",
+    '40:5': "The reed is defined before anything is measured: six cubits, each a cubit and a hand breadth.",
+    '40:6': "He begins at the east gate, which is the gate the glory had gone out by.",
+    '40:16': "Narrow windows, and palm trees upon the posts. The ledger of measures keeps noting ornament.",
+    '40:17': "Thirty chambers on the pavement of the outer court, which is as far as the people came.",
+    '40:22': "Seven steps up to the outer gate. The way in rises before it leads anywhere.",
+    '40:31': "Eight steps where the outer gate had seven. Each court stands higher than the one outside it.",
+    '40:38': "Chambers by the gate posts \"where they washed the burnt offering.\" The plan makes room for blood.",
+    '40:39': "Tables in the gate porch for the burnt, sin and trespass offerings. The gateway is a killing floor.",
+    '40:41': "Eight tables whereupon they slew their sacrifices, counted as carefully as the walls are.",
+    '40:43': "Hooks a hand broad, and flesh upon the tables. The measured house is also a slaughterhouse.",
+    '40:44': "Chambers for the singers are set in the inner court, next to those kept for the priests.",
+    '40:45': "\"Keepers of the charge of the house.\" A room is assigned by what a man is answerable for.",
+    '40:46': "The sons of Zadok are named at the altar chamber, and the naming settles who may come near.",
+    '40:47': "The inner court measures foursquare, and the altar stands in the middle of it.",
+    '40:49': "Porch, steps and pillars. The reed reaches the temple door and the tour goes in without it.",
+    # ---- Chapter 41 ----
+    '41:4': "\"This is the most holy place.\" Twenty cubits square, and the guide says what it is.",
+    '41:6': "The side chambers rest against the wall of the house but take no hold in it.",
+    '41:7': "The building widens as it rises: the higher a man goes in it, the more room he is given.",
+    '41:12': "A large building stands behind the temple to the west, measured and never once explained.",
+    '41:18': "Cherubims and palm trees alternating: a guard and a garden carved along the same wall.",
+    '41:19': "A man's face on one side of the palm tree and a lion's on the other, through the whole house.",
+    '41:22': "\"This is the table that is before the LORD\" — said of an altar, and the altar is of wood.",
+    '41:25': "Cherubims and palm trees are cut into the doors as well. The pattern carries onto what moves.",
+    # ---- Chapter 42 ----
+    '42:13': "The holy chambers are where the priests eat the most holy things. The plan includes their meals.",
+    '42:14': "The ministering garments are left behind and others put on before going out to the people.",
+    '42:15': "\"When he had made an end of measuring the inner house\" — the survey now turns outward.",
+    '42:16': "Five hundred reeds a side, taken with the reed itself. The outer limit is walked, not estimated.",
+    '42:20': "The wall stands \"to make a separation between the sanctuary and the profane place.\"",
+})
