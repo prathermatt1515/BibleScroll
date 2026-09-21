@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Written one-line takeaways for 1 Chronicles 1-29."""
+
+TAKEAWAYS = {
+    # ---- Chapter 1 ----
+    '1:1': "The book opens with one word: Adam. Israel's genealogy is a claim staked on the whole human race.",
+    '1:4': "Noah, Shem, Ham, and Japheth — the line to David walks straight over a drowned world without a word.",
+    '1:10': "\"He began to be mighty upon the earth.\" The first man singled out for power, and not for good.",
+    '1:12': "\"Of whom came the Philistines\" — Israel's oldest enemy is filed in the same family tree as Israel.",
+    '1:19': "Peleg is named for a division. Even the naming of a child carries the memory of a world coming apart.",
+    '1:27': "\"Abram; the same is Abraham.\" The renaming that reordered history is dropped in as a settled fact.",
+    '1:28': "Isaac and Ishmael in one breath. The son outside the promise is listed before the line narrows.",
+    '1:34': "\"Esau and Israel\" — the chronicler will not write Jacob's old name even beside his brother's.",
+    '1:43': "Edom had kings while Israel had none. The record states it plainly and declines to explain it.",
+    '1:51': "\"Hadad died also.\" Eight kings of Edom, each dying in turn, and not one of them founding a house.",
+    # ---- Chapter 2 ----
+    '2:1': "Twelve names, Reuben first and nobody left out. All Israel is counted before Judah is singled out.",
+    '2:3': "\"Was evil in the sight of the LORD; and he slew him.\" A genealogy stops mid-name to record a verdict.",
+    '2:4': "The line to David runs through Tamar, and the chronicler leaves that shame standing in the record.",
+    '2:7': "\"Achar, the troubler of Israel\" — one man's theft is still in his name generations after the stones fell.",
+    '2:11': "Boaz appears with no mention of Ruth. Chronicles keeps the line and leaves the love story to another book.",
+    '2:15': "\"David the seventh.\" The youngest is reached at last, and the whole chapter has been walking toward him.",
+    '2:16': "Joab and Abishai are entered as their mother's sons. In Chronicles as in Samuel, Zeruiah's name carries them.",
+    '2:17': "Amasa's father is an Ishmeelite. The man Joab murdered has foreign blood recorded without comment.",
+    '2:20': "Bezaleel, who built the tabernacle, is set in Judah's line. The craftsman is remembered beside the kings.",
+    '2:34': "\"Sheshan had no sons, but daughters.\" A line about to die out, and the record names the trouble first.",
+    '2:35': "The house is carried on by an Egyptian slave given a daughter. The line survives through an irregularity.",
+    '2:55': "Families of scribes are entered in a warrior's genealogy. Writing other men down was itself a calling.",
+    # ---- Chapter 3 ----
+    '3:1': "Amnon heads the list. Chronicles records these sons without a word of what the first two did to this house.",
+    '3:4': "Seven years and six months in Hebron, thirty-three in Jerusalem. The reign is measured before it is told.",
+    '3:5': "Solomon is listed as Bathshua's fourth son. Chronicles names the mother and says nothing of Uriah.",
+    '3:9': "\"And Tamar their sister.\" One daughter named among the sons, and this book never tells what became of her.",
+    '3:10': "The kings of Judah run past as a list of sons. A whole second book will be spent on what this line did.",
+    '3:17': "The list keeps counting straight through the captivity, as though the line had never been cut off.",
+    '3:19': "Zerubbabel arrives in a genealogy, not a throne room. David's house continues as a family, not a kingdom.",
+    '3:24': "The line runs past the exile to men nobody remembers. A promise is kept in obscurity as well as in glory.",
+    # ---- Chapter 4 ----
+    '4:9': "A mother names her son for her own pain, and the record calls him the most honourable of his brothers.",
+    '4:10': "Jabez asks for blessing, land, God's hand and keeping from harm — and the verse ends by saying he got it.",
+    '4:14': "A whole valley is named for its craftsmen. Ordinary trades are given their place in the tribal record.",
+    '4:18': "Mered married Pharaoh's daughter, and she is entered in Judah's genealogy with no apology attached.",
+    '4:22': "\"And these are ancient things.\" The chronicler admits he is copying records older than anyone's memory.",
+    '4:23': "Potters who lived among plants and hedges get into scripture because the work they did was the king's.",
+    '4:27': "Simeon did not multiply like Judah. The record notes a tribe quietly shrinking and offers no reason.",
+    '4:40': "\"Wide, and quiet, and peaceable\" — the land is called good in the same breath as the men who take it.",
+    '4:41': "Hezekiah's reign is dated into a genealogy. These lists stay tethered to real kings and real years.",
+    '4:43': "The Amalekites Saul was told to destroy are finished off by Simeonites in a footnote, centuries late.",
+    # ---- Chapter 5 ----
+    '5:1': "The firstborn loses the birthright over one act, and the genealogy is reckoned so that everyone knows why.",
+    '5:2': "Judah gets the ruler and Joseph the birthright. The blessing is split, and neither half was earned.",
+    '5:6': "A prince of Reuben ends his entry as a captive. The exile is already inside the genealogy.",
+    '5:18': "Forty-four thousand skilful men, counted and armed — and the next verses credit the victory elsewhere.",
+    '5:20': "\"They cried to God in the battle.\" The prayer came in the middle of the fighting, not safely before it.",
+    '5:22': "\"The war was of God.\" And the men who won it hold the land only \"until the captivity.\"",
+    '5:25': "The tribes that trusted God in one battle went after the gods of the nations he had destroyed for them.",
+    '5:26': "God stirs up an Assyrian king. The empire that carries Israel off is described as an instrument.",
+}
