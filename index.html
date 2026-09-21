@@ -684,7 +684,7 @@
       cloudDocRef().set({
         saved, notes, readVerses, openDates,
         updatedAt: Date.now()
-      }, { merge: true }).catch(() => {});
+      }, { merge: true }).catch(reportSyncError);
     }, 1200);
   }
 
@@ -750,7 +750,7 @@
         }
         showToast('Signed in as ' + (user.displayName || user.email));
       } catch (e) {
-        showToast('Signed in, but sync failed');
+        reportSyncError(e);
       }
       refreshAllNoteIndicators();
       refreshRailState();
@@ -1372,11 +1372,37 @@
     }
   };
 
-  function showToast(msg) {
+  function showToast(msg, ms) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 1800);
+    clearTimeout(t._hide);
+    t._hide = setTimeout(() => t.classList.remove('show'), ms || 1800);
+  }
+
+  // Firestore failures were being swallowed — one catch showed a fixed
+  // message and the background sync discarded the error entirely — which left
+  // "sync failed" with nothing to act on. Name the cause instead.
+  function syncErrorMessage(e) {
+    const code = (e && e.code) ? String(e.code) : '';
+    if (code.indexOf('permission-denied') !== -1) {
+      return 'Sync blocked: Firestore rules deny access to your user document';
+    }
+    if (code.indexOf('unauthenticated') !== -1) {
+      return 'Sync failed: not authenticated with Firestore';
+    }
+    if (code.indexOf('invalid-argument') !== -1 || code.indexOf('resource-exhausted') !== -1) {
+      return 'Sync failed: the synced document is too large (' + code + ')';
+    }
+    if (code.indexOf('unavailable') !== -1 || code.indexOf('deadline') !== -1) {
+      return 'Sync failed: could not reach Firestore (offline?)';
+    }
+    return 'Sync failed: ' + (code || (e && e.message) || 'unknown');
+  }
+
+  function reportSyncError(e) {
+    console.error('[BibleScroll] Firestore sync failed:', e);
+    showToast(syncErrorMessage(e), 5000);
   }
 
   // ---------- Deep study ----------
