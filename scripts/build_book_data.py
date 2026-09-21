@@ -217,7 +217,11 @@ def build(book):
             'deeper': deeper,
             'greek': greek_for(il_key, c, v),
             'related': xrefs.get((c, v), []),
-            'takeaway': smart_trim(explain, TAKEAWAY_MAX),
+            # A takeaway cut from the Explain text just restates the
+            # paragraph above it, so books ship without one and the card
+            # stays hidden until scripts/takeaways/<book>.py supplies a
+            # written line.
+            'takeaway': '',
             'apply': questions[0] if questions else '',
         }
 
