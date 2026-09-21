@@ -249,23 +249,33 @@
   #splash.fading { opacity: 0; pointer-events: none; }
   #splash.done { display: none; }
   #splash img {
-    width: 108px; height: 108px; object-fit: contain; margin-bottom: 30px;
+    width: 116px; height: 116px; object-fit: contain; margin-bottom: 34px;
     animation: splash-rise 0.9s ease both;
   }
   #splash-welcome {
-    font-family: Georgia, serif; font-size: 25px; color: var(--text-primary);
-    margin: 0 0 14px; animation: splash-rise 0.9s ease 0.15s both;
+    font-family: Georgia, serif; color: var(--text-primary);
+    font-size: clamp(28px, 8.2vw, 38px); line-height: 1.25;
+    margin: 0 0 18px; animation: splash-rise 0.9s ease 0.15s both;
   }
   #splash-line {
-    font-size: 15px; line-height: 1.65; color: var(--text-secondary);
-    max-width: 310px; margin: 0; animation: splash-rise 0.9s ease 0.3s both;
+    font-family: Georgia, serif; color: var(--text-secondary);
+    font-size: clamp(17px, 4.8vw, 22px); line-height: 1.6;
+    max-width: 19ch; margin: 0; animation: splash-rise 0.9s ease 0.3s both;
   }
+  /* It waits for a tap now, so it has to say so. */
+  #splash-hint {
+    position: absolute; bottom: calc(46px + env(safe-area-inset-bottom, 0px));
+    font-size: 13px; letter-spacing: 0.4px; color: var(--text-tertiary);
+    margin: 0; opacity: 0; animation: splash-hint 1s ease 1.4s forwards;
+  }
+  @keyframes splash-hint { to { opacity: 1; } }
   @keyframes splash-rise {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     #splash img, #splash-welcome, #splash-line { animation: none; }
+    #splash-hint { animation: none; opacity: 1; }
     #splash { transition: none; }
   }
 
@@ -584,6 +594,7 @@
   <img src="cross.png" alt="">
   <p id="splash-welcome">Welcome</p>
   <p id="splash-line">Prepare your heart and mind to hear from God the Father.</p>
+  <p id="splash-hint">Tap to continue</p>
 </div>
 
 <nav id="bottom-tray">
@@ -1842,9 +1853,10 @@
   };
 
   // ---------- Opening screen ----------
-  // Shown over Home on every launch, then faded out. The name arrives with
-  // auth, which resolves after this is already on screen, so it is filled in
-  // late if it turns up while the screen is still visible.
+  // Shown over Home on every launch and dismissed by a tap, not a timer, so
+  // it stays as long as they want it. The name arrives with auth, which
+  // resolves after this is already on screen, so it is filled in late if it
+  // turns up while the greeting is still visible.
   const splashEl = document.getElementById('splash');
   let splashGone = false;
 
@@ -1869,7 +1881,6 @@
 
   setSplashWelcome();
   splashEl.addEventListener('click', dismissSplash);
-  setTimeout(dismissSplash, 2600);
 
   // ---------- Bottom tray ----------
   // Home, Notes and Saved all live inside the home page; Read is the verse
