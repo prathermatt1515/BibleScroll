@@ -30,6 +30,28 @@ FILLER = re.compile(r'^(this verse (?:shows|tells|teaches|reminds|says)'
                     r'|here we see|in this passage)', re.I)
 
 
+def verse_text(stem):
+    path = os.path.join(DATA, 'verses_%s.json' % stem)
+    if not os.path.exists(path):
+        return {}
+    with io.open(path, encoding='utf-8') as fh:
+        return {'%d:%d' % (r['c'], r['v']): r['kjv'] for r in json.load(fh)}
+
+
+def echo_ratio(line, verse):
+    """How much of a takeaway is just the verse's own words read back.
+
+    A quoted phrase followed by an observation scores well under 1.0; a line
+    that is only the verse quoted scores 1.0, and the spec rules that out —
+    the card would then repeat the text directly above it.
+    """
+    own = re.findall(r"[a-z']+", line.lower())
+    if not own:
+        return 0.0
+    theirs = set(re.findall(r"[a-z']+", verse.lower()))
+    return sum(1 for w in own if w in theirs) / len(own)
+
+
 def verse_keys(stem):
     path = os.path.join(DATA, 'study_%s.json' % stem)
     if not os.path.exists(path):
@@ -45,6 +67,7 @@ def lint(module):
         print('%-14s no study data' % module)
         return 0
     written = importlib.import_module(module).TAKEAWAYS
+    verses = verse_text(stem)
     problems = []
 
     stray = sorted(set(written) - keys)
@@ -72,6 +95,8 @@ def lint(module):
             problems.append('%s: exhortation — %s' % (key, line[:70]))
         if FILLER.match(ours.strip()):
             problems.append('%s: filler opening — %s' % (key, line[:70]))
+        if key in verses and echo_ratio(line, verses[key]) >= 0.95:
+            problems.append('%s: only the verse read back — %s' % (key, line[:70]))
 
     pct = 100.0 * len(written) / len(keys)
     lengths = sorted(len(v) for v in written.values())

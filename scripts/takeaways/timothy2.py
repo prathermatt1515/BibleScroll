@@ -11,7 +11,7 @@ TAKEAWAYS = {
     '1:6': "The gift needs stirring up, like a fire banked low. It was given once and can go quiet.",
     '1:7': "Fear is named as a spirit not given — which means its presence is not evidence of failure to try harder.",
     '1:8': "\"Nor of me his prisoner.\" Paul knows association with him is now a liability and asks Timothy to accept it.",
-    '1:9': "Saved and called \"not according to our works, but according to his own purpose and grace\" — given before the world began.",
+    '1:9': "Grace was given before the world began, which dates it earlier than anything we could have done to earn it.",
     '1:10': "Death is not survived but abolished, and life is brought to light by a gospel rather than discovered by inquiry.",
     '1:11': "Preacher, apostle, teacher — three words for the one job, and each of them got him into this cell.",
     '1:12': "\"I know whom I have believed.\" Not what. His confidence rests on a person's competence to keep what was handed over.",
