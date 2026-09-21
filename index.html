@@ -1270,18 +1270,24 @@
       body = refs.map(r => `<div class="related-link">${r}</div>`).join('') || '<p class="study-body">No related verses found.</p>';
     }
 
+    // Only show a card when there is something to put in it; Ephesians
+    // draws on sources that carry no reflection question.
     const showCards = opt === 'explain' || opt === 'deeper';
+    const takeawayCard = showCards && (data.takeaway || '').trim();
+    const applyCard = showCards && (data.apply || '').trim();
     drawer.innerHTML = `
       <div class="drawer-handle"></div>
       <button class="back-btn" id="study-back">‹ Back</button>
       <p class="study-title">${titles[opt]}</p>
       <p class="drawer-ref">${state.book} ${v.c}:${v.v}</p>
       ${body}
-      ${showCards ? `
+      ${takeawayCard ? `
         <div class="study-card">
           <div class="study-card-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>KEY TAKEAWAY</div>
           <p>${data.takeaway || ''}</p>
         </div>
+      ` : ''}
+      ${applyCard ? `
         <div class="study-card">
           <div class="study-card-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12h.01M12 3l1.9 1.9a1 1 0 0 0 .7.29H17a2 2 0 0 1 2 2v2.4a1 1 0 0 0 .29.7L21 12l-1.71 1.71a1 1 0 0 0-.29.7V17a2 2 0 0 1-2 2h-2.4a1 1 0 0 0-.7.29L12 21l-1.9-1.9a1 1 0 0 0-.7-.29H7a2 2 0 0 1-2-2v-2.4a1 1 0 0 0-.29-.7L3 12l1.71-1.71a1 1 0 0 0 .29-.7V7a2 2 0 0 1 2-2h2.4a1 1 0 0 0 .7-.29z"/></svg>APPLY IT</div>
           <p>${data.apply || ''}</p>
