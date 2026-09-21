@@ -520,6 +520,8 @@
     k: 'kjvstudy.org',
     c: 'John Calvin, Commentaries (16th c., public domain)',
     m: 'F. B. Meyer, Through the Bible Day by Day (public domain)',
+    kc: 'kjvstudy.org, with John Calvin\u2019s commentary',
+    km: 'kjvstudy.org, with F. B. Meyer\u2019s notes',
     l: 'Written for BibleScroll \u2014 Lutheran reading'
   };
   function sourceNote(code) {
@@ -1289,9 +1291,11 @@
       body = refs.map(r => `<div class="related-link">${r}</div>`).join('') || '<p class="study-body">No related verses found.</p>';
     }
 
-    // Only show a card when there is something to put in it; Ephesians
-    // draws on sources that carry no reflection question.
-    const showCards = opt === 'explain' || opt === 'deeper';
+    // The takeaway summarises the Explain text, so it belongs on that tab
+    // alone — repeating it under Deeper study said the same thing twice and
+    // made the longer note look like a restatement of the shorter one.
+    // A card is only drawn when there is something to put in it.
+    const showCards = opt === 'explain';
     const takeawayCard = showCards && (data.takeaway || '').trim();
     const applyCard = showCards && (data.apply || '').trim();
     drawer.innerHTML = `

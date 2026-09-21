@@ -22,7 +22,7 @@ STUDY_DIR = '/home/user/kennethreitz/kjvstudy.org/kjvstudy_org/data'
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
 
 EXPLAIN_MAX = 500
-DEEPER_MAX = 500
+DEEPER_MAX = 1200   # Deeper study is the long read; Explain stays short
 TAKEAWAY_MAX = 180
 
 # Book name -> (kjv file stem, web file stem, commentary stem, xref stem, interlinear key)
