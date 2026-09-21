@@ -482,9 +482,9 @@
   // ---------- State ----------
   const BOOK_VERSES = { James: JAMES_VERSES };
   const BOOK_STUDY = { James: STUDY_DATA };
-  const CONTENT_AVAILABLE = ['James', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians'];
-  const BOOK_CODES = { James: 'JAS', Matthew: 'MAT', Mark: 'MRK', Luke: 'LUK', John: 'JHN', Acts: 'ACT', Romans: 'ROM', '1 Corinthians': '1CO', '2 Corinthians': '2CO', Galatians: 'GAL', Ephesians: 'EPH' };
-  const BOOK_FILE_NAMES = { 'James': 'James', 'Matthew': 'Matthew', 'Mark': 'Mark', 'Luke': 'Luke', 'John': 'John', 'Acts': 'Acts', 'Romans': 'Romans', '1 Corinthians': '1Corinthians', '2 Corinthians': '2Corinthians', 'Galatians': 'Galatians', 'Ephesians': 'Ephesians' };
+  const CONTENT_AVAILABLE = ['James', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation'];
+  const BOOK_CODES = { James: 'JAS', Matthew: 'MAT', Mark: 'MRK', Luke: 'LUK', John: 'JHN', Acts: 'ACT', Romans: 'ROM', '1 Corinthians': '1CO', '2 Corinthians': '2CO', Galatians: 'GAL', Ephesians: 'EPH' , Philippians: 'PHP', Colossians: 'COL', '1 Thessalonians': '1TH', '2 Thessalonians': '2TH', '1 Timothy': '1TI', '2 Timothy': '2TI', Titus: 'TIT', Philemon: 'PHM', Hebrews: 'HEB', '1 Peter': '1PE', '2 Peter': '2PE', '1 John': '1JN', '2 John': '2JN', '3 John': '3JN', Jude: 'JUD', Revelation: 'REV' };
+  const BOOK_FILE_NAMES = { 'James': 'James', 'Matthew': 'Matthew', 'Mark': 'Mark', 'Luke': 'Luke', 'John': 'John', 'Acts': 'Acts', 'Romans': 'Romans', '1 Corinthians': '1Corinthians', '2 Corinthians': '2Corinthians', 'Galatians': 'Galatians', 'Ephesians': 'Ephesians' , 'Philippians': 'Philippians', 'Colossians': 'Colossians', '1 Thessalonians': '1Thessalonians', '2 Thessalonians': '2Thessalonians', '1 Timothy': '1Timothy', '2 Timothy': '2Timothy', 'Titus': 'Titus', 'Philemon': 'Philemon', 'Hebrews': 'Hebrews', '1 Peter': '1Peter', '2 Peter': '2Peter', '1 John': '1John', '2 John': '2John', '3 John': '3John', 'Jude': 'Jude', 'Revelation': 'Revelation' };
   const state = {
     translation: localStorage.getItem('sj_translation') || 'kjv',
     theme: localStorage.getItem('sj_theme') || 'dark',
@@ -510,7 +510,23 @@
     '1 Corinthians': [31,16,23,21,13,20,40,13,27,33,34,31,13,40,58,24],
     '2 Corinthians': [24,17,18,18,21,18,16,24,15,18,33,21,14],
     Galatians: [24,21,29,31,26,18],
-    Ephesians: [23,22,21,32,33,24]
+    Ephesians: [23,22,21,32,33,24],
+    Philippians: [30,30,21,23],
+    Colossians: [29,23,25,18],
+    '1 Thessalonians': [10,20,13,18,28],
+    '2 Thessalonians': [12,17,18],
+    '1 Timothy': [20,15,16,16,25,21],
+    '2 Timothy': [18,26,17,22],
+    Titus: [16,15,15],
+    Philemon: [25],
+    Hebrews: [14,18,19,16,14,20,28,13,28,39,40,29,25],
+    '1 Peter': [25,25,22,19,14],
+    '2 Peter': [21,22,18],
+    '1 John': [10,29,24,21,21],
+    '2 John': [13],
+    '3 John': [14],
+    Jude: [25],
+    Revelation: [20,29,22,11,14,17,17,13,21,11,19,17,18,20,8,21,18,24,21,15,27,21]
   };
 
   const API_BIBLE_KEY = "mSiigwn6LhcbU2ZwR3nc5";
