@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""Written one-line takeaways for Haggai 1-2."""
+
+TAKEAWAYS = {
+    # ---- Chapter 1 ----
+    '1:1': "Dated to the day in a Persian king's reign, and addressed to a governor and a priest. Judah has no king.",
+    '1:2': "\"The time is not come.\" The objection is not refusal but scheduling, which is how most things never happen.",
+    '1:4': "Their own houses are panelled and his lies waste. The comparison is made in terms of interior finish.",
+    '1:5': "\"Consider your ways\" — the order is to look at the accounts rather than to work up a feeling about them.",
+    '1:6': "Sown much and brought in little, wages earned into a bag with holes. The economics of neglect, itemised.",
+    '1:7': "The same sentence a second time, not for emphasis but because now it points at something to do.",
+    '1:8': "\"Go up to the mountain, and bring wood.\" The remedy for a stalled work is haulage, not a resolution.",
+    '1:9': "\"I did blow upon it.\" The bad year is claimed rather than explained away as weather or hard luck.",
+    '1:10': "Dew stayed and fruit stayed. The shortage is described as something withheld, not merely absent.",
+    '1:11': "Corn, wine, oil, men, cattle, all the labour of the hands. The drought is itemised down to the wages.",
+    '1:12': "They obeyed, and it took one sermon. The book turns on a people who simply did what they were told.",
+    '1:13': "\"I am with you.\" What is promised to the men who start work is company rather than success.",
+    '1:14': "The LORD stirred up their spirit, and then they worked. Even the willingness is credited to him.",
+    # ---- Chapter 2 ----
+    '2:3': "The men old enough to remember the first house see this one as nothing. Their grief is not argued with.",
+    '2:4': "Be strong, three times over, and then \"work.\" The encouragement arrives as a job rather than a feeling.",
+    '2:5': "The promise reaches back to Egypt. Nothing new is offered; the old covenant is said to be still standing.",
+    '2:6': "\"Yet once, it is a little while.\" Hebrews reads this shaking as the removal of all that can be shaken.",
+    '2:7': "\"The desire of all nations shall come.\" What fills the house is not its fittings but someone arriving.",
+    '2:8': "\"The silver is mine, and the gold is mine.\" A shortage of funds is answered by a point about ownership.",
+    '2:9': "The plainer building is promised the greater glory. Whatever the measure is here, it is not materials.",
+    '2:11': "A doctrinal question is settled by sending them to ask the priests. The law is consulted, not bypassed.",
+    '2:12': "Holiness does not travel through a fold of cloth. The priests answer no, and they answer correctly.",
+    '2:13': "Uncleanness does travel. The two rulings are not symmetrical, and that asymmetry is the whole sermon.",
+    '2:14': "The people are ruled unclean, and so is what they bring. Proximity to a holy place made them nothing.",
+    '2:15': "\"Consider from this day and upward.\" They are asked to date their hard years against the state of the site.",
+    '2:16': "Twenty measures came to ten, fifty vessels to twenty. The shortfall is recalled in figures, not in moods.",
+    '2:17': "Blasting, mildew and hail, and still no turning. Amos's refrain turns up on a building site.",
+    '2:18': "The reckoning is dated from the day the foundation was laid. Everything is counted again from there.",
+    '2:19': "Nothing in the barn and nothing on the trees, and the blessing is promised anyway, ahead of the evidence.",
+    '2:21': "The word to a provincial governor is that the heavens will shake. The small project is set in a large frame.",
+    '2:22': "Chariots overthrown and riders killed by their brothers' swords. Empires are shown failing from inside.",
+    '2:23': "Zerubbabel is made a signet, something carried and used. David's line is kept, though it is not enthroned.",
+}
