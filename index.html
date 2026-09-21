@@ -624,6 +624,53 @@
   const saved = JSON.parse(localStorage.getItem('sj_saved') || '{}');
   const notes = JSON.parse(localStorage.getItem('sj_notes') || '{}');
 
+  // Sync merges the cloud copy into the local one, which can add but never
+  // remove. Without a record of what was deleted, a deleted note or save is
+  // simply re-added from the cloud on the next sign-in. These tombstones are
+  // that record: "this key was deleted at this time", synced like everything
+  // else, and cleared if the same verse is written again.
+  const tombstones = JSON.parse(localStorage.getItem('sj_deleted') || '{}');
+  const TOMBSTONE_TTL = 1000 * 60 * 60 * 24 * 180;   // six months
+
+  function pruneTombstones() {
+    const cutoff = Date.now() - TOMBSTONE_TTL;
+    let dropped = 0;
+    Object.keys(tombstones).forEach(k => {
+      if (!(tombstones[k] > cutoff)) { delete tombstones[k]; dropped++; }
+    });
+    if (dropped) localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
+  }
+  pruneTombstones();
+
+  function markDeleted(kind, key) {
+    tombstones[kind + ':' + key] = Date.now();
+    localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
+  }
+
+  // Writing a verse again undoes its tombstone, so re-saving a note on a verse
+  // you once deleted does not get deleted again on the next merge.
+  function markAlive(kind, key) {
+    if (tombstones[kind + ':' + key]) {
+      delete tombstones[kind + ':' + key];
+      localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
+    }
+  }
+
+  function applyTombstones() {
+    Object.keys(tombstones).forEach(k => {
+      const sep = k.indexOf(':');
+      const kind = k.slice(0, sep), key = k.slice(sep + 1);
+      if (kind === 'saved') delete saved[key];
+      else if (kind === 'notes') {
+        delete notes[key];
+        Object.keys(notes).forEach(nk => {
+          const raw = notes[nk];
+          if (raw && raw.ref === key) delete notes[nk];
+        });
+      }
+    });
+  }
+
   const BOOKS_66 = ["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi","Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
   // Study notes come from several public-domain works. Entries carry a source
   // code; untagged ones are kjvstudy.org, which supplies most of the text.
@@ -691,7 +738,7 @@
     clearTimeout(cloudSyncTimer);
     cloudSyncTimer = setTimeout(() => {
       cloudDocRef().set({
-        saved, notes, readVerses, openDates,
+        saved, notes, readVerses, openDates, deleted: tombstones,
         updatedAt: Date.now()
       }, { merge: true }).then(noteSyncOk).catch(reportSyncError);
     }, 1200);
@@ -749,13 +796,23 @@
           Object.assign(notes, data.notes || {});
           Object.assign(readVerses, data.readVerses || {});
           (data.openDates || []).forEach(d => { if (!openDates.includes(d)) openDates.push(d); });
+          // Take the union of both devices' deletions, then apply it — so a
+          // note deleted anywhere stays deleted everywhere, instead of being
+          // resurrected by whichever copy still had it.
+          Object.keys(data.deleted || {}).forEach(k => {
+            const when = data.deleted[k];
+            if (!tombstones[k] || tombstones[k] < when) tombstones[k] = when;
+          });
+          pruneTombstones();
+          applyTombstones();
+          localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
           localStorage.setItem('sj_saved', JSON.stringify(saved));
           localStorage.setItem('sj_notes', JSON.stringify(notes));
           localStorage.setItem('sj_read', JSON.stringify(readVerses));
           localStorage.setItem('sj_open_dates', JSON.stringify(openDates));
-          await cloudDocRef().set({ saved, notes, readVerses, openDates, updatedAt: Date.now() }, { merge: true });
+          await cloudDocRef().set({ saved, notes, readVerses, openDates, deleted: tombstones, updatedAt: Date.now() }, { merge: true });
         } else {
-          await cloudDocRef().set({ saved, notes, readVerses, openDates, updatedAt: Date.now() });
+          await cloudDocRef().set({ saved, notes, readVerses, openDates, deleted: tombstones, updatedAt: Date.now() });
         }
         noteSyncOk();
         showToast('Signed in as ' + (user.displayName || user.email));
@@ -1181,8 +1238,8 @@
   document.getElementById('save-btn').onclick = () => {
     const idx = currentIndex();
     const key = verseKey(idx);
-    if (saved[key]) { delete saved[key]; showToast('Removed from saved'); }
-    else { saved[key] = true; showToast('Verse saved'); }
+    if (saved[key]) { delete saved[key]; markDeleted('saved', key); showToast('Removed from saved'); }
+    else { saved[key] = true; markAlive('saved', key); showToast('Verse saved'); }
     localStorage.setItem('sj_saved', JSON.stringify(saved));
     scheduleCloudSync();
     refreshRailState();
@@ -1279,8 +1336,10 @@
     const oldIdx = noteEditState.idx;
     if (existing) clearNoteRange(existing.startKey, existing.span);
     const val = document.getElementById('note-textarea').value.trim();
+    if (existing && !val) markDeleted('notes', existing.startKey);
     if (val) {
       notes[key] = { text: val, span: noteEditState.span };
+      markAlive('notes', key);
       for (let i = 1; i < noteEditState.span; i++) {
         const vv = state.verses[noteEditState.idx + i];
         if (vv) notes[`${state.book}:${vv.c}:${vv.v}`] = { ref: key };
@@ -1752,6 +1811,7 @@
   // so a note deletes cleanly even when its book is not currently loaded.
   function deleteNoteAt(startKey) {
     delete notes[startKey];
+    markDeleted('notes', startKey);
     Object.keys(notes).forEach(k => {
       const raw = notes[k];
       if (raw && raw.ref === startKey) delete notes[k];
@@ -1764,6 +1824,7 @@
 
   function deleteSavedAt(key) {
     delete saved[key];
+    markDeleted('saved', key);
     localStorage.setItem('sj_saved', JSON.stringify(saved));
     scheduleCloudSync();
     refreshRailState();
