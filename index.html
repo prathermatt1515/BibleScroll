@@ -1289,13 +1289,12 @@
       body = refs.map(r => `<div class="related-link">${r}</div>`).join('') || '<p class="study-body">No related verses found.</p>';
     }
 
-    // The takeaway summarises the Explain text, so it belongs on that tab
-    // alone — repeating it under Deeper study said the same thing twice and
-    // made the longer note look like a restatement of the shorter one. The
-    // Apply it question is not a summary of either tab, so it stays on both.
-    // A card is only drawn when there is something to put in it.
+    // Both cards state the verse's own point rather than summarising either
+    // tab, so both belong on both tabs. A card is only drawn where there is
+    // something to put in it: books whose takeaway would just be the Explain
+    // text cut short carry none, and show no card rather than a restatement.
     const studyTab = opt === 'explain' || opt === 'deeper';
-    const takeawayCard = opt === 'explain' && (data.takeaway || '').trim();
+    const takeawayCard = studyTab && (data.takeaway || '').trim();
     const applyCard = studyTab && (data.apply || '').trim();
     drawer.innerHTML = `
       <div class="drawer-handle"></div>

@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_book_data import smart_trim, EXPLAIN_MAX, TAKEAWAY_MAX
 from ephesians_explain import NOTES as EPH_1_3
 from ephesians_explain_2 import NOTES as EPH_4_6
+from ephesians_takeaway import TAKEAWAYS
 
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
 
@@ -300,16 +301,24 @@ def main():
     for key, text in notes.items():
         entry = study[key]
         entry['explain'] = smart_trim(text, EXPLAIN_MAX)
-        entry['takeaway'] = smart_trim(entry['explain'], TAKEAWAY_MAX)
         entry['srcExplain'] = 'l'
+
+    # Written one-line takeaways. Every other book's takeaway is the Explain
+    # text cut short, which reads as duplication beside the text it came from;
+    # those are dropped rather than shown.
+    missing = sorted(set(study) - set(TAKEAWAYS))
+    if missing:
+        raise SystemExit('no takeaway for: %s' % ', '.join(missing))
+    for key, line in TAKEAWAYS.items():
+        study[key]['takeaway'] = line
 
     for key, text in APPLY.items():
         study[key]['apply'] = text
 
     with io.open(path, 'w', encoding='utf-8') as fh:
         fh.write(json.dumps(study, ensure_ascii=False, separators=(', ', ': ')))
-    print('Ephesians: %d commentaries and %d reflection questions'
-          % (len(notes), len(APPLY)))
+    print('Ephesians: %d commentaries, %d takeaways, %d reflection questions'
+          % (len(notes), len(TAKEAWAYS), len(APPLY)))
 
 
 if __name__ == '__main__':
