@@ -201,6 +201,10 @@
   .greek-word:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
   .greek-orig { font-size: 18px; color: var(--accent); margin-bottom: 2px; }
   .greek-meaning { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .study-source {
+    margin: 10px 0 0; font-size: 11px; line-height: 1.5;
+    color: var(--text-tertiary); font-style: italic;
+  }
   .related-link {
     display: block; padding: 10px 4px; border-bottom: 0.5px solid var(--border);
     font-size: 14px; color: var(--text-primary); cursor: pointer;
@@ -510,6 +514,19 @@
   const notes = JSON.parse(localStorage.getItem('sj_notes') || '{}');
 
   const BOOKS_66 = ["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi","Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
+  // Study notes come from several public-domain works. Entries carry a source
+  // code; untagged ones are kjvstudy.org, which supplies most of the text.
+  const STUDY_SOURCES = {
+    k: 'kjvstudy.org',
+    c: 'John Calvin, Commentaries (16th c., public domain)',
+    m: 'F. B. Meyer, Through the Bible Day by Day (public domain)',
+    l: 'Written for BibleScroll \u2014 Lutheran reading'
+  };
+  function sourceNote(code) {
+    const label = STUDY_SOURCES[code || 'k'];
+    return label ? `<p class="study-source">${label}</p>` : '';
+  }
+
   const CHAPTER_COUNTS = {
     James: [27,26,18,17,20],
     Matthew: [25,23,17,25,48,34,29,34,38,42,30,50,58,36,39,28,27,35,30,34,46,46,39,51,46,75,66,20],
@@ -1254,9 +1271,11 @@
 
     let body = '';
     if (opt === 'explain') {
-      body = `<p class="study-body">${data.explain || 'No commentary available for this verse yet.'}</p>`;
+      body = `<p class="study-body">${data.explain || 'No commentary available for this verse yet.'}</p>`
+             + (data.explain ? sourceNote(data.srcExplain) : '');
     } else if (opt === 'deeper') {
-      body = `<p class="study-body">${data.deeper || 'No deeper study available for this verse yet.'}</p>`;
+      body = `<p class="study-body">${data.deeper || 'No deeper study available for this verse yet.'}</p>`
+             + (data.deeper ? sourceNote(data.srcDeeper) : '');
     } else if (opt === 'original') {
       const words = data.greek || [];
       body = words.map(w => `

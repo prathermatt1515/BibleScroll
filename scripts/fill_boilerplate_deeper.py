@@ -52,19 +52,22 @@ def fill(book):
     from_calvin = from_meyer = unchanged = 0
     for key in targets:
         c, v = (int(x) for x in key.split(':'))
-        text = None
+        text = src = None
         if v in calvin.get(c, {}):
             text = cs.lead_bold(calvin[c][v], kjv.get(key, ''), book, c, v)
+            src = 'c'
             from_calvin += 1
         else:
             note = cs.passage_for(meyer.get(c, {}), v)
             if note:
                 text = cs.meyer_note(note)
+                src = 'm'
                 from_meyer += 1
         if text is None:
             unchanged += 1          # keep the book-level note over nothing
             continue
         study[key]['deeper'] = smart_trim(text, DEEPER_MAX)
+        study[key]['srcDeeper'] = src
 
     with io.open(os.path.join(DATA, 'study_%s.json' % book), 'w',
                  encoding='utf-8') as fh:

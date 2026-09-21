@@ -60,6 +60,15 @@ def main():
 
             entry['explain'] = explain
             entry['deeper'] = deeper
+            # Tag the source so the drawer can say where the note came from.
+            # Untagged entries are kjvstudy.org, the default everywhere else.
+            if explain:
+                entry['srcExplain'] = 'c'
+            else:
+                entry.pop('srcExplain', None)
+            entry['srcDeeper'] = 'm' if deeper else None
+            if not deeper:
+                entry.pop('srcDeeper', None)
             entry['takeaway'] = smart_trim(explain, TAKEAWAY_MAX)
             # Neither source carries reflection questions; the drawer hides
             # the card rather than showing an empty one.
