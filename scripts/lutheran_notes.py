@@ -7,11 +7,16 @@ Two gaps are left after Calvin and Meyer:
            6:6, 6:22)
   apply    all 155 verses — neither source carries reflection questions
 
-These are written rather than sourced, from a Lutheran reading: law and
+Calvin filled the other 147 verses, but reads as 16th-century prose, which
+is heavy going in a one-verse feed — so these now cover the whole book. The
+notes themselves live in ephesians_explain.py (chapters 1-3) and
+ephesians_explain_2.py (chapters 4-6).
+
+All of it is written rather than sourced, from a Lutheran reading: law and
 gospel distinguished, righteousness received rather than achieved,
-assurance located in Christ instead of in the believer, and ordinary
-work treated as calling. They are tagged source 'l' so the drawer can
-say where they came from.
+assurance located in Christ instead of in the believer, and ordinary work
+treated as calling. Tagged source 'l' so the drawer says where it came
+from.
 """
 import io
 import json
@@ -20,6 +25,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_book_data import smart_trim, EXPLAIN_MAX, TAKEAWAY_MAX
+from ephesians_explain import NOTES as EPH_1_3
+from ephesians_explain_2 import NOTES as EPH_4_6
 
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
 
@@ -278,10 +285,20 @@ def main():
     if extra:
         raise SystemExit('question for verses that do not exist: %s' % ', '.join(extra))
 
-    for key, text in EXPLAIN.items():
+    # The 8 verses Calvin passed over, plus the rest of the book, which now
+    # replaces Calvin outright: sound but hard going as 16th-century prose.
+    notes = dict(EXPLAIN)
+    notes.update(EPH_1_3)
+    notes.update(EPH_4_6)
+    gaps = sorted(set(study) - set(notes))
+    if gaps:
+        raise SystemExit('no commentary for: %s' % ', '.join(gaps))
+    stray = sorted(set(notes) - set(study))
+    if stray:
+        raise SystemExit('commentary for verses that do not exist: %s' % ', '.join(stray))
+
+    for key, text in notes.items():
         entry = study[key]
-        if entry['explain'].strip():
-            raise SystemExit('%s already has commentary; refusing to overwrite' % key)
         entry['explain'] = smart_trim(text, EXPLAIN_MAX)
         entry['takeaway'] = smart_trim(entry['explain'], TAKEAWAY_MAX)
         entry['srcExplain'] = 'l'
@@ -291,8 +308,8 @@ def main():
 
     with io.open(path, 'w', encoding='utf-8') as fh:
         fh.write(json.dumps(study, ensure_ascii=False, separators=(', ', ': ')))
-    print('Ephesians: filled %d commentaries and %d reflection questions'
-          % (len(EXPLAIN), len(APPLY)))
+    print('Ephesians: %d commentaries and %d reflection questions'
+          % (len(notes), len(APPLY)))
 
 
 if __name__ == '__main__':

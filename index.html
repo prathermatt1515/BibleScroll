@@ -518,9 +518,7 @@
   // code; untagged ones are kjvstudy.org, which supplies most of the text.
   const STUDY_SOURCES = {
     k: 'kjvstudy.org',
-    c: 'John Calvin, Commentaries (16th c., public domain)',
     m: 'F. B. Meyer, Through the Bible Day by Day (public domain)',
-    kc: 'kjvstudy.org, with John Calvin\u2019s commentary',
     km: 'kjvstudy.org, with F. B. Meyer\u2019s notes',
     l: 'Written for BibleScroll \u2014 Lutheran reading'
   };
@@ -1293,11 +1291,12 @@
 
     // The takeaway summarises the Explain text, so it belongs on that tab
     // alone — repeating it under Deeper study said the same thing twice and
-    // made the longer note look like a restatement of the shorter one.
+    // made the longer note look like a restatement of the shorter one. The
+    // Apply it question is not a summary of either tab, so it stays on both.
     // A card is only drawn when there is something to put in it.
-    const showCards = opt === 'explain';
-    const takeawayCard = showCards && (data.takeaway || '').trim();
-    const applyCard = showCards && (data.apply || '').trim();
+    const studyTab = opt === 'explain' || opt === 'deeper';
+    const takeawayCard = opt === 'explain' && (data.takeaway || '').trim();
+    const applyCard = studyTab && (data.apply || '').trim();
     drawer.innerHTML = `
       <div class="drawer-handle"></div>
       <button class="back-btn" id="study-back">‹ Back</button>
