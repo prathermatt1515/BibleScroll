@@ -493,6 +493,17 @@
     verses: JAMES_VERSES,
     liveTextCache: JSON.parse(localStorage.getItem('sj_livecache') || '{}')
   };
+  // Older builds cached live translations under `trans:chapter:verse`, with no
+  // book — so every book served whichever book was read first. Those keys are
+  // unreachable now that the book is part of the key; drop them once.
+  (() => {
+    const cache = state.liveTextCache;
+    const stale = Object.keys(cache).filter(k => k.split(':').length < 4);
+    if (!stale.length) return;
+    stale.forEach(k => delete cache[k]);
+    localStorage.setItem('sj_livecache', JSON.stringify(cache));
+  })();
+
   const TOTAL_CHAPTERS = 5;
   const readVerses = JSON.parse(localStorage.getItem('sj_read') || '{}');
   const saved = JSON.parse(localStorage.getItem('sj_saved') || '{}');
@@ -751,7 +762,7 @@
     if (state.translation === 'kjv' || state.translation === 'web') {
       return offlineText(v, state.translation);
     }
-    const cacheKey = `${state.translation}:${v.c}:${v.v}`;
+    const cacheKey = `${state.translation}:${state.book}:${v.c}:${v.v}`;
     if (state.liveTextCache[cacheKey]) return state.liveTextCache[cacheKey];
     try {
       const text = await fetchLiveVerse(v.c, v.v, state.translation);
