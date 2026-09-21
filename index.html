@@ -476,6 +476,9 @@
     <button class="rail-btn" id="screenshot-btn" aria-label="Screenshot">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
     </button>
+    <button class="rail-btn" id="grid-btn" aria-label="Chapter grid">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    </button>
   </div>
 
   <button id="theme-toggle" aria-label="Toggle theme">
@@ -1765,6 +1768,13 @@
     showHomePage();
   }
 
+  // The chapter grid was three taps deep — Home, find the book, tap it.
+  // From the rail it opens directly on whatever book you are reading.
+  document.getElementById('grid-btn').onclick = () => {
+    showHomePage();
+    openBookDetail(state.book);
+  };
+
   // ---------- Bottom tray ----------
   // Home, Notes and Saved all live inside the home page; Read is the verse
   // feed underneath it. The tray marks which of the four you are looking at.
@@ -1927,6 +1937,7 @@
   }
 
   function openBookDetail(book) {
+    setTrayActive('home');
     setHomeTitle(book);
     const drawer = document.getElementById('home-content');
     const counts = CHAPTER_COUNTS[book];
