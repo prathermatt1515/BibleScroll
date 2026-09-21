@@ -539,7 +539,7 @@
 
   function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider).catch(() => showToast('Sign-in failed'));
+    firebase.auth().signInWithRedirect(provider).catch((e) => showToast('Sign-in failed: ' + (e && e.code ? e.code : 'unknown')));
   }
 
   function signOutUser() {
