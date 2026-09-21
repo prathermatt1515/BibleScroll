@@ -280,3 +280,95 @@ TAKEAWAYS.update({
     '34:34': "The veil comes off when he goes in to the LORD. Uncovered before God, covered before men.",
     '34:35': "The veil goes back on each time. The shining is not permanent, and the covering has to be repeated.",
 })
+
+TAKEAWAYS.update({
+    # ---- Chapter 35 ----
+    '35:1': "Moses gathers the whole congregation — the same crowd that once gathered to Aaron, now assembled to be told what to do.",
+    '35:2': "The sabbath is put first, before one word about building. Rest is not the reward waiting on the far side of the work.",
+    '35:3': "\"Kindle no fire.\" The one concrete prohibition named strikes straight at the metalworker in the week he starts.",
+    '35:5': "\"Whosoever is of a willing heart.\" After the calf, the offering is still asked for rather than demanded.",
+    '35:10': "\"Every wise hearted among you shall come.\" The skilled are invited as a class; nobody is conscripted by name.",
+    '35:20': "They departed from the presence of Moses — and the next verse has them coming back carrying things.",
+    '35:21': "\"Every one whose heart stirred him up.\" The text keeps tracing the giving back to an inward movement, not a quota.",
+    '35:22': "Bracelets, earrings and rings of gold. The same kind of jewellery that was broken off to make the calf.",
+    '35:23': "\"Every man, with whom was found.\" People bring what they happen to have, not what they wish they had.",
+    '35:25': "The women spin with their own hands and bring what they spun. The labour itself is brought as the offering.",
+    '35:26': "Goats' hair, the coarsest stuff in the tent, is spun by women whose hearts stirred them \"in wisdom.\"",
+    '35:27': "The rulers bring the onyx stones. They come late in the list and give the one thing only they could have given.",
+    '35:30': "Moses names Bezaleel to the people. The congregation is told whose hands are on their offering and who called him.",
+    '35:34': "\"He hath put in his heart that he may teach.\" The gift includes handing it on; a craftsman is made a trainer.",
+    '35:35': "Engraver, embroiderer, weaver. Every trade in the camp is put under the one word wisdom.",
+
+    # ---- Chapter 36 ----
+    '36:2': "\"Every one whose heart stirred him up to come unto the work.\" Willingness stands beside skill as a qualification.",
+    '36:3': "\"They brought yet unto him free offerings every morning.\" The generosity did not stop after the first surge of it.",
+    '36:5': "\"The people bring much more than enough.\" It is a complaint no building project has ever expected to make.",
+    '36:6': "A proclamation goes through the camp to make the giving stop. Moses has to restrain Israel from being generous.",
+    '36:7': "\"Sufficient... and too much.\" The record closes the ledger and admits the surplus instead of quietly absorbing it.",
+    '36:8': "The ten curtains are credited to every wise hearted man among them. The great work is written down as a plural.",
+
+    # ---- Chapter 37 ----
+    '37:1': "\"Bezaleel made the ark.\" The maker is named for this one object and then disappears behind \"he made\" for the rest.",
+    '37:7': "The cherubim are beaten out of one piece with the mercy seat. The guardians and the lid cannot be taken apart.",
+    '37:16': "Dishes, spoons, bowls and covers, all of pure gold — the tableware of a table at which nobody eats.",
+    '37:29': "The last thing made is a perfume. A chapter of hammered gold ends at an apothecary's bench.",
+
+    # ---- Chapter 38 ----
+    '38:8': "The laver is cast from the looking glasses of the women who assembled at the door. They gave up the glass they saw themselves in.",
+    '38:21': "\"This is the sum of the tabernacle, as it was counted.\" The accounts are published and signed off by a named man.",
+    '38:22': "The record credits Bezaleel with doing all that the LORD commanded — obedience, not artistry, is what gets written down.",
+    '38:23': "Aholiab is remembered in Scripture as an engraver and an embroiderer. The trade is the thing worth recording.",
+    '38:24': "Twenty-nine talents of gold and more. The cost is totalled out loud rather than left as an impression.",
+    '38:26': "A bekah a man, from six hundred and three thousand five hundred and fifty men. The whole nation is in that silver.",
+    '38:27': "A talent a socket, a hundred sockets from a hundred talents. The arithmetic comes out exactly even.",
+
+    # ---- Chapter 39 ----
+    '39:1': "\"As the LORD commanded Moses.\" The refrain starts here and will be repeated until nobody can miss the point.",
+    '39:3': "The gold is beaten into plates and cut into wires to be woven in. Metal is made thread so that it can be worn.",
+    '39:9': "The breastplate is made double — a pouch. It is built to hold something inside as well as to display what is on it.",
+    '39:32': "\"Thus was all the work finished... so did they.\" The sentence says it twice, as though the fact needed underlining.",
+    '39:33': "They bring the whole thing to Moses rather than erecting it themselves. Finished work is handed over for inspection.",
+    '39:42': "\"So the children of Israel made all the work.\" The people who made the calf are the people who made this.",
+    '39:43': "Moses looked on all the work and blessed them. Inspection ending in blessing is the shape of Genesis 1.",
+
+    # ---- Chapter 40 ----
+    '40:2': "\"On the first day of the first month.\" The dwelling goes up on New Year's Day; the year opens with God's house.",
+    '40:3': "The ark goes in first and is covered at once. The centre of the sanctuary is the part nobody is allowed to look at.",
+    '40:4': "\"Set in order the things that are to be set in order.\" Bread and light are arranged by hand before any glory arrives.",
+    '40:9': "Anointed, hallowed, \"and it shall be holy.\" A verdict is spoken over the objects; the workmanship did not earn it.",
+    '40:16': "\"Thus did Moses: according to all that the LORD commanded him, so did he.\" A whole life summed up in one sentence.",
+    '40:17': "Exactly a year after Egypt. It took twelve months to get from slavery to God living in the middle of the camp.",
+    '40:18': "Moses fastens the sockets and sets up the boards himself. The man who spoke with God does the lifting.",
+    '40:20': "The testimony goes into the ark, and the mercy seat goes on top of it. The law is put in and then covered over.",
+    '40:23': "He sets the bread in order before the LORD. The first meal laid out in the new house is not for anybody in the camp.",
+    '40:25': "He lighted the lamps before the LORD. A man strikes the first light in the tent, and it is lit for God to see by.",
+    '40:27': "He burnt sweet incense on it. Before a single prayer has been offered there, the tent already smells of prayer.",
+    '40:29': "The burnt offering is made at the door before the glory comes down. Sacrifice goes first; the presence follows.",
+    '40:31': "Moses and Aaron wash their hands and feet at the laver. The men who built it still cannot walk in as they are.",
+    '40:33': "The court goes up last, and \"so Moses finished the work.\" The labour of sixteen chapters closes in five words.",
+    '40:34': "The cloud covered it and the glory filled it. Everything since chapter 25 has been arranging for this moment.",
+    '40:35': "Moses cannot go in. The man who built the tent is shut out of it by the very presence it was built for.",
+    '40:36': "They travel when the cloud lifts. Israel's timetable is set by God's movement rather than by their own readiness.",
+    '40:37': "\"They journeyed not till the day that it was taken up.\" Staying put is obedience as much as marching is.",
+    '40:38': "Cloud by day, fire by night, in sight of all Israel. The book ends with God plainly present and still on the move.",
+})
+
+TAKEAWAYS.update({
+    # ---- Additions ----
+    '23:14': "Three feasts a year. The working calendar is broken open at fixed points and nobody chooses when.",
+    '23:26': "\"The number of thy days I will fulfil.\" The promise is a full life, not necessarily a long one.",
+    '23:28': "Hornets go before them. Part of the conquest is done by means Israel could never take the credit for.",
+    '23:31': "The bounds are described before one town has been taken. God draws the map before the marching starts.",
+    '25:4': "Blue, purple, scarlet, fine linen — and goats' hair. Royal dye and coarse hair go on the same list.",
+    '26:5': "Fifty loops facing fifty loops, \"that the loops may take hold one of another.\" The pieces are made to grip each other.",
+    '26:24': "The corners are coupled beneath and above, into one ring. The weakest points get fastened twice.",
+    '28:15': "It is called the breastplate of judgment. What the priest carries over his heart is a legal word, not a sentiment.",
+    '29:2': "Unleavened bread goes into the basket alongside the animals. A priest is made at a meal as well as at an altar.",
+    '29:17': "The ram is cut up and its inwards washed before burning. Even what will be smoke is made clean first.",
+    '29:39': "A lamb in the morning and a lamb at evening. Both ends of every day are marked by a death.",
+    '30:13': "The text stops to say a shekel is twenty gerahs. The price is defined so that nobody can quietly shave it.",
+    '30:19': "Hands and feet: what a priest does with them and where he has walked are the two things washed.",
+    '31:5': "Stone, timber and metal alike. The gift covers the whole trade, not only the part of it that touches holy things.",
+    '32:9': "\"Stiffnecked\" is a word for an ox that will not turn with the yoke. It governs the next two chapters.",
+    '34:11': "\"Behold, I drive out before thee.\" The command to observe arrives wrapped in what God undertakes to do first.",
+})

@@ -45,7 +45,6 @@ TAKEAWAYS = {
     '4:8': "Peace and sleep are named as the proof. Safety is measured by whether a man can stop keeping watch.",
 
     # ---- Chapter 5 ----
-    '5:1': "He asks God to consider his meditation — the part of prayer that never became words.",
     '5:2': "He addresses God as King before making any request, which settles who is petitioning whom.",
     '5:3': "\"In the morning\" twice, and then \"will look up.\" Prayer is directed and then watched for an answer.",
     '5:4': "God's hatred of evil is stated as incompatibility, not temper. Wickedness cannot lodge where he is.",
@@ -67,13 +66,11 @@ TAKEAWAYS = {
     '6:6': "Tears are described in flood language. The psalter lets a man exaggerate his sorrow out loud before God.",
     '6:7': "Grief is said to age the eye. The body keeps the account of what the heart has carried.",
     '6:8': "The turn comes mid-psalm with no change in circumstances reported — only \"the LORD hath heard.\"",
-    '6:9': "He says it twice, heard and received, as though certainty needed repeating to be believed.",
     '6:10': "The enemies are wished the same vexation he has just described in himself.",
 
     # ---- Chapter 7 ----
     '7:1': "Trust is stated first and the request second. The refuge is claimed before the rescue arrives.",
     '7:2': "The danger is put as a lion tearing with no one to deliver — a picture of being entirely alone with it.",
-    '7:3': "He opens his own case to examination rather than assuming his innocence is obvious.",
     '7:4': "The defence offered is that he spared a man who had no claim on his mercy.",
     '7:5': "He invites the worst if he is guilty. An oath like this is how a man with nothing to hide talks.",
     '7:6': "\"Awake for me\" — the prayer accuses God of sleeping, and the psalter keeps the accusation in.",
@@ -101,7 +98,6 @@ TAKEAWAYS = {
 
     # ---- Chapter 9 ----
     '9:1': "Whole-hearted praise is paired with showing forth the works. Gratitude here has an audience.",
-    '9:2': "Gladness is directed at God himself, not at the outcome. \"I will be glad in thee\" is the whole clause.",
     '9:3': "The enemies fall at his presence rather than at David's counterattack.",
     '9:4': "The throne is described as a place where cases get heard. God's kingship is first of all a judgeship.",
     '9:5': "Blotting out the name is the ancient shape of final judgement — not only defeat but erasure.",
@@ -118,7 +114,6 @@ TAKEAWAYS = {
     '9:16': "God is made known by what he does, not by explanation. Judgement is one of the ways he is recognised.",
     '9:17': "The nations that forget God are set beside the wicked, as though forgetting were itself the wickedness.",
     '9:18': "\"Not alway\" and \"not for ever\" — the psalm concedes the delay while denying it the last word.",
-    '9:19': "\"Let not man prevail\" is the whole fear underneath the psalm, said plainly at last.",
     '9:20': "The judgement asked for is that the nations learn they are men. Knowing your own creaturehood is the mercy here.",
 
     # ---- Chapter 10 ----
@@ -126,7 +121,6 @@ TAKEAWAYS = {
     '10:2': "The prayer asks that the schemer be taken in his own device, before asking for the poor to be rescued.",
     '10:3': "He boasts of his appetite and praises greed in others. Wickedness here is not hidden but celebrated.",
     '10:4': "\"God is not in all his thoughts.\" Pride's real work is not denial of God but successful inattention to him.",
-    '10:5': "God's judgments are \"far above out of his sight\" — not disbelieved, just too high up to be a factor.",
     '10:6': "\"I shall not be moved\" is a word of faith in the psalms, spoken here by a man with no God in it.",
     '10:7': "Cursing, deceit and fraud in the mouth, mischief kept under the tongue — the store is bigger than the speech.",
     '10:8': "Ambush in villages and secret places. The cruelty is patient and it chooses people nobody will miss.",
@@ -155,7 +149,6 @@ TAKEAWAYS.update({
     # ---- Chapter 12 ----
     '12:1': "The cry is not about enemies but about scarcity — the godly are simply running out.",
     '12:2': "\"A double heart\" is the diagnosis: the lips flatter because the heart is already two things.",
-    '12:3': "Judgement falls on speech itself. The tongue is treated as an organ that can be answerable.",
     '12:4': "\"Our lips are our own\" — the boast of free speech is quoted here as the language of rebellion.",
     '12:5': "God's stated reason for arising is the sighing of the needy. The trigger is a sound, not a strategy.",
     '12:6': "Against lips full of vanity, God's words are set as silver refined seven times. Purity is the contrast.",
@@ -164,7 +157,6 @@ TAKEAWAYS.update({
 
     # ---- Chapter 13 ----
     '13:1': "\"How long... for ever?\" He asks God to set a limit on a silence he fears has no end.",
-    '13:2': "Taking counsel in his own soul is listed as part of the suffering. Self-advice becomes its own weariness.",
     '13:3': "\"Lighten mine eyes\" — the request is for the light to come back into a face, which is how life is measured here.",
     '13:4': "The reason offered is the enemy's boast. He fears God's reputation going down with his own.",
     '13:5': "\"But I have trusted in thy mercy.\" The turn rests on mercy, which nothing in his circumstances has confirmed.",
@@ -205,7 +197,6 @@ TAKEAWAYS.update({
     '17:3': "He claims God visited him in the night and found nothing — the hours when a man is least able to perform.",
     '17:4': "What kept him off the destroyer's paths was the word of God's lips, not his own resolve.",
     '17:5': "Having just claimed uprightness, he immediately asks to be held up. The integrity is not self-supporting.",
-    '17:6': "\"For thou wilt hear me\" — the reason he calls is that he is already sure of the answer.",
     '17:7': "Lovingkindness is asked for as something marvellous. Mercy is treated as a wonder, not a routine.",
     '17:8': "The apple of the eye and the shadow of wings: the most guarded thing in a body, and a bird over its young.",
     '17:9': "\"Compass me about\" — the enemies are not ahead of him but all around, which is what makes wings the right image.",
@@ -229,7 +220,6 @@ TAKEAWAYS.update({
     '18:10': "He rides a cherub and flies on the wind. Even the storm is transport, not the deity itself.",
     '18:11': "God makes darkness his secret place. The nearer he comes, the less he can be looked at.",
     '18:12': "The brightness burns off the very clouds he was hiding in. Concealment does not survive his approach.",
-    '18:13': "Thunder is called his voice. The sky is not accompanying the rescue; it is the rescue speaking.",
     '18:14': "Lightning is treated as archery. The scattering is aimed, not weather.",
     '18:15': "The sea floor and the world's foundations are laid bare by a breath. Creation is undressed to save one man.",
     '18:16': "\"He sent from above, he took me, he drew me out.\" Three verbs, all his; the drowning man does nothing.",
@@ -240,7 +230,6 @@ TAKEAWAYS.update({
     '18:21': "Keeping God's ways is defined negatively: he did not wickedly depart. Faithfulness as staying put.",
     '18:22': "The judgments were \"before me\" — kept in sight rather than kept in memory.",
     '18:23': "\"I kept myself from mine iniquity\" — he names a particular sin that is his own, not sin in general.",
-    '18:24': "\"In his eyesight\" is added the second time. The verdict that counts is rendered where God is looking.",
     '18:25': "God meets the merciful as merciful. The character a man brings is the character he encounters.",
     '18:26': "\"With the froward thou wilt shew thyself froward.\" Crookedness finds God hard to deal with, and is told why.",
     '18:27': "Saving the afflicted and lowering high looks are one action described twice.",
@@ -254,8 +243,6 @@ TAKEAWAYS.update({
     '18:35': "\"Thy gentleness hath made me great.\" The one thing named as the making of him is the softest word in the psalm.",
     '18:36': "The enlarged step is the opposite of the snares of verse five. Room to walk is itself deliverance.",
     '18:37': "The pursuit does not stop halfway. Where God gives victory, David does not leave the work unfinished.",
-    '18:38': "The language is unsparing. The psalter does not clean up what winning a war actually looked like.",
-    '18:39': "The subduing is God's; the fighting is his. The psalm refuses to separate them.",
     '18:40': "\"Thou hast given me the necks of mine enemies\" — even the moment of triumph is described as a gift received.",
     '18:41': "They cried to the LORD and were not answered. Prayer in extremity is not automatically heard.",
     '18:42': "Dust before wind, dirt in the streets: the enemies end as the two most worthless things underfoot.",
@@ -270,7 +257,6 @@ TAKEAWAYS.update({
     # ---- Chapter 19 ----
     '19:1': "The heavens declare glory without saying anything a man could quote. Creation testifies and never argues.",
     '19:2': "Day and night hand the message to each other. The witness has no gaps in it.",
-    '19:3': "No language is needed, so no one is excluded by not knowing the words.",
     '19:4': "\"Through all the earth\" — the reach of this preaching is what Paul will say leaves the nations without excuse.",
     '19:5': "The sun is a bridegroom and a runner: eager, not merely regular. The order of nature is described as joy.",
     '19:6': "\"Nothing hid from the heat thereof\" — the sun's reach is the picture of an exposure nothing escapes.",
@@ -286,7 +272,6 @@ TAKEAWAYS.update({
     # ---- Chapter 20 ----
     '20:1': "The people pray for the king before the battle. The whole psalm is intercession, not self-defence.",
     '20:2': "Help is asked from the sanctuary, not the armoury. Where strength is expected to come from is the point.",
-    '20:3': "Remembering the offerings is asked for as a ground of favour, but God is the one who must accept them.",
     '20:4': "\"According to thine own heart\" — the prayer is bold enough to ask God to grant what the king wants.",
     '20:5': "Banners are set up in the name of God rather than in the name of the king who will fight under them.",
     '20:6': "\"Now know I\" — one man's certainty breaks into the congregation's prayer before anything has happened.",
@@ -298,7 +283,7 @@ TAKEAWAYS.update({
     '21:1': "The king's joy is in God's strength rather than in his own victory.",
     '21:2': "\"Hast not withholden the request of his lips\" — the granting is named twice, as if it were hard to believe once.",
     '21:3': "\"Thou preventest him\" — God arrives with blessing before it is asked for. The crown is placed, not seized.",
-    '21:4': "He asked for life and was given length of days for ever, which is more than the request could hold.",
+    '21:4': "He asked for life. The answer overshot the asking by everything that \"for ever\" adds.",
     '21:5': "Honour and majesty are \"laid upon him\" like a garment. Even the king's dignity is issued to him.",
     '21:6': "Gladness comes from God's countenance. The face, not the gifts, is what makes him most blessed.",
     '21:7': "Between all the blessings, the one thing said about the king himself is that he trusts.",
@@ -307,7 +292,6 @@ TAKEAWAYS.update({
 
 TAKEAWAYS.update({
     '21:9': "The oven image puts the fire inside them. Wrath is not only what falls on the wicked but what they become.",
-    '21:10': "Judgement reaches the seed as well. The psalm assumes a man's evil does not stop at his own lifetime.",
     '21:11': "\"Which they are not able to perform.\" The plot is real and simply beyond their strength.",
     '21:12': "Arrows aimed at the face turn men around. The rout is caused by being looked at.",
     '21:13': "The psalm asks God to be exalted in his own strength, not in the king's, and stops there.",
@@ -317,7 +301,6 @@ TAKEAWAYS.update({
     '22:2': "Unanswered by day and by night, and still not silent. Persistence here is not evidence that prayer is working.",
     '22:3': "\"But thou art holy.\" He will not explain the silence by finding a fault in God.",
     '22:4': "He recites the fathers' deliverance as fact, which sharpens rather than soothes the present silence.",
-    '22:5': "They cried and were not confounded — the exact thing not happening to him, said out loud.",
     '22:6': "\"I am a worm, and no man.\" Contempt has done its work: he no longer counts himself among people.",
     '22:7': "The shot-out lip and the shaken head are recorded gestures, and the gospels will see them again at a cross.",
     '22:8': "The mockers use his own theology against him: if God delights in you, let him prove it.",
@@ -325,7 +308,6 @@ TAKEAWAYS.update({
     '22:10': "\"Cast upon thee from the womb\" — dependence was never chosen; it was his condition before he could speak.",
     '22:11': "\"For there is none to help\" is given as the reason God should come near. Having no one else is the qualification.",
     '22:12': "Bulls of Bashan: the enemies are drawn as well-fed livestock, heavy and stupid and pressing in.",
-    '22:13': "The mouth is open before the bite. What he describes is the moment of anticipation, not the injury.",
     '22:14': "Poured out, disjointed, melted — he reports the collapse of his body from the inside.",
     '22:15': "\"Thou hast brought me into the dust of death.\" The hand he blames for it is God's.",
     '22:16': "Pierced hands and feet, written centuries before crucifixion was a Roman word.",
@@ -369,11 +351,9 @@ TAKEAWAYS.update({
     '25:2': "Shame, not defeat, is what he fears. To trust and be let down publicly is the worse outcome.",
     '25:3': "He widens his own prayer to cover everyone who waits. Personal need becomes intercession mid-sentence.",
     '25:4': "In the middle of trouble the request is for instruction. He assumes he may be going the wrong way.",
-    '25:5': "\"On thee do I wait all the day\" — waiting is offered as the posture in which teaching is received.",
     '25:6': "He asks God to remember mercies that are \"ever of old.\" The appeal is to God's long habit.",
     '25:7': "Remember not the sins, remember thou me. The same verb is asked to work in two directions at once.",
     '25:8': "Because God is good, he teaches sinners. Goodness expresses itself as instruction of the wrong people.",
-    '25:9': "Guidance is promised to the meek, which makes teachability the qualification rather than intelligence.",
     '25:10': "All God's paths are mercy and truth. Not some merciful and some true — every one of them both.",
     '25:11': "\"Pardon mine iniquity; for it is great.\" The size of the sin is used as an argument for forgiving it.",
     '25:12': "The man who fears God is taught the way he shall choose — instruction comes before the choosing, not after.",
@@ -384,7 +364,7 @@ TAKEAWAYS.update({
     '25:17': "The troubles are \"enlarged\" — grief takes up more room than it did, and he says so.",
     '25:18': "Affliction and sin are laid before God in the same breath, as though relief and pardon were one request.",
     '25:19': "Their hatred is called cruel. He names the quality of it, not just the number of them.",
-    '25:20': "Trust is given as the reason he should not be ashamed. He has staked his standing on God's response.",
+    '25:20': "\"For I put my trust in thee\" — his whole standing now depends on whether God answers.",
     '25:21': "Integrity is asked to preserve him, and then the ground shifts to waiting. Even his uprightness is not his security.",
     '25:22': "The acrostic ends outside itself, praying for the whole nation after twenty-one verses about one man.",
 
@@ -393,7 +373,6 @@ TAKEAWAYS.update({
     '26:2': "Examine, prove, try — three words for the same request. He invites the deepest possible inspection.",
     '26:3': "The integrity he claims is traced to lovingkindness kept before his eyes. He walked well by looking at something.",
     '26:4': "Righteousness is described by whose company he has refused. Where a man sits is counted as a moral act.",
-    '26:5': "Hating the congregation of evildoers is set opposite loving the house of God in the same psalm.",
     '26:6': "Washing the hands is done in order to go round the altar. The cleansing is for approach, not for display.",
     '26:7': "The purpose of access is thanksgiving out loud. He comes to the altar in order to tell about God.",
     '26:8': "\"The place where thine honour dwelleth\" — he loves the house for who is in it, not for the architecture.",
@@ -420,14 +399,13 @@ TAKEAWAYS.update({
 
     # ---- Chapter 28 ----
     '28:1': "Silence from God, not disaster, is what would put him among the dead. Being unanswered is the pit.",
-    '28:2': "Hands lifted toward the oracle. The body turns to face the place where God has spoken.",
     '28:3': "\"Speak peace to their neighbours, but mischief is in their hearts\" — he asks not to share the fate of the two-faced.",
     '28:4': "The prayer is that their work be handed back to them. Judgement is requested as accuracy, not excess.",
     '28:5': "The named cause is inattention: they do not regard what God does. Not seeing his works is treated as guilt.",
     '28:6': "The whole psalm turns on \"he hath heard.\" One clause converts petition into blessing.",
     '28:7': "Strength, shield, trust, help, joy, song — he traces the whole chain and puts trust in the middle of it.",
     '28:8': "The pronoun changes to \"their.\" His own answered prayer is read as evidence for the people's safety.",
-    '28:9': "The psalm ends asking God to feed and carry them, which is shepherd's work, not a king's.",
+    '28:9': "Feeding them and lifting them up is shepherd's work, asked of God by a king who could not do it.",
 
     # ---- Chapter 29 ----
     '29:1': "\"O ye mighty\" — the ones told to give glory are the powerful, who have the most trouble giving it.",
@@ -449,7 +427,6 @@ TAKEAWAYS.update({
     '30:5': "A moment of anger against a lifetime of favour, a night of weeping against a morning. The proportions are the point.",
     '30:6': "\"In my prosperity I said, I shall never be moved.\" Comfort taught him a confidence he had not earned.",
     '30:7': "The mountain stood by God's favour, and the trouble came when the face was hidden, not when the mountain fell.",
-    '30:8': "He does not pretend the crying stopped when the trouble started. The psalm keeps the record of his panic.",
     '30:9': "The argument offered is that dust cannot praise. He bargains with God about the loss of a worshipper.",
     '30:10': "The plea narrows to two words: hear, and have mercy. Elaborate argument collapses into request.",
     '30:11': "Sackcloth taken off and gladness girded on. The change of clothing is how the change of state is reported.",
@@ -459,7 +436,6 @@ TAKEAWAYS.update({
 TAKEAWAYS.update({
     # ---- Chapter 31 ----
     '31:1': "Deliverance is asked for \"in thy righteousness\" — God's own rightness is the ground of the rescue.",
-    '31:2': "\"Deliver me speedily.\" The prayer is allowed to be impatient about timing without being impatient about God.",
     '31:3': "Because God is his fortress, he asks to be led. Security does not remove the need for direction.",
     '31:4': "The net was laid \"privily.\" What he most needs pulling out of is the trap he could not see.",
     '31:5': "\"Into thine hand I commit my spirit\" — the words Christ will die saying, spoken here by a man asking to live.",
@@ -517,12 +493,11 @@ TAKEAWAYS.update({
     '33:19': "Kept alive in famine, not kept out of it. The promise is preservation through the scarcity.",
     '33:20': "Waiting is put in the same breath as help and shield. The waiting is not the absence of protection.",
     '33:21': "Joy is traced to trust in the name — to what they know him to be, not to what has happened.",
-    '33:22': "Mercy is asked for \"according as we hope\" — the measure requested is their own expectation.",
+    '33:22': "\"According as we hope in thee\" — the measure they ask to be given is the size of their own waiting.",
 
     # ---- Chapter 34 ----
     '34:1': "\"At all times\" is written by a man who had just escaped by pretending to be insane.",
     '34:2': "Boasting is allowed when its subject is God, and the people who are glad to hear it are the humble.",
-    '34:3': "Magnifying is invited as a joint act. Praise is treated as something too large for one voice.",
     '34:4': "Delivered from his fears, which is not the same as delivered from the danger.",
     '34:5': "Looking produced light in their faces. What a man attends to shows on him.",
     '34:6': "\"This poor man cried\" — he puts himself in the third person, as an example rather than a hero.",
@@ -547,9 +522,7 @@ TAKEAWAYS.update({
     '35:1': "He asks God to both plead his case and fight for him — advocate and soldier in one request.",
     '35:2': "God is asked to pick up armour. The image is startling enough that the psalm does not soften it.",
     '35:3': "\"Say unto my soul, I am thy salvation.\" With the spear already drawn, what he wants most is to be told.",
-    '35:4': "Confusion and shame are asked for rather than death. He wants the plot broken, not the plotters destroyed.",
     '35:5': "Chaff blown off the threshing floor, with an angel behind it — the wind of judgement is given a person.",
-    '35:6': "Dark and slippery: the pursuit he asks for uses their own footing against them.",
     '35:7': "\"Without cause\" twice in one verse. The motiveless quality of the malice is what he cannot get past.",
     '35:8': "The net catches the man who hid it, and the destruction arrives \"at unawares\" — the surprise he was planning.",
     '35:9': "The joy anticipated is in the LORD and his salvation, not in the enemies' fall he has just described.",
@@ -566,7 +539,6 @@ TAKEAWAYS.update({
     '35:20': "\"Them that are quiet in the land\" — the victims are described as people who were not looking for a fight.",
     '35:21': "\"Aha, aha, our eye hath seen it.\" They claim to have witnessed what the false witnesses invented.",
     '35:22': "\"This thou hast seen\" answers their boast of seeing. The one real witness is asked to stop being silent.",
-    '35:23': "God is told to wake up to a case, as though the delay were inattention rather than purpose.",
     '35:24': "Judgement is asked for according to God's righteousness, not the psalmist's, after all his protest of innocence.",
     '35:25': "\"We have swallowed him up\" is the sentence he cannot bear them to say. The fear is of their satisfaction.",
     '35:26': "Shame and dishonour are described as clothing — something they would be seen in, not merely feel.",
@@ -598,7 +570,6 @@ TAKEAWAYS.update({
     '37:6': "Vindication is promised as light at noon — public, undeniable, and not arranged by the man himself.",
     '37:7': "Rest and patience are commanded precisely about the man whose wicked schemes are succeeding.",
     '37:8': "Anger is said to lead to evil. The psalm treats indignation at injustice as a road that can end badly.",
-    '37:9': "Those who wait inherit. In this psalm inheritance is the reward of not grabbing.",
     '37:10': "\"Thou shalt diligently consider his place, and it shall not be\" — you will look carefully and find nothing there.",
     '37:11': "The meek inherit the earth and get peace with it. Jesus will quote the line without softening the claim.",
     '37:12': "Gnashing teeth at the just: the hostility is personal and physical, not merely a difference of principle.",
@@ -606,7 +577,6 @@ TAKEAWAYS.update({
     '37:14': "The sword is drawn against the poor and needy. Violence in this psalm always runs downhill.",
     '37:15': "The weapon turns inward. The sword enters the heart that drew it.",
     '37:16': "A little with righteousness is called better outright. The comparison is not consoling but evaluative.",
-    '37:17': "Broken arms against an upholding hand. Strength and support are set opposite each other, not strength and strength.",
     '37:18': "\"The LORD knoweth the days of the upright\" — their obscure and difficult days are counted by someone.",
     '37:19': "Satisfied in famine, not exempted from it. The promise sits inside the evil time.",
     '37:20': "The fat of lambs burned on an altar: the wicked end as smoke, consumed in the very act of being offered up.",
@@ -626,7 +596,6 @@ TAKEAWAYS.update({
     '37:35': "The green bay tree is native, rooted and flourishing in its own soil. That is what made it look permanent.",
     '37:36': "\"I sought him, but he could not be found.\" The disappearance is total and the psalmist went looking.",
     '37:37': "\"Mark the perfect man\" — the instruction is to watch how a life ends, not how it looks at its height.",
-    '37:38': "\"The end of the wicked shall be cut off\" — not only the man but the future he was building toward.",
     '37:39': "After forty verses of moral contrast, salvation is finally said to be \"of the LORD.\"",
     '37:40': "\"Because they trust in him\" is the last clause of the psalm, and the only reason given for the rescue.",
 
@@ -637,14 +606,12 @@ TAKEAWAYS.update({
     '38:4': "Iniquities \"gone over mine head\" — drowning language used for guilt rather than for enemies.",
     '38:5': "\"Because of my foolishness\" — he traces the rot in his wounds back to his own stupidity, not to misfortune.",
     '38:6': "Bowed down and mourning all day. The posture of grief has become his ordinary carriage.",
-    '38:7': "The psalter includes a man describing a loathsome disease in his loins without euphemism.",
     '38:8': "The roaring comes from disquiet of heart, not from the pain. The inner trouble is louder than the illness.",
     '38:9': "\"All my desire is before thee\" — he stops describing and admits God already has the whole account.",
     '38:10': "The light of the eyes going out is how the psalms say a man is finished.",
     '38:11': "Friends and kinsmen stand off from the sore. Illness costs him the people, not only the strength.",
     '38:12': "While his friends withdraw, his enemies come closer. Weakness sorts the people around a man quickly.",
     '38:13': "He answers slander with silence, deaf and dumb by choice rather than by inability.",
-    '38:14': "\"In whose mouth are no reproofs\" — he has given up defending himself, which is not the same as agreeing.",
     '38:15': "The silence is explained: he is not answering them because he is waiting on God to answer.",
     '38:16': "His concern about their triumph is bound up with his own slipping foot, which he expects.",
     '38:17': "\"My sorrow is continually before me\" — nothing in the day is free of it.",
@@ -694,7 +661,6 @@ TAKEAWAYS.update({
     '41:4': "\"Heal my soul; for I have sinned\" — the disease he asks to be cured of is the guilt, not the fever.",
     '41:5': "They want his name to perish as well as his life. Erasure, not just death, is the wish.",
     '41:6': "The visitor speaks kindly at the bedside and carries the news out as gossip.",
-    '41:7': "Whispering together — the conspiracy is conducted at the volume of concern.",
     '41:8': "\"Now that he lieth he shall rise up no more.\" They have read his illness as a verdict from God.",
     '41:9': "The friend who ate his bread lifted the heel. Jesus will quote this at a table, about a man still sitting there.",
     '41:10': "\"That I may requite them\" — the prayer is honest about wanting to settle the account himself.",
@@ -719,7 +685,6 @@ TAKEAWAYS.update({
 
     # ---- Chapter 43 ----
     '43:1': "He asks God to be his advocate against a whole nation, and then names one deceitful man.",
-    '43:2': "\"Thou art the God of my strength: why dost thou cast me off?\" Both halves are said without embarrassment.",
     '43:3': "Light and truth are asked for as guides, personified and sent out ahead of him.",
     '43:4': "\"God my exceeding joy\" — the altar is wanted for the person at it, not for the ritual.",
     '43:5': "The refrain closes the psalm rather than interrupting it. Nothing has changed except where the hope is put.",
@@ -738,11 +703,9 @@ TAKEAWAYS.update({
     '44:11': "Sheep appointed for meat. Israel is described as livestock God has designated for slaughter.",
     '44:12': "\"Thou sellest thy people for nought\" — the accusation is not cruelty but a sale at no profit.",
     '44:13': "The shame is social. They are a reproach to the neighbours, among people who have to keep living near them.",
-    '44:14': "A byword among the heathen. Their defeat has become a saying other nations use.",
     '44:15': "Confusion is \"continually before me\" and shame has covered his face. Humiliation has become a permanent state.",
     '44:16': "What he cannot bear is not the enemy's sword but the enemy's blasphemy.",
     '44:17': "\"Yet have we not forgotten thee.\" The psalm makes the one claim that removes every easy explanation.",
-    '44:18': "Heart and steps both named. They insist the loyalty was inward and outward alike.",
     '44:19': "Broken \"in the place of dragons\" and covered with death's shadow — and still the covenant was kept.",
     '44:20': "The test is offered in the form they would recognise: hands stretched out to a strange god.",
     '44:21': "\"He knoweth the secrets of the heart\" is invoked as their defence, not as a threat to them.",
@@ -783,7 +746,6 @@ TAKEAWAYS.update({
     '46:8': "\"Behold... what desolations he hath made.\" The invitation is to look at ruins and call them God's work.",
     '46:9': "Peace comes by breaking the weapons, not by persuading the armies.",
     '46:10': "\"Be still\" is addressed to the raging nations as much as to the frightened. It is an order to stop.",
-    '46:11': "The refrain returns unchanged after the judgement scene. What was true in the earthquake is true after it.",
 
     # ---- Chapter 47 ----
     '47:1': "\"All ye people\" — the clapping is demanded of the nations, not only of Israel.",
@@ -809,12 +771,10 @@ TAKEAWAYS.update({
     '48:10': "Praise reaches as far as the name does. The limit of God's fame is the limit of his worship.",
     '48:11': "Judah's daughters are told to be glad \"because of thy judgments\" — the verdicts are what they celebrate.",
     '48:12': "Walk round, count the towers. Faith is asked to take a physical inventory.",
-    '48:13': "The point of counting the bulwarks is to have something to tell the next generation.",
     '48:14': "After all the walls and towers, what is promised is a guide. The city was never the security.",
 
     # ---- Chapter 49 ----
     '49:1': "The psalm addresses the inhabitants of the world, not the congregation. This is wisdom offered to everyone.",
-    '49:2': "Low and high, rich and poor \"together\" — the audience is mixed on purpose, since the subject levels them.",
     '49:4': "He calls his teaching a dark saying and puts it to the harp. Hard truth is set to music to be carried.",
     '49:5': "The question is why he should fear when his own past sins surround him — not when enemies do.",
     '49:6': "The rich are described by what they trust, not by what they own.",
@@ -830,7 +790,6 @@ TAKEAWAYS.update({
     '49:16': "\"Be not thou afraid when one is made rich.\" The instruction assumes another's wealth is frightening.",
     '49:17': "He carries nothing away and his glory does not follow him down. Both halves describe the same empty hands.",
     '49:18': "Men praise you when you do well to yourself. The psalm notes exactly whose approval self-interest buys.",
-    '49:19': "\"They shall never see light\" — the fathers' generation is described as a place, and it is dark.",
     '49:20': "The refrain returns with \"understandeth not\" added. What makes a man like the beasts is not dying but not seeing it.",
 
     # ---- Chapter 50 ----
@@ -844,9 +803,7 @@ TAKEAWAYS.update({
     '50:8': "The sacrifices are not the problem. God clears the ritual before he indicts the worshippers.",
     '50:9': "\"I will take no bullock out of thy house.\" The offering was never something God needed to receive.",
     '50:10': "Cattle on a thousand hills already belong to him, which makes the gift a return, not a supply.",
-    '50:11': "He knows the birds of the mountains — the creatures nobody offers and nobody counts.",
     '50:12': "\"If I were hungry, I would not tell thee.\" The sarcasm exposes what the worshippers thought they were doing.",
-    '50:13': "The question is left unanswered, because the idea of God eating meat is the point being ridiculed.",
     '50:14': "What is asked instead is thanksgiving and kept vows — things that cannot be delegated to an animal.",
     '50:15': "Calling on him in trouble is listed as worship. Needing God is a way of honouring him.",
     '50:16': "The wicked man's offence is reciting the covenant. The indictment is against the mouth, not the hands.",
@@ -867,7 +824,6 @@ TAKEAWAYS.update({
     '51:6': "\"Truth in the inward parts\" is what God desires, and it is exactly what he has not had.",
     '51:7': "Hyssop belonged to the leper's cleansing. He asks to be treated as the unclean man he now knows he is.",
     '51:8': "\"The bones which thou hast broken\" — he credits God with the damage and asks him to make them rejoice.",
-    '51:9': "Hiding the face was the complaint of other psalms. Here he asks for it, because of what would be seen.",
     '51:10': "\"Create\" is the verb of Genesis. Nothing less than a making from nothing will serve for a heart.",
     '51:11': "The fear is not punishment but being put out of God's presence. Saul is close enough to remember.",
     '51:12': "He asks for the joy of salvation to be restored, not the salvation. What he lost was the gladness of it.",
@@ -883,7 +839,6 @@ TAKEAWAYS.update({
     '52:1': "\"O mighty man\" is said with contempt. Against his boasting is set the one thing that actually endures.",
     '52:2': "A razor is a grooming tool. The tongue's danger is that it is precise and kept close to the skin.",
     '52:3': "Loving evil more than good: the charge is about preference, not weakness.",
-    '52:4': "\"All devouring words\" — speech is described as eating, and the appetite is what he is accused of.",
     '52:5': "Plucked out of his dwelling and rooted out of the land: the man who destroyed by speech is removed bodily.",
     '52:6': "The righteous see, fear, and then laugh. The fear comes first, and it is not for the fallen man.",
     '52:7': "\"Strengthened himself in his wickedness\" — he was getting stronger, and that was the shape of his ruin.",
@@ -892,15 +847,12 @@ TAKEAWAYS.update({
 
     # ---- Chapter 53 ----
     '53:1': "\"Abominable iniquity\" replaces the works of the earlier version. The second telling names it harder.",
-    '53:2': "The search is repeated in the psalter because the result has not changed between the two hearings.",
-    '53:3': "\"Every one of them is gone back.\" The word is of turning away, not merely of never having come.",
-    '53:4': "They devour God's people and never pray. The two are put side by side as one description.",
+    '53:4': "Ignorance, in this psalm, is not a failure of information but of address: they never ask.",
     '53:5': "\"Where no fear was\" — the terror that seized them had no external cause. God scattered them with nothing.",
     '53:6': "The same longing closes both versions: salvation must come out of Zion, because it will not come from within.",
 
     # ---- Chapter 54 ----
     '54:1': "Saved by the name and judged by the strength. He asks for rescue and a verdict in the same breath.",
-    '54:2': "\"The words of my mouth\" — the prayer draws attention to itself as spoken, by a man in hiding.",
     '54:3': "\"They have not set God before them.\" The betrayers' real fault is an absence, not an act.",
     '54:4': "\"Behold, God is mine helper\" — the turn comes at the psalm's midpoint, on nothing but assertion.",
     '54:5': "\"Cut them off in thy truth\" — even the destruction asked for is to be an act of God's faithfulness.",
@@ -912,13 +864,11 @@ TAKEAWAYS.update({
     '55:2': "\"I mourn in my complaint, and make a noise.\" The psalm admits the prayer is not composed.",
     '55:3': "They cast iniquity upon him — the accusation is that they are transferring their own guilt onto him.",
     '55:4': "\"The terrors of death are fallen upon me.\" Not death, but the dread of it, is what has landed.",
-    '55:5': "Fearfulness, trembling, horror — three words for the same state, piled up because one would not do.",
     '55:6': "\"Oh that I had wings like a dove\" — the most honest wish in the psalter, and it is escape, not victory.",
     '55:7': "The wilderness, elsewhere a place of danger, is here the thing he longs for. Anywhere is better than this.",
     '55:8': "The storm he wants to escape is a human one. The weather in this psalm is other people.",
     '55:9': "\"Divide their tongues\" — he asks for Babel, for the conspiracy to lose the ability to understand itself.",
     '55:10': "Mischief patrols the walls that were built to keep it out.",
-    '55:11': "Deceit and guile \"depart not from her streets.\" The corruption has become residential.",
     '55:12': "\"Then I could have borne it.\" He measures the wound by the fact that an enemy's version would have healed.",
     '55:13': "\"A man mine equal, my guide, and mine acquaintance\" — the betrayer is identified by closeness, never by name.",
     '55:14': "They walked to the house of God together. The friendship was religious, which is why the break is total.",
@@ -934,7 +884,6 @@ TAKEAWAYS.update({
 
     # ---- Chapter 56 ----
     '56:1': "\"Man would swallow me up\" — the enemy is named as man, which already limits him.",
-    '56:2': "\"They be many\" is said to the most High. The count is offered to the one it cannot impress.",
     '56:3': "\"What time I am afraid, I will trust in thee.\" Fear is not denied; it is given a scheduled response.",
     '56:4': "He praises God's word while still in danger, then says flesh can do nothing to him. The order matters.",
     '56:5': "They wrest his words daily. The attack is on what he says, twisted into something he did not mean.",
@@ -942,7 +891,6 @@ TAKEAWAYS.update({
     '56:7': "\"Shall they escape by iniquity?\" He asks whether wickedness can be its own way out, and expects no.",
     '56:8': "Wanderings counted, tears bottled, both written in a book. God is described as keeping records of small griefs.",
     '56:9': "\"This I know; for God is for me.\" The whole psalm rests on a preposition.",
-    '56:10': "The line is repeated with the divine name changed. He praises the word under both titles, as if testing it.",
     '56:11': "The refrain returns with \"man\" in place of \"flesh.\" Named either way, the threat is still only human.",
     '56:12': "\"Thy vows are upon me\" — the promises he made under pressure are treated as a weight he is glad to carry.",
     '56:13': "Delivered from death, he asks next to be kept from falling. Survival was not the whole of what he wanted.",
