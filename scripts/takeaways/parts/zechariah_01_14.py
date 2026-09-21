@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Written one-line takeaways for Zechariah 1-14."""
+
+TAKEAWAYS = {
+    # ---- Chapter 1 ----
+    '1:1': "Dated by a Persian king's years. Zechariah starts speaking two months after Haggai's last recorded word.",
+    '1:3': "\"Turn ye unto me, and I will turn unto you.\" The order of the clauses is not the order of the causes.",
+    '1:4': "\"Be ye not as your fathers.\" The warning is that the former prophets were ignored by people who heard them.",
+    '1:5': "\"Your fathers, where are they? and the prophets, do they live for ever?\" Both sides of the quarrel are dead.",
+    '1:6': "The fathers conceded at the end that the word had held. That confession is quoted as their last statement.",
+    '1:8': "The first night vision: a rider among myrtle trees in a hollow. God's cavalry is stationed somewhere low.",
+    '1:9': "\"What are these?\" He asks, and the angel tells him. Every vision in this book arrives with its explanation.",
+    '1:10': "The horses are patrols sent through the earth. The empire is under surveillance it knows nothing about.",
+    '1:11': "\"All the earth sitteth still.\" The world's calm is filed as bad news, since Judah is still in rubble.",
+    '1:12': "\"How long?\" is asked by the angel, not the prophet, and the seventy years are quoted back to God.",
+    '1:13': "The reply is described before it is reported: good words, comfortable words. The tone is the message.",
+    '1:14': "Jealousy is given as the motive for the comfort. God is possessive about the city he let fall.",
+    '1:15': "\"They helped forward the affliction.\" The instruments of judgement went further than judgement required.",
+    '1:16': "A line stretched over Jerusalem is a builder's gesture. Mercy shows up here looking like surveying.",
+    '1:17': "Four times \"yet\" in one verse: prosperity, comfort, and the choice of Jerusalem made a second time.",
+    '1:19': "\"The horns which have scattered Judah\" — four of them, one for each direction the scattering came from.",
+    '1:20': "Four carpenters to four horns. The answer to the powers turns out to be the same number of working men.",
+    '1:21': "\"No man did lift up his head.\" The scattering is measured by posture, and the carpenters come to end it.",
+    # ---- Chapter 2 ----
+    '2:1': "A man with a measuring line, going out to size the city. The third vision opens as a surveying job.",
+    '2:3': "One angel runs to head off another. The measuring is interrupted before it can be finished.",
+    '2:4': "\"Towns without walls\" — the city is told it will outgrow its defences, which is bad news to a builder.",
+    '2:5': "\"A wall of fire round about.\" The defence offered is God's presence instead of masonry.",
+    '2:6': "The exiles still in Babylon are told to run. Comfort for Jerusalem arrives as a summons to leave.",
+    '2:7': "\"O Zion, that dwellest with the daughter of Babylon.\" Zion is addressed as still at the wrong address.",
+    '2:8': "\"He that toucheth you toucheth the apple of his eye.\" The tenderest image in the book is about reprisal.",
+    '2:9': "The spoilers become spoil to their own servants. The reversal runs the whole way down the household.",
+    '2:10': "\"I come, and I will dwell in the midst of thee.\" What is promised is residence rather than visits.",
+    '2:11': "Many nations joined to the LORD and called his people. The Gentiles are added, and Judah is not displaced.",
+    '2:13': "\"Be silent, O all flesh.\" The fitting answer to God getting up is quiet, not applause.",
+    # ---- Chapter 3 ----
+    '3:1': "The fourth vision is a courtroom. The high priest stands in the dock and Satan rises to prosecute.",
+    '3:2': "\"The LORD rebuke thee.\" The accused says nothing at all; his defence is conducted by somebody else.",
+    '3:3': "\"Filthy garments\" — the accusation was true. Joshua is not being acquitted on the facts.",
+    '3:4': "Iniquity is removed by stripping the clothes off and handing over others. It arrives as a change of dress.",
+    '3:5': "The prophet interrupts to ask for the mitre. He wants the man back in office, not merely pardoned.",
+    '3:7': "The charge to walk in God's ways comes after the clothes and never before. That order is the doctrine.",
+    '3:8': "\"My servant the BRANCH\" — a shoot off a cut stump. The title takes for granted that the dynasty was felled.",
+    '3:9': "One stone, seven eyes, and the land's iniquity removed in one day. The day is single, and it is not this one.",
+    '3:10': "Vine and fig tree, every man calling his neighbour. The vision ends in ordinary neighbourliness.",
+}
