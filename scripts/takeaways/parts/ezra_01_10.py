@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Written takeaways for Ezra."""
+
+TAKEAWAYS = {
+    # ---- Chapter 1 ----
+    '1:1': "The LORD stirred up the spirit of Cyrus. The empire's paperwork is Jeremiah's word coming due.",
+    '1:2': "A Persian king credits the God of heaven with his whole empire, and the restoration arrives in his handwriting.",
+    '1:3': "\"Who is there among you?\" The return is opened as an invitation, and most of the exiles will stay where they are.",
+    '1:4': "Those who stay are told to fund those who go. Not everyone is sent, and nobody is left with nothing to do.",
+    '1:5': "\"All them whose spirit God had raised\" — even the willingness to go home is traced back to God.",
+    '1:6': "The neighbours strengthened their hands with silver and beasts, as Egypt once loaded Israel for the road out.",
+    '1:7': "The vessels come back out of the house of Nebuchadnezzar's gods. What was carried off as loot is returned as property.",
+    '1:8': "A Persian treasurer counts the holy vessels into a Jewish prince's hands, item by item, on the record.",
+    '1:11': "The inventory is exact because the claim is exact: this is the same furniture, coming home.",
+    # ---- Chapter 2 ----
+    '2:1': "\"Every one unto his city\" — a homecoming register, names matched back to places emptied seventy years before.",
+    '2:2': "The company includes a Nehemiah and a Mordecai. Common names, and not the famous men who later bore them.",
+    '2:21': "The roll turns from fathers' houses to towns. Some came back to a family name, others only to a place.",
+    '2:35': "Senaah sends three thousand six hundred and thirty, the largest entry in the list, and is never heard of again.",
+    '2:36': "Priests are entered by their fathers' houses, because a priest who cannot name his house cannot serve.",
+    '2:40': "Seventy and four Levites against four thousand priests. The office without the honour was the one nobody wanted.",
+    '2:41': "An hundred twenty and eight singers are counted in. The choir is listed as staff, not as ornament.",
+    '2:43': "The Nethinims are temple servants, many of them bearing foreign names, and the register keeps every one.",
+    '2:55': "\"The children of Solomon's servants\" — men still identified by the forced labour their fathers were put to.",
+    '2:59': "They came up with everyone else and could not shew their father's house. Belonging is easier to feel than to prove.",
+    '2:61': "A priestly line that took the Barzillai name with the bride, and was known by her house instead of Aaron's.",
+    '2:62': "\"They were not found: therefore were they, as polluted, put from the priesthood.\" The register outranks the man's claim.",
+    '2:63': "Barred from the holy things until a priest with Urim and Thummim should stand up — which is to say, indefinitely.",
+    '2:64': "Forty-two thousand went home. Judah comes back the size of a province, not the size of a nation.",
+    '2:65': "Two hundred singing men and singing women, counted in among the servants and the maids and the livestock.",
+    '2:68': "Some of the chief of the fathers gave freely the moment they saw the site. The ruin itself was the appeal.",
+    '2:69': "\"They gave after their ability\" — the measure is capacity, and only the total is kept, not the donors.",
+    '2:70': "Everyone settled in his own city first, and the temple site stayed bare. The homecoming precedes the work.",
+    # ---- Chapter 3 ----
+    '3:1': "The seventh month gathers them as one man — the month of trumpets, atonement and booths, unkept for decades.",
+    '3:2': "The altar goes up before the temple does. Sacrifice could not be made to wait on architecture.",
+    '3:3': "\"For fear was upon them\" — they set the altar because they were afraid, and offered morning and evening anyway.",
+    '3:4': "Tabernacles kept by people barely out of tents. The feast of temporary shelters fits this year exactly.",
+    '3:6': "Offerings from the first day of the month, and the foundation not yet laid. Worship begins on bare ground.",
+    '3:7': "Masons paid, cedars floated from Lebanon to Joppa. The second temple is begun exactly as the first one was.",
+    '3:8': "The work starts in the second month of the second year, Solomon's season. The pattern is being copied deliberately.",
+    '3:10': "Trumpets and cymbals set in order after the ordinance of David, with nothing standing yet but a foundation.",
+    '3:11': "\"For his mercy endureth for ever toward Israel\" — sung by the generation that mercy had outlasted in exile.",
+    '3:12': "The old men who had seen the first house wept with a loud voice at the size of this one.",
+    '3:13': "Nobody could tell the shout of joy from the weeping. The book does not separate them either.",
+}
