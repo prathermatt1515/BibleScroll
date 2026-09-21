@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Written one-line takeaways for 2 Corinthians.
+
+Each states what the verse turns on. Greetings, travel notes and bare
+connectives are left out deliberately; the drawer hides the card rather
+than showing filler.
+"""
+
+TAKEAWAYS = {
+    # ---- Chapter 1 ----
+    '1:1': "Addressed past Corinth to all Achaia. A letter about a private quarrel is written to be read widely.",
+    '1:3': "Father of mercies, God of all comfort — the titles a man picks when he is writing out of trouble.",
+    '1:4': "Comfort is given in order to be handed on. It is not allowed to stop with the person comforted.",
+    '1:5': "Sufferings and consolation are measured against each other, and the scale is said to match.",
+    '1:6': "Even his affliction is entered on their account. Nothing that happens to him is only his.",
+    '1:7': "Partakers of the sufferings and of the consolation. The two are not offered as alternatives.",
+    '1:8': "\"We despaired even of life.\" An apostle puts despair in writing and attaches no lesson to it.",
+    '1:9': "The sentence of death had a purpose: to end any remaining trust in himself.",
+    '1:10': "Delivered, doth deliver, will deliver. Three tenses, and the middle one is the hardest to hold.",
+    '1:11': "Their praying is written into the machinery, so that the thanks afterwards belongs to many.",
+    '1:12': "His one boast is a clear conscience, and even that he credits to grace rather than to character.",
+    '1:13': "\"We write none other things than what ye read.\" No second meaning waiting behind the letter.",
+    '1:14': "The relationship is dated forward. What they are to each other is settled in the day of the Lord.",
+    '1:15': "The whole breach began with a changed travel plan and a visit that never happened.",
+    '1:17': "The charge is that he is unreliable, and he takes it seriously enough to answer it for two chapters.",
+    '1:18': "He stakes the truthfulness of God on whether his own word to them was yes and no.",
+    '1:19': "The argument moves from Paul's reliability to Christ's, because the first was never the real question.",
+    '1:20': "Every promise God ever made is kept in one place, and the Amen is said there too.",
+    '1:21': "Establishing and anointing are both God's verbs, and they are in the present tense.",
+    '1:22': "The Spirit is called an earnest — a down payment, which commits the payer to the rest of the sum.",
+    '1:23': "The absence they held against him is explained as mercy: he stayed away in order to spare them.",
+    '1:24': "\"Not dominion over your faith.\" An apostle declining the authority he is being accused of misusing.",
+
+    # ---- Chapter 2 ----
+    '2:1': "He decides against a second painful visit, and the pain he is weighing is theirs.",
+    '2:2': "The only people who could cheer him up are the ones he has just made sorry.",
+    '2:3': "He wrote rather than came. The severe letter was the gentler of the two options open to him.",
+    '2:4': "\"With many tears.\" He tells them what the harsh letter actually was: love, written badly on purpose.",
+    '2:5': "\"He hath not grieved me, but in part.\" He refuses to cast himself as the injured party.",
+    '2:6': "The punishment is called sufficient, which means discipline in this church is given an ending.",
+    '2:7': "The danger has changed sides: the man is now at risk of being swallowed up by too much sorrow.",
+    '2:8': "Love is to be confirmed — ratified publicly, in the same assembly that voted the punishment.",
+    '2:9': "He admits the letter had a second purpose: it was a test of whether they would obey at all.",
+    '2:10': "He follows their forgiveness rather than leading it, and does it in the presence of Christ.",
+    '2:11': "The advantage Satan is looking for is a congregation that will not let a man back in.",
+    '2:13': "A door opened by the Lord at Troas, and he walked away from it because Titus had not come.",
+    '2:14': "The triumph is a Roman procession, and the apostles are walking in it as the captives.",
+    '2:15': "The same fragrance rises whether men are saved or perish. The gospel does not change to suit its result.",
+    '2:16': "\"Who is sufficient for these things?\" The question is left standing, and the chapter ends on it.",
+    '2:17': "The word for corrupting the word is a wine-seller's word. His rivals are accused of watering it.",
+
+    # ---- Chapter 3 ----
+    '3:1': "Letters of commendation were the ordinary credential, and he declines to produce one.",
+    '3:2': "\"Ye are our epistle.\" The congregation is the reference letter, and it is being read by everyone.",
+    '3:3': "Written with the Spirit on hearts of flesh. Jeremiah and Ezekiel are pressed into a defence of a ministry.",
+    '3:4': "Whatever confidence he has is held through Christ and directed toward God, not toward his record.",
+    '3:5': "Not sufficient even to think anything as of ourselves. The disclaimer reaches down to the thoughts.",
+    '3:6': "\"The letter killeth, but the spirit giveth life.\" Law and gospel distinguished in six words.",
+    '3:7': "He grants the old covenant its glory first, and calls the ministry of death glorious without irony.",
+    '3:8': "The argument is from greater to greater. Nothing is won here by making the first covenant small.",
+    '3:9': "Condemnation and righteousness are both named ministries. The law was doing a real job, not a failed one.",
+    '3:10': "The earlier glory is eclipsed rather than denied — outshone by something standing next to it.",
+    '3:11': "The difference between them is not brightness but duration: one is passing, the other remains.",
+    '3:12': "The hope produces bluntness. Plain speech is presented as a consequence of confidence, not of temperament.",
+    '3:13': "The veil is read as hiding a fading glory — a reason Exodus itself never gives for it.",
+    '3:14': "The veil has moved from a face to a reading. It now lies over a text rather than over a man.",
+    '3:15': "And then it moves again, from the page to the heart, where no amount of reading can reach it.",
+    '3:16': "The veil is not studied away. It is removed in the turning, and by someone other than the reader.",
+    '3:17': "Liberty is located in a presence rather than in a permission. Where the Spirit is, it is already there.",
+    '3:18': "\"Are changed\" is passive, and the means is looking. Nobody in this sentence transforms himself.",
+
+    # ---- Chapter 4 ----
+    '4:1': "\"As we have received mercy, we faint not.\" The stamina is traced to mercy, not to resolve.",
+    '4:2': "Handling the word of God deceitfully was evidently a live option, or there would be nothing to renounce.",
+    '4:3': "If the gospel is hidden, he will not locate the fault in the message or in his own delivery.",
+    '4:4': "Unbelief is described as a blinding done to a man, which makes it worse than a bad decision.",
+    '4:5': "\"We preach not ourselves\" — and the rest of the sentence makes him their servant, for Jesus' sake.",
+    '4:6': "The light of Genesis shines into a heart, and what it shows is a face.",
+    '4:7': "The cheapness of the pot is not an embarrassment to the plan. It is the plan.",
+    '4:8': "Each concession is made fully before it is qualified. He is troubled, and he is perplexed, and he says so.",
+    '4:9': "Persecuted but not forsaken. The denial is never that it happened, only that it finished him.",
+    '4:10': "The body carries the dying of Jesus around so that the living of Jesus has somewhere to show.",
+    '4:12': "\"Death worketh in us, but life in you.\" The cost lands on one side and the benefit on the other.",
+    '4:13': "\"I believed, and therefore have I spoken.\" Speaking is the consequence of faith, which is why he cannot stop.",
+    '4:14': "The resurrection he expects is a corporate one: raised, and presented together with them.",
+    '4:15': "The chain runs grace, thanksgiving, glory — and the thanksgiving is other people's, not his.",
+    '4:16': "Outward man perishing and inward man renewed, both asserted as present facts, neither cancelling the other.",
+    '4:17': "\"Light affliction, which is but for a moment\" — written by the man who despaired of his life in chapter one.",
+    '4:18': "Looking at what cannot be seen is what makes the weighing possible. Without it the affliction is just heavy.",
+}

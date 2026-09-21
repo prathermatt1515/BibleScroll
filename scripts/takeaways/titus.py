@@ -3,7 +3,7 @@
 
 TAKEAWAYS = {
     # ---- Chapter 1 ----
-    '1:1': "\"The truth which is after godliness\" — the letter's thesis is in its first sentence: doctrine is measured by the life it makes.",
+    '1:1': "\"The truth which is after godliness\" — the letter's thesis is in its first line: doctrine is measured by the life it makes.",
     '1:2': "\"God, that cannot lie\" — the hope rests on an incapacity in God, not on a resolution he might revise.",
     '1:3': "The eternal promise is made public \"through preaching.\" What was settled before the world began now travels by sermon.",
     '1:4': "Titus is a Gentile, and Paul calls him son \"after the common faith.\" The kinship claimed is not the usual one.",
@@ -30,9 +30,9 @@ TAKEAWAYS = {
     '2:7': "The teacher's own pattern of works is named before the content of his doctrine. He is part of the lesson.",
     '2:8': "The aim is to leave critics with nothing to say — not to defeat them in argument but to starve the complaint.",
     '2:9': "\"Not answering again.\" Instruction is given to people with no legal standing, which assumes they are moral agents anyway.",
-    '2:10': "Slaves are said to \"adorn the doctrine of God\" — the lowest household rank is given the highest possible description of its work.",
+    '2:10': "Slaves \"adorn the doctrine of God\" — the lowest rank in the house is given the highest description of its work.",
     '2:11': "Grace \"hath appeared\" — it arrived as an event, in a person, not as a quality God has always had in reserve.",
-    '2:12': "Grace teaches. What most people expect grace to excuse, it is here said to instruct, and the schooling is for \"this present world.\"",
+    '2:12': "Grace teaches. What it is expected to excuse, it here instructs, and the schooling is for \"this present world.\"",
     '2:13': "The hope is blessed because of who appears: \"the great God and our Saviour Jesus Christ,\" held in one title.",
     '2:14': "\"Gave himself\" — redemption from iniquity and zeal for good works come out of the same act, in that order.",
     '2:15': "\"Let no man despise thee.\" Authority here belongs to the message spoken, not to the age of the man speaking.",
@@ -42,13 +42,11 @@ TAKEAWAYS = {
     '3:2': "Speaking evil of no man, and meekness \"unto all men.\" The instruction does not stop at the church door.",
     '3:3': "\"We ourselves also were sometimes foolish.\" Before any description of outsiders, Paul puts himself in the list.",
     '3:4': "The turn comes with kindness appearing. Nothing on the human side of the sentence changed first.",
-    '3:5': "\"Not by works of righteousness which we have done\" — the works are not merely insufficient, they are ruled out as the ground.",
+    '3:5': "\"Not by works of righteousness which we have done\" — and the saving comes by a washing, something done to a person.",
     '3:6': "The Spirit is shed \"abundantly,\" and the supply comes through Christ. Nothing here is rationed by performance.",
     '3:7': "Justified by grace, made heirs in hope. The verdict is present, the inheritance is ahead, neither is earned.",
     '3:8': "Good works follow the faithful saying, not the other way round, and they are to be affirmed constantly.",
     '3:9': "Foolish questions are dismissed for being \"unprofitable and vain\" — not for being wrong, but for producing nothing.",
     '3:10': "Two admonitions, then rejection. The process is short, and it has a process.",
     '3:11': "\"Condemned of himself.\" The divisive man passes the sentence; the church only recognises it.",
-    '3:12': "Paul plans to winter at Nicopolis and will send a replacement before pulling Titus away. The work is not left unattended.",
-    '3:15': "\"Greet them that love us in the faith\" — the affection is not named person by person, and no one is left out.",
 }
