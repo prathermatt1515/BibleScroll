@@ -26,6 +26,21 @@ DATA_JS = os.path.join(HERE, '..', 'data.js')
 
 # module name -> study file stem in data/
 STEMS = {
+    'genesis': 'Genesis', 'exodus': 'Exodus', 'leviticus': 'Leviticus',
+    'numbers': 'Numbers', 'deuteronomy': 'Deuteronomy', 'joshua': 'Joshua',
+    'judges': 'Judges', 'ruth': 'Ruth',
+    'samuel1': '1Samuel', 'samuel2': '2Samuel',
+    'kings1': '1Kings', 'kings2': '2Kings',
+    'chronicles1': '1Chronicles', 'chronicles2': '2Chronicles',
+    'ezra': 'Ezra', 'nehemiah': 'Nehemiah', 'esther': 'Esther', 'job': 'Job',
+    'psalms': 'Psalms', 'proverbs': 'Proverbs',
+    'ecclesiastes': 'Ecclesiastes', 'song': 'SongofSolomon',
+    'isaiah': 'Isaiah', 'jeremiah': 'Jeremiah',
+    'lamentations': 'Lamentations', 'ezekiel': 'Ezekiel', 'daniel': 'Daniel',
+    'hosea': 'Hosea', 'joel': 'Joel', 'amos': 'Amos', 'obadiah': 'Obadiah',
+    'jonah': 'Jonah', 'micah': 'Micah', 'nahum': 'Nahum',
+    'habakkuk': 'Habakkuk', 'zephaniah': 'Zephaniah', 'haggai': 'Haggai',
+    'zechariah': 'Zechariah', 'malachi': 'Malachi',
     'matthew': 'Matthew', 'mark': 'Mark', 'luke': 'Luke', 'john': 'John',
     'acts': 'Acts', 'romans': 'Romans',
     'corinthians1': '1Corinthians', 'corinthians2': '2Corinthians',

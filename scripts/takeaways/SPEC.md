@@ -50,8 +50,36 @@ where you would end up repeating a neighbouring line.
 - **Epistles** are dense argument — expect 85–95%.
 - **Narrative** (Acts) and **apocalyptic** (Revelation) run lower — expect 75–88%.
 
+Old Testament bands:
+
+- **Wisdom and poetry** (Psalms, Proverbs, Ecclesiastes, Job's speeches, Song
+  of Solomon) — 85–95%. Nearly every line carries its own point.
+- **Prophets** (Isaiah through Malachi, Lamentations) — 80–90%. Oracles of
+  judgement repeat their images; take the turn each verse actually makes, and
+  skip the verse that only restates the one before it.
+- **Narrative** (Genesis, Exodus, Joshua–Esther, Jonah, Daniel 1–6) — 70–85%.
+- **Law and ritual** (Leviticus, Numbers, Deuteronomy's statutes, Exodus
+  25–40) — 55–75%. Measurements, materials and repeated offering formulas
+  mostly carry no standalone point; the law's shape and its reasons do.
+- **Lists** (Numbers' censuses, the Chronicles genealogies, temple rosters,
+  Ezra–Nehemiah's name lists) — 20–40% is right and honest. Take the verse
+  that says something — a name with a story attached, a total that matters,
+  a line that breaks the pattern — and leave the rest bare.
+
 Never pad to raise the number. An omitted verse is better than a filler line,
 and a filler line is the exact thing this whole feature replaced.
+
+## Old Testament specifics
+
+Read the verse as it stands, in its own covenant and moment, before reading it
+forward. Where the New Testament plainly takes up a verse (Isaiah 53, Psalm 22,
+Genesis 3:15), the connection is worth naming once, plainly — not smuggled into
+every neighbouring line, and never as a substitute for what the verse says
+where it sits.
+
+The KJV's divine name is `LORD` in small capitals; write it as LORD. Hebrew
+names and places are spelled as the KJV spells them, since that is the text
+on screen.
 
 ## Hard requirements
 
