@@ -414,6 +414,19 @@
     font-size: 11px; color: var(--text-secondary); cursor: pointer;
   }
   .verse-box.read { background: var(--accent-dim); color: #fff; }
+  /* Part-read chapters are otherwise invisible on this grid, which matters
+     when you are looking for something to clear. */
+  .verse-box.partial { box-shadow: inset 0 0 0 1.5px var(--accent-dim); }
+  .verse-grid.clearing .verse-box.has-read { background: #8B3A3A; color: #fff; box-shadow: none; }
+  .verse-grid.clearing .verse-box:not(.has-read) { opacity: 0.35; }
+  .clear-toggle {
+    display: block; margin: 18px auto 0; padding: 9px 18px;
+    background: var(--bg-pill); color: var(--text-secondary);
+    border: 0.5px solid var(--border); border-radius: 999px;
+    font-size: 13px; font-family: inherit; cursor: pointer;
+  }
+  .clear-toggle.active { color: #e29b9a; border-color: #8B3A3A; }
+  .clear-hint { text-align: center; font-size: 12px; color: var(--text-secondary); margin: 10px 0 0; line-height: 1.5; }
 
   #toast {
     position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
@@ -1578,6 +1591,7 @@
 
   function openHome() {
     homeIsOpen = true;
+    clearMode = false;
     setTrayActive('home');
     setHomeTitle('Home');
     const drawer = document.getElementById('home-content');
@@ -1661,9 +1675,10 @@
   // Used instead of window.confirm, which some mobile browsers suppress and
   // which cannot be styled to match the app.
   let confirmAction = null;
-  function askConfirm(title, body, onYes) {
+  function askConfirm(title, body, onYes, okLabel) {
     document.getElementById('confirm-title').textContent = title;
     document.getElementById('confirm-body').textContent = body;
+    document.getElementById('confirm-ok').textContent = okLabel || 'Delete';
     confirmAction = onYes;
     document.getElementById('confirm-overlay').classList.add('open');
   }
@@ -1782,27 +1797,82 @@
     });
   }
 
+  // Scrolling a verse past marks it read, so a fast scroll through a chapter
+  // can register as read when it was not. Clear mode turns the chapter grid
+  // into a way to undo that, one chapter at a time.
+  let clearMode = false;
+
+  function clearChapterProgress(book, chapter) {
+    const count = CHAPTER_COUNTS[book][chapter - 1];
+    let cleared = 0;
+    for (let v = 1; v <= count; v++) {
+      const key = `${book}:${chapter}:${v}`;
+      if (readVerses[key]) { delete readVerses[key]; cleared++; }
+    }
+    localStorage.setItem('sj_read', JSON.stringify(readVerses));
+    scheduleCloudSync();
+    refreshRailState();
+    return cleared;
+  }
+
   function openBookDetail(book) {
     setHomeTitle(book);
     const drawer = document.getElementById('home-content');
     const counts = CHAPTER_COUNTS[book];
-    let html = `<button class="back-btn" id="home-back">‹ Back to home</button><div class="verse-grid" style="grid-template-columns:repeat(5,1fr);">`;
+    const readByChapter = counts.map((count, ci) => {
+      let n = 0;
+      for (let v = 1; v <= count; v++) if (readVerses[`${book}:${ci + 1}:${v}`]) n++;
+      return n;
+    });
+    const anyRead = readByChapter.some(n => n > 0);
+
+    let html = `<button class="back-btn" id="home-back">‹ Back to home</button>`;
+    html += `<div class="verse-grid${clearMode ? ' clearing' : ''}" style="grid-template-columns:repeat(5,1fr);">`;
     counts.forEach((count, ci) => {
       const chapterNum = ci + 1;
-      let readCount = 0;
-      for (let v = 1; v <= count; v++) {
-        if (readVerses[`${book}:${chapterNum}:${v}`]) readCount++;
-      }
+      const readCount = readByChapter[ci];
       const isComplete = readCount === count;
-      html += `<div class="verse-box ${isComplete ? 'read' : ''}" data-c="${chapterNum}" title="${readCount}/${count} read">${chapterNum}</div>`;
+      const cls = [
+        'verse-box',
+        isComplete ? 'read' : '',
+        !isComplete && readCount > 0 ? 'partial' : '',
+        readCount > 0 ? 'has-read' : '',
+      ].filter(Boolean).join(' ');
+      html += `<div class="${cls}" data-c="${chapterNum}" data-read="${readCount}" data-count="${count}" title="${readCount}/${count} read">${chapterNum}</div>`;
     });
     html += `</div>`;
+    if (anyRead || clearMode) {
+      html += `<button class="clear-toggle${clearMode ? ' active' : ''}" id="clear-toggle">${clearMode ? 'Done' : 'Clear a chapter'}</button>`;
+    }
+    if (clearMode) {
+      html += `<p class="clear-hint">Tap a chapter to mark it unread.<br>Only chapters with progress can be cleared.</p>`;
+    }
     drawer.innerHTML = html;
-    document.getElementById('home-back').onclick = () => openHome();
+
+    document.getElementById('home-back').onclick = () => { clearMode = false; openHome(); };
+    const toggle = document.getElementById('clear-toggle');
+    if (toggle) toggle.onclick = () => { clearMode = !clearMode; openBookDetail(book); };
+
     drawer.querySelectorAll('.verse-box').forEach(box => {
       box.onclick = () => {
-        hideHomePage();
-        switchToBook(book, parseInt(box.dataset.c), 1);
+        const chapterNum = parseInt(box.dataset.c);
+        if (!clearMode) {
+          hideHomePage();
+          switchToBook(book, chapterNum, 1);
+          return;
+        }
+        const readCount = parseInt(box.dataset.read);
+        if (!readCount) { showToast(`Nothing read in ${book} ${chapterNum} yet`); return; }
+        const total = parseInt(box.dataset.count);
+        askConfirm(
+          `Clear ${book} ${chapterNum}?`,
+          `${readCount} of ${total} verses will be marked unread. Your notes and saved verses are not affected.`,
+          () => {
+            const n = clearChapterProgress(book, chapterNum);
+            openBookDetail(book);
+            showToast(`${book} ${chapterNum} marked unread (${n} verses)`);
+          },
+          'Clear');
       };
     });
   }
