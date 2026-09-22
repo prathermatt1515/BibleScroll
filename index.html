@@ -612,6 +612,17 @@
   .plan-card.earned .plan-fill { background: var(--accent); }
   .plan-line { font-size: 11px; color: var(--text-tertiary); margin: 0; line-height: 1.35; }
   .plan-card.mile .plan-head { margin-bottom: 6px; }
+  /* The whole-Bible plan spans the row: it is the one number the app is for. */
+  .plan-card.whole { grid-column: 1 / -1; }
+  .whole-pct {
+    font-family: Georgia, serif; font-size: 30px; line-height: 1.05;
+    color: var(--text-primary); margin: 2px 0 10px;
+  }
+  .whole-pct span {
+    font-family: inherit; font-size: 12px; color: var(--text-tertiary);
+    letter-spacing: 0.02em; margin-left: 7px;
+  }
+  .plan-card.whole .plan-bar { height: 5px; }
 
   .badge-count { font-size: 11px; color: var(--text-secondary); margin: 0 0 8px; }
 
@@ -2123,7 +2134,7 @@
   function badgeStats() {
     const done = new Set();
     const complete = new Set();
-    let chapters = 0;
+    let chapters = 0, verses = 0, versesTotal = 0;
     BOOKS_66.forEach(book => {
       const counts = CHAPTER_COUNTS[book] || [];
       let full = 0;
@@ -2131,12 +2142,16 @@
         const c = ci + 1;
         let read = 0;
         for (let v = 1; v <= verseCount; v++) if (readVerses[`${book}:${c}:${v}`]) read++;
+        // Counted here rather than from the size of the reading record, so a
+        // key left behind by an older build cannot inflate the total.
+        verses += read;
+        versesTotal += verseCount;
         if (read === verseCount) { done.add(`${book}:${c}`); full++; chapters++; }
       });
       if (counts.length && full === counts.length) complete.add(book);
     });
     return {
-      done, complete, chapters,
+      done, complete, chapters, verses, versesTotal,
       books: complete.size,
       streak: computeStreak(),
       returned: hasReturned(),
@@ -2189,7 +2204,7 @@
       about: 'Thirty-nine books gathered over something like a thousand years — law, chronicle, poetry, proverb and prophecy, by many hands, in two languages. It is the scripture Jesus read and quoted, and the New Testament is largely unreadable without it.' },
 
     { id: 'whole', icon: 'globe', minutes: 3948, group: 'Structure', name: 'Whole Counsel',
-      books: BOOKS_66, note: 'Every book of the Bible',
+      books: BOOKS_66, note: 'Every book of the Bible', headline: true,
       about: 'Sixty-six books, 1,189 chapters, 31,102 verses. The name is Paul taking leave of the Ephesian elders in Acts 20: "I have not shunned to declare unto you all the counsel of God" — the whole of it, not the parts that suited him.' },
 
     { id: 'creation', icon: 'sunrise', minutes: 11, group: 'Landmarks', name: 'In the Beginning',
@@ -2330,7 +2345,38 @@
   // you choose and work through; a milestone is earned and cannot be aimed at.
   // Calling both "badges" made the first kind look like a trophy cabinet when
   // it is really a list of somewhere to go next.
+  // Counting whole books hides most of a life's reading: forty chapters into
+  // Genesis the whole-Bible plan still read "0 of 66 books". Verses are the
+  // finest thing tracked, so the one plan that is the point of the app moves
+  // from the first chapter.
+  function percentOfBible(st) {
+    return st.versesTotal ? (st.verses / st.versesTotal) * 100 : 0;
+  }
+
+  function formatPercent(pct) {
+    if (pct <= 0) return '0%';
+    if (pct < 0.1) return '<0.1%';
+    if (pct < 10) return pct.toFixed(1) + '%';
+    if (pct >= 99.95 && pct < 100) return '99.9%';
+    return Math.round(pct) + '%';
+  }
+
+  const commas = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  function headlineCardHtml(b, st, earned) {
+    const pct = percentOfBible(st);
+    const books = b.parts ? b.parts(st).filter(x => x.done).length : 0;
+    return `<button class="plan-card whole${earned ? ' earned' : ''}" data-badge="${b.id}">`
+      + `<div class="plan-head"><span class="plan-icon">${planIcon(b.icon)}</span>`
+      + `<span class="plan-name">${b.name}</span></div>`
+      + `<p class="whole-pct">${formatPercent(pct)}<span> of the Bible read</span></p>`
+      + `<div class="plan-bar"><div class="plan-fill" style="width:${Math.min(100, pct)}%;"></div></div>`
+      + `<p class="plan-line">${commas(st.verses)} of ${commas(st.versesTotal)} verses`
+      + ` · ${books} of 66 books</p></button>`;
+  }
+
   function planCardHtml(b, st, earned) {
+    if (b.headline) return headlineCardHtml(b, st, earned);
     const parts = b.parts ? b.parts(st) : null;
     const have = parts ? parts.filter(x => x.done).length : (earned ? 1 : 0);
     const need = parts ? parts.length : 1;
@@ -2360,7 +2406,10 @@
   function badgeSectionHtml() {
     const { stats, earned } = refreshBadges(false);
     const set = new Set(earned);
-    const plans = BADGES.filter(b => b.kind === 'plan');
+    const all = BADGES.filter(b => b.kind === 'plan');
+    // The whole Bible is the point of the app, so it goes first rather than
+    // ninth in the order the list happens to be written in.
+    const plans = all.filter(b => b.headline).concat(all.filter(b => !b.headline));
     const miles = BADGES.filter(b => b.kind === 'milestone');
     const donePlans = plans.filter(b => set.has(b.id)).length;
     const doneMiles = miles.filter(b => set.has(b.id)).length;
@@ -2387,12 +2436,16 @@
     const meter = badge.meter ? badge.meter(st) : null;
 
     let status;
-    if (earned) status = 'Earned';
+    if (badge.headline) {
+      status = `${formatPercent(percentOfBible(st))} read · `
+             + `${commas(st.verses)} of ${commas(st.versesTotal)} verses · `
+             + `${parts.filter(x => x.done).length} of ${parts.length} books`;
+    } else if (earned) status = 'Earned';
     else if (parts) status = `${parts.filter(x => x.done).length} of ${parts.length}`;
     else if (meter) status = `${meter[0]} of ${meter[1]}`;
     else status = 'Not yet';
 
-    const extra = badge.minutes ? ` · ${readingTime(badge.minutes)}` : '';
+    const extra = badge.minutes && !badge.headline ? ` · ${readingTime(badge.minutes)}` : '';
     let html = `<div class="drawer-handle"></div>`
       + `<p class="bd-group"><span class="bd-icon">${planIcon(badge.icon)}</span>`
       + `${badge.kind === 'plan' ? 'Reading plan' : 'Milestone'}</p>`
