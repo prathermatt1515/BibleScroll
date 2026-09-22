@@ -494,6 +494,30 @@
   .library-chevron { color: var(--text-tertiary); flex-shrink: 0; }
   .library-chevron svg { width: 16px; height: 16px; }
 
+  /* Book and chapter picker. The pill is labelled with a chapter number, so
+     the sheet it opens has to be able to set one; a book expands its chapters
+     in place rather than sending you elsewhere to find them. */
+  .picker-testament {
+    /* Sticks 14px high to cover the drawer's own top padding: content
+       scrolling through that strip would otherwise appear above the header. */
+    position: sticky; top: -14px; z-index: 2; background: var(--bg-card);
+    font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--text-tertiary); padding: 26px 4px 7px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .picker-book { justify-content: space-between; }
+  .picker-book.open { color: var(--accent); }
+  .picker-note { font-size: 11px; color: var(--accent); margin-left: auto; }
+  .picker-caret {
+    font-size: 10px; color: var(--text-tertiary); flex-shrink: 0;
+    transition: transform 0.15s ease;
+  }
+  .picker-book.open .picker-caret { transform: rotate(180deg); color: var(--accent); }
+  .picker-chapters {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+    padding: 12px 2px 16px; border-bottom: 0.5px solid var(--border);
+  }
+
   .book-row {
     display: flex; align-items: center; justify-content: space-between; padding: 12px 4px;
     border-bottom: 0.5px solid var(--border); cursor: pointer;
@@ -1386,26 +1410,81 @@
   });
 
   // ---------- Book picker ----------
-  document.getElementById('chapter-pill').onclick = () => {
-    const list = document.getElementById('chapter-list');
-    list.innerHTML = '';
-    BOOKS_66.forEach(book => {
-      const btn = document.createElement('button');
-      btn.className = 'menu-item';
-      const isCurrent = book === state.book;
-      if (CONTENT_AVAILABLE.includes(book)) {
-        btn.innerHTML = `${book}${isCurrent ? ' <span style="color:var(--accent); font-size:12px;">(current)</span>' : ''}`;
-        btn.onclick = () => {
-          closeDrawer('chapter-overlay');
-          switchToBook(book, 1, 1);
-        };
-      } else {
-        btn.innerHTML = `<span style="color:var(--text-tertiary);">${book}</span>`;
-        btn.style.cursor = 'default';
-      }
-      list.appendChild(btn);
+  // ---------- Book and chapter picker ----------
+  // Every book is available now, so there is no unavailable state to draw.
+  const OT_BOOK_COUNT = 39;
+  let pickerOpenBook = null;
+
+  function chapterGridHtml(book) {
+    const counts = CHAPTER_COUNTS[book] || [];
+    let html = '<div class="picker-chapters" data-book="' + book + '">';
+    counts.forEach((verseCount, ci) => {
+      const c = ci + 1;
+      let read = 0;
+      for (let v = 1; v <= verseCount; v++) if (readVerses[`${book}:${c}:${v}`]) read++;
+      const cls = ['verse-box',
+                   read === verseCount ? 'read' : '',
+                   read > 0 && read < verseCount ? 'partial' : ''].filter(Boolean).join(' ');
+      html += `<div class="${cls}" data-c="${c}" title="${read}/${verseCount} read">${c}</div>`;
     });
+    return html + '</div>';
+  }
+
+  function drawBookPicker() {
+    const list = document.getElementById('chapter-list');
+    let html = '';
+    BOOKS_66.forEach((book, i) => {
+      if (i === 0) html += '<div class="picker-testament">Old Testament</div>';
+      if (i === OT_BOOK_COUNT) html += '<div class="picker-testament">New Testament</div>';
+      const isOpen = book === pickerOpenBook;
+      html += `<button class="menu-item picker-book${isOpen ? ' open' : ''}" data-book="${book}">`
+            + `<span>${book}</span>`
+            + (book === state.book ? '<span class="picker-note">reading</span>' : '')
+            + '<span class="picker-caret">▾</span></button>';
+      if (isOpen) html += chapterGridHtml(book);
+    });
+    list.innerHTML = html;
+
+    list.querySelectorAll('.picker-book').forEach(btn => {
+      btn.onclick = () => {
+        const book = btn.dataset.book;
+        pickerOpenBook = pickerOpenBook === book ? null : book;
+        drawBookPicker();
+        if (pickerOpenBook) scrollPickerTo(pickerOpenBook);
+      };
+    });
+    list.querySelectorAll('.picker-chapters .verse-box').forEach(cell => {
+      cell.onclick = () => {
+        const book = cell.closest('.picker-chapters').dataset.book;
+        closeDrawer('chapter-overlay');
+        switchToBook(book, parseInt(cell.dataset.c, 10), 1);
+      };
+    });
+  }
+
+  // Bring a book's row to the top of the sheet, clear of the sticky testament
+  // header — otherwise the chapter grid fills the screen with numbers and the
+  // book they belong to has scrolled out of sight. scrollIntoView would move
+  // the page behind the drawer too, so the drawer is scrolled directly, and
+  // measured rather than derived from offsetTop, which depends on whichever
+  // ancestor happens to be positioned.
+  const PICKER_HEADER_H = 30;
+  function scrollPickerTo(book) {
+    const list = document.getElementById('chapter-list');
+    const row = list.querySelector(`.picker-book[data-book="${book}"]`);
+    const drawer = list.closest('.drawer');
+    if (!row || !drawer) return;
+    const delta = row.getBoundingClientRect().top - drawer.getBoundingClientRect().top;
+    drawer.scrollTop += delta - PICKER_HEADER_H;
+  }
+
+  document.getElementById('chapter-pill').onclick = () => {
+    // Opens on the book being read, with its chapters already showing, rather
+    // than at Genesis every time.
+    pickerOpenBook = state.book;
+    drawBookPicker();
     openDrawer('chapter-overlay');
+    requestAnimationFrame(() => scrollPickerTo(state.book));
   };
 
   // ---------- Translation picker ----------
