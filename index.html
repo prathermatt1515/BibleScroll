@@ -518,6 +518,15 @@
     padding: 12px 2px 16px; border-bottom: 0.5px solid var(--border);
   }
 
+  /* Section heads for the Home book list. Not sticky, unlike the picker's:
+     #home-page already has a sticky header bar at top 0 and two of them would
+     fight for the same strip. */
+  .book-section {
+    font-size: 13px; font-weight: 500; color: var(--text-secondary);
+    margin: 22px 0 4px;
+  }
+  .book-section:first-of-type { margin-top: 20px; }
+
   .book-row {
     display: flex; align-items: center; justify-content: space-between; padding: 12px 4px;
     border-bottom: 0.5px solid var(--border); cursor: pointer;
@@ -2064,25 +2073,23 @@
         </div>
         <div class="library-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
-      <p style="font-size:13px; font-weight:500; color:var(--text-secondary); margin:20px 0 4px;">Books of the Bible</p>
     `;
-    BOOKS_66.forEach(book => {
-      if (CONTENT_AVAILABLE.includes(book)) {
-        const counts = CHAPTER_COUNTS[book];
-        const total = counts.reduce((a, b) => a + b, 0);
-        let readCount = 0;
-        Object.keys(readVerses).forEach(k => { if (k.startsWith(book + ':')) readCount++; });
-        const pct = Math.round((readCount / total) * 100);
-        html += `<div class="book-row" data-book="${book}">
-          <span class="book-name">${book}</span>
-          <div class="book-progress-wrap">
-            <div class="book-progress-track"><div class="book-progress-fill" style="width:${pct}%;"></div></div>
-            <span class="book-pct">${pct}%</span>
-          </div>
-        </div>`;
-      } else {
-        html += `<div class="book-row disabled"><span class="book-name">${book}</span><span class="book-pct">—</span></div>`;
-      }
+    // Malachi ran straight into Matthew with nothing marking the join.
+    BOOKS_66.forEach((book, i) => {
+      if (i === 0) html += `<p class="book-section">Old Testament</p>`;
+      if (i === OT_BOOK_COUNT) html += `<p class="book-section">New Testament</p>`;
+      const counts = CHAPTER_COUNTS[book];
+      const total = counts.reduce((a, b) => a + b, 0);
+      let readCount = 0;
+      Object.keys(readVerses).forEach(k => { if (k.startsWith(book + ':')) readCount++; });
+      const pct = Math.round((readCount / total) * 100);
+      html += `<div class="book-row" data-book="${book}">
+        <span class="book-name">${book}</span>
+        <div class="book-progress-wrap">
+          <div class="book-progress-track"><div class="book-progress-fill" style="width:${pct}%;"></div></div>
+          <span class="book-pct">${pct}%</span>
+        </div>
+      </div>`;
     });
     html += `<p class="build-stamp">Build ${BUILD_STAMP}</p>`;
     drawer.innerHTML = html;
