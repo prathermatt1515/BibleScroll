@@ -6,8 +6,18 @@
 <title>Bible Scroll</title>
 <meta name="description" content="The whole Bible, one verse at a time — with commentary, the original Hebrew and Greek, and cross references you can follow.">
 <link rel="icon" href="cross.png">
-<link rel="apple-touch-icon" href="cross.png">
+<link rel="manifest" href="manifest.json">
+
+<!-- Added to a home screen this runs without browser chrome, so it needs its
+     own icon and name rather than a screenshot of the page and a URL. The
+     icon has the app's background baked in: cross.png is transparent, and a
+     transparent icon is composited onto whatever the launcher decides. -->
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bible Scroll">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FAF9F6" media="(prefers-color-scheme: light)">
 
 <!-- Shared links showed the page title, which still named the one book the
      app started with, beside a generic browser icon. -->
@@ -323,18 +333,25 @@
   #splash.fading { opacity: 0; pointer-events: none; }
   #splash.done { display: none; }
   #splash img {
-    width: 116px; height: 116px; object-fit: contain; margin-bottom: 34px;
+    width: 116px; height: 116px; object-fit: contain; margin-bottom: 14px;
     animation: splash-rise 0.9s ease both;
+  }
+  /* The app says its own name before it says anything else. */
+  #splash-title {
+    font-family: Georgia, serif; color: var(--accent);
+    font-size: 15px; letter-spacing: 0.26em; text-transform: uppercase;
+    margin: 0 0 30px; padding-left: 0.26em;
+    animation: splash-rise 0.9s ease 0.1s both;
   }
   #splash-welcome {
     font-family: Georgia, serif; color: var(--text-primary);
     font-size: clamp(28px, 8.2vw, 38px); line-height: 1.25;
-    margin: 0 0 18px; animation: splash-rise 0.9s ease 0.15s both;
+    margin: 0 0 18px; animation: splash-rise 0.9s ease 0.25s both;
   }
   #splash-line {
     font-family: Georgia, serif; color: var(--text-secondary);
     font-size: clamp(17px, 4.8vw, 22px); line-height: 1.6;
-    max-width: 19ch; margin: 0; animation: splash-rise 0.9s ease 0.3s both;
+    max-width: 19ch; margin: 0; animation: splash-rise 0.9s ease 0.4s both;
   }
   /* It waits for a tap now, so it has to say so. */
   #splash-hint {
@@ -828,6 +845,7 @@
 
 <div id="splash">
   <img src="cross.png" alt="">
+  <p id="splash-title">Bible Scroll</p>
   <p id="splash-welcome">Welcome</p>
   <p id="splash-line">Prepare your heart and mind to hear from God the Father.</p>
   <p id="splash-hint">Tap to continue</p>
