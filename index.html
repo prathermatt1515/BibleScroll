@@ -28,6 +28,7 @@
     --text-tertiary: #5c5c58;
     --accent: #c9a37a;
     --accent-dim: #8B5A3C;
+    --wj: #d4766b;
     --study-bg: #241d16;
     --border: #2a2a2a;
     --border-strong: #45443f;
@@ -41,6 +42,7 @@
     --text-tertiary: #a3a39c;
     --accent: #8B5A3C;
     --accent-dim: #8B5A3C;
+    --wj: #a8332a;
     --study-bg: #f3ece3;
     --border: #e3e0d8;
     --border-strong: #c9c5ba;
@@ -95,6 +97,10 @@
     font-size: 21px; line-height: 1.65; text-align: center; color: var(--text-primary);
     max-width: 520px;
   }
+  /* Words of Jesus. Pure red sits badly on both backgrounds — it glares on
+     the dark one and turns pink on the light one — so each theme gets a tone
+     mixed for it. */
+  .wj { color: var(--wj); }
   .verse-ref {
     font-size: 13px; color: var(--text-secondary); text-align: center; margin-top: 16px;
     cursor: pointer;
@@ -1341,7 +1347,11 @@
     for (let i = Math.max(0, idx - 1); i <= Math.min(state.verses.length - 1, idx + 1); i++) {
       const el = document.getElementById(`vtext-${i}`);
       if (el && el.textContent === '…') {
-        getVerseText(i).then(t => { if (el) el.textContent = t; });
+        const verse = state.verses[i];
+        getVerseText(i).then(t => {
+          if (!el) return;
+          ensureRedLetter(() => { el.innerHTML = withRedLetters(t, verse); });
+        });
       }
     }
   }
@@ -2180,6 +2190,46 @@
     updateReturnPill();
     switchToBook(back.book, back.c, back.v, { keepTrail: true });
   };
+
+  // ---------- Words of Jesus ----------
+  // Red letters are an editorial tradition, not part of the text, so they
+  // come from the editions that mark them: the KJV's OSIS <q who="Jesus">
+  // spans and the WEB's <wj>. NIV and NLT arrive from the API as plain text
+  // with no marking, so they stay black.
+  let redLetter = null;
+  let redLetterPending = null;
+  function ensureRedLetter(then) {
+    if (redLetter) { then && then(); return; }
+    if (!redLetterPending) {
+      redLetterPending = fetch('data/redletter.json')
+        .then(r => r.json())
+        .then(j => { redLetter = j; })
+        .catch(() => { redLetter = {}; });
+    }
+    redLetterPending.then(() => then && then());
+  }
+
+  function escapeHtml(t) {
+    return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Spans are character ranges over this verse's own text, built against the
+  // exact strings this app ships and checked span by span, so an offset can
+  // never land mid-word.
+  function withRedLetters(text, verse) {
+    const table = redLetter && redLetter[state.translation];
+    if (!table) return escapeHtml(text);
+    const spans = (table[state.book] || {})[`${verse.c}:${verse.v}`];
+    if (!spans || !spans.length) return escapeHtml(text);
+    let out = '', at = 0;
+    spans.forEach(([lo, hi]) => {
+      if (lo < at || hi > text.length) return;
+      out += escapeHtml(text.slice(at, lo))
+           + '<span class="wj">' + escapeHtml(text.slice(lo, hi)) + '</span>';
+      at = hi;
+    });
+    return out + escapeHtml(text.slice(at));
+  }
 
   // ---------- Deep study ----------
   function studyKey(idx) { const v = state.verses[idx]; return `${v.c}:${v.v}`; }
