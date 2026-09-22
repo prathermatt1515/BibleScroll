@@ -535,6 +535,50 @@
   /* Section heads for the Home book list. Not sticky, unlike the picker's:
      #home-page already has a sticky header bar at top 0 and two of them would
      fight for the same strip. */
+  /* Borrows the chapter flash's veil and timing so an earned badge arrives
+     the same way a new chapter does, at a size a name can actually sit at. */
+  #badge-flash {
+    position: fixed; inset: 0; z-index: 141; display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    pointer-events: none; text-align: center; padding: 0 32px;
+  }
+  #badge-flash.show { display: flex; }
+  #badge-flash::before {
+    content: ''; position: absolute; inset: 0; background: var(--bg);
+    animation: cf-veil 2.2s ease-out forwards;
+  }
+  #badge-flash::after {
+    content: ''; position: absolute; left: 50%; top: 46%; width: 320px; height: 320px;
+    transform: translate(-50%, -50%); pointer-events: none;
+    background: radial-gradient(circle, rgba(201,163,122,0.16) 0%, rgba(201,163,122,0) 68%);
+    animation: cf-veil 2.2s ease-out forwards;
+  }
+  .bf-label {
+    position: relative; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 10px; animation: cf-in 2.2s ease-out forwards;
+  }
+  .bf-name {
+    position: relative; font-family: Georgia, serif; font-size: 32px; line-height: 1.2;
+    color: var(--text-primary); margin: 0; animation: cf-num 2.2s cubic-bezier(.2,.9,.25,1) forwards;
+  }
+  .bf-note {
+    position: relative; font-size: 13px; color: var(--text-secondary); margin: 0;
+    animation: cf-in 2.2s ease-out forwards;
+  }
+
+  /* Badge grid on Home. Unearned badges stay legible rather than hidden, so
+     the list reads as somewhere to go rather than a locked cabinet. */
+  .badge-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px; }
+  .badge-card {
+    background: var(--bg-pill); border: 0.5px solid var(--border);
+    border-radius: 10px; padding: 11px 12px;
+  }
+  .badge-card.earned { border-color: var(--accent-dim); background: var(--bg-card); }
+  .badge-name { font-size: 13px; color: var(--text-secondary); margin: 0 0 3px; }
+  .badge-card.earned .badge-name { color: var(--text-primary); }
+  .badge-note { font-size: 11px; color: var(--text-tertiary); margin: 0; line-height: 1.35; }
+  .badge-count { font-size: 11px; color: var(--text-secondary); margin: 0 0 8px; }
+
   /* Following a related verse changes book and chapter, and without this
      there is no way back to the verse that sent you. Sits above the tray and
      under the Home sheet, so it disappears on its own when Home is open. */
@@ -715,6 +759,13 @@
   <p class="cf-num" id="cf-num"></p>
   <div class="cf-rule"></div>
   <p class="cf-sub" id="cf-sub"></p>
+</div>
+
+<div id="badge-flash" aria-hidden="true">
+  <p class="bf-label">Badge earned</p>
+  <p class="bf-name" id="bf-name"></p>
+  <div class="cf-rule"></div>
+  <p class="bf-note" id="bf-note"></p>
 </div>
 
 <div id="splash">
@@ -1024,6 +1075,7 @@
           Object.assign(notes, data.notes || {});
           Object.assign(readVerses, data.readVerses || {});
           (data.openDates || []).forEach(d => { if (!openDates.includes(d)) openDates.push(d); });
+          (data.readDates || []).forEach(d => { if (!readDates.includes(d)) readDates.push(d); });
           // Take the union of both devices' deletions, then apply it — so a
           // note deleted anywhere stays deleted everywhere, instead of being
           // resurrected by whichever copy still had it.
@@ -1038,9 +1090,10 @@
           localStorage.setItem('sj_notes', JSON.stringify(notes));
           localStorage.setItem('sj_read', JSON.stringify(readVerses));
           localStorage.setItem('sj_open_dates', JSON.stringify(openDates));
-          await cloudDocRef().set({ saved, notes, readVerses, openDates, deleted: tombstones, updatedAt: Date.now() }, { merge: true });
+          localStorage.setItem('sj_read_dates', JSON.stringify(readDates));
+          await cloudDocRef().set({ saved, notes, readVerses, openDates, readDates, deleted: tombstones, updatedAt: Date.now() }, { merge: true });
         } else {
-          await cloudDocRef().set({ saved, notes, readVerses, openDates, deleted: tombstones, updatedAt: Date.now() });
+          await cloudDocRef().set({ saved, notes, readVerses, openDates, readDates, deleted: tombstones, updatedAt: Date.now() });
         }
         noteSyncOk();
         // On a normal launch the opening screen is already greeting them by
@@ -1060,6 +1113,9 @@
   });
 
   // ---------- Streak tracking ----------
+  // The streak used to count days the app was opened, which credited a launch
+  // with no reading in it. It counts days a verse was actually read; opens are
+  // still recorded, they just do not earn anything.
   function todayStr(d) { d = d || new Date(); return d.toISOString().slice(0, 10); }
   function recordOpenToday() {
     const dates = JSON.parse(localStorage.getItem('sj_open_dates') || '[]');
@@ -1070,8 +1126,28 @@
     return dates;
   }
   const openDates = recordOpenToday();
+
+  const readDates = JSON.parse(localStorage.getItem('sj_read_dates') || '[]');
+  function recordReadToday() {
+    const t = todayStr();
+    if (readDates.includes(t)) return;
+    readDates.push(t);
+    localStorage.setItem('sj_read_dates', JSON.stringify(readDates));
+  }
+
+  // A gap of a week or more that reading came back from. Streaks punish life
+  // happening; this is the one thing that notices the return.
+  function hasReturned() {
+    const sorted = [...new Set(readDates)].sort();
+    for (let i = 1; i < sorted.length; i++) {
+      const gap = (Date.parse(sorted[i]) - Date.parse(sorted[i - 1])) / 86400000;
+      if (gap >= 8) return true;
+    }
+    return false;
+  }
+
   function computeStreak() {
-    const set = new Set(openDates);
+    const set = new Set(readDates);
     let count = 0;
     let d = new Date();
     if (!set.has(todayStr(d))) return 0;
@@ -1082,7 +1158,7 @@
     return count;
   }
   function last7Days() {
-    const set = new Set(openDates);
+    const set = new Set(readDates);
     const out = [];
     const today = new Date();
     const sunday = new Date(today);
@@ -1368,9 +1444,15 @@
       const key = `${state.book}:${verse.c}:${verse.v}`;
       if (!readVerses[key]) { readVerses[key] = true; changed = true; }
     }
+    // Landing on a verse is not reading it: opening the app puts one on the
+    // screen, and counting that would make the streak mean "opened" again by
+    // the back door. The day is only recorded once the reader has moved.
+    const moved = lastReadIdx !== null && idx !== lastReadIdx;
     lastReadIdx = idx;
     if (changed) {
       localStorage.setItem('sj_read', JSON.stringify(readVerses));
+      if (moved) recordReadToday();
+      refreshBadges(true);
       scheduleCloudSync();
     }
   }
@@ -1632,6 +1714,7 @@
     else { saved[key] = true; markAlive('saved', key); showToast('Verse saved'); }
     localStorage.setItem('sj_saved', JSON.stringify(saved));
     scheduleCloudSync();
+    refreshBadges(true);
     refreshRailState();
   };
 
@@ -1739,6 +1822,7 @@
     scheduleCloudSync();
     closeDrawer('note-overlay');
     showToast('Note saved');
+    refreshBadges(true);
     const affected = Math.max(oldSpan, noteEditState.span);
     for (let i = 0; i < affected; i++) refreshNoteIndicatorForIdx(oldIdx + i);
   };
@@ -1894,6 +1978,174 @@
     }
     strongsPending.then(then);
   }
+
+  // ---------- Badges ----------
+  // Nothing here is stored when it is earned. Every badge is a question asked
+  // of the reading itself, so clearing a chapter takes its badges with it and
+  // a badge can never outlive the reading behind it. The only thing kept is
+  // which ones have already been announced.
+  //
+  // Nothing rewards speed. Reading credits every verse scrolled past, so a
+  // fast flick through Psalms would win any volume-per-day badge going; these
+  // ask what has been read and whether the reader came back, not how quickly.
+  const PENTATEUCH = BOOKS_66.slice(0, 5);
+  const GOSPELS = ['Matthew', 'Mark', 'Luke', 'John'];
+  const MINOR_PROPHETS = BOOKS_66.slice(27, 39);
+  const PAULINE = BOOKS_66.slice(44, 57);
+  const LONG_ROADS = ['Genesis', 'Psalms', 'Isaiah', 'Jeremiah', 'Ezekiel'];
+  const OT_BOOKS = BOOKS_66.slice(0, OT_BOOK_COUNT);
+  const NT_BOOKS = BOOKS_66.slice(OT_BOOK_COUNT);
+
+  // One pass over the reading, shared by every test below, so a badge sweep
+  // does not walk all 31,102 verses once per badge.
+  function badgeStats() {
+    const done = new Set();
+    const complete = new Set();
+    let chapters = 0;
+    BOOKS_66.forEach(book => {
+      const counts = CHAPTER_COUNTS[book] || [];
+      let full = 0;
+      counts.forEach((verseCount, ci) => {
+        const c = ci + 1;
+        let read = 0;
+        for (let v = 1; v <= verseCount; v++) if (readVerses[`${book}:${c}:${v}`]) read++;
+        if (read === verseCount) { done.add(`${book}:${c}`); full++; chapters++; }
+      });
+      if (counts.length && full === counts.length) complete.add(book);
+    });
+    return {
+      done, complete, chapters,
+      books: complete.size,
+      streak: computeStreak(),
+      returned: hasReturned(),
+      notes: countDistinctNotes(),
+      saved: Object.keys(saved).length,
+    };
+  }
+
+  const chaptersDone = (st, book, from, to) => {
+    for (let c = from; c <= to; c++) if (!st.done.has(`${book}:${c}`)) return false;
+    return true;
+  };
+  const booksDone = (st, list) => list.every(b => st.complete.has(b));
+
+  const BADGES = [
+    // Structure — the shape of the book itself.
+    { id: 'first-chapter', group: 'Structure', name: 'First Chapter',
+      note: 'Finish a chapter', test: st => st.chapters >= 1 },
+    { id: 'gospels', group: 'Structure', name: 'The Gospels',
+      note: 'Matthew, Mark, Luke and John', test: st => booksDone(st, GOSPELS) },
+    { id: 'law', group: 'Structure', name: 'The Law',
+      note: 'Genesis through Deuteronomy', test: st => booksDone(st, PENTATEUCH) },
+    { id: 'twelve', group: 'Structure', name: 'The Twelve',
+      note: 'All twelve minor prophets', test: st => booksDone(st, MINOR_PROPHETS) },
+    { id: 'paul', group: 'Structure', name: "Paul's Hand",
+      note: 'All thirteen of his letters', test: st => booksDone(st, PAULINE) },
+    { id: 'long-roads', group: 'Structure', name: 'The Long Roads',
+      note: 'Genesis, Psalms, Isaiah, Jeremiah, Ezekiel', test: st => booksDone(st, LONG_ROADS) },
+    { id: 'nt', group: 'Structure', name: 'New Testament',
+      note: 'All twenty-seven books', test: st => booksDone(st, NT_BOOKS) },
+    { id: 'ot', group: 'Structure', name: 'Old Testament',
+      note: 'All thirty-nine books', test: st => booksDone(st, OT_BOOKS) },
+    { id: 'whole', group: 'Structure', name: 'Whole Counsel',
+      note: 'Every book of the Bible', test: st => st.books === 66 },
+
+    // Landmarks — particular ground, which suits this app more than volume.
+    { id: 'creation', group: 'Landmarks', name: 'In the Beginning',
+      note: 'Genesis 1 to 3', test: st => chaptersDone(st, 'Genesis', 1, 3) },
+    { id: 'psalm119', group: 'Landmarks', name: 'The Long Psalm',
+      note: 'All 176 verses of Psalm 119', test: st => st.done.has('Psalms:119') },
+    { id: 'isaiah53', group: 'Landmarks', name: 'The Suffering Servant',
+      note: 'Isaiah 53', test: st => st.done.has('Isaiah:53') },
+    { id: 'sermon', group: 'Landmarks', name: 'On the Mount',
+      note: 'Matthew 5 to 7', test: st => chaptersDone(st, 'Matthew', 5, 7) },
+    { id: 'romans8', group: 'Landmarks', name: 'No Condemnation',
+      note: 'Romans 8', test: st => st.done.has('Romans:8') },
+    { id: 'love', group: 'Landmarks', name: 'The More Excellent Way',
+      note: '1 Corinthians 13', test: st => st.done.has('1 Corinthians:13') },
+    { id: 'passion', group: 'Landmarks', name: 'Four Accounts',
+      note: 'The passion in all four Gospels',
+      test: st => chaptersDone(st, 'Matthew', 26, 27) && chaptersDone(st, 'Mark', 14, 15)
+                  && chaptersDone(st, 'Luke', 22, 23) && chaptersDone(st, 'John', 18, 19) },
+    { id: 'ending', group: 'Landmarks', name: 'All Things New',
+      note: 'Revelation 21 and 22', test: st => chaptersDone(st, 'Revelation', 21, 22) },
+
+    // Depth — the study side, which is what this app has that a plain reader does not.
+    { id: 'first-save', group: 'Depth', name: 'Kept',
+      note: 'Save a verse', test: st => st.saved >= 1 },
+    { id: 'first-note', group: 'Depth', name: 'In Your Own Words',
+      note: 'Write a note', test: st => st.notes >= 1 },
+    { id: 'notes-25', group: 'Depth', name: 'Margin Notes',
+      note: 'Twenty-five notes', test: st => st.notes >= 25 },
+
+    // Consistency — and one badge for coming back.
+    { id: 'streak-7', group: 'Consistency', name: 'Seven Days',
+      note: 'A week of reading in a row', test: st => st.streak >= 7 },
+    { id: 'streak-30', group: 'Consistency', name: 'Thirty Days',
+      note: 'A month in a row', test: st => st.streak >= 30 },
+    { id: 'streak-100', group: 'Consistency', name: 'Hundred Days',
+      note: 'A hundred in a row', test: st => st.streak >= 100 },
+    { id: 'streak-365', group: 'Consistency', name: 'A Full Year',
+      note: 'Three hundred and sixty-five in a row', test: st => st.streak >= 365 },
+    { id: 'return', group: 'Consistency', name: 'Return',
+      note: 'Come back after a week away', test: st => st.returned },
+  ];
+
+  const badgesSeen = JSON.parse(localStorage.getItem('sj_badges_seen') || '[]');
+  // A first run with reading already behind it absorbs what it has earned
+  // without announcing twenty badges at once.
+  const hadBadgeRecord = localStorage.getItem('sj_badges_seen') !== null;
+
+  function badgeSectionHtml() {
+    const { earned } = refreshBadges(false);
+    const set = new Set(earned);
+    let html = `<p class="badge-count">${earned.length} of ${BADGES.length} earned</p>`
+             + `<div class="badge-grid">`;
+    BADGES.forEach(b => {
+      html += `<div class="badge-card${set.has(b.id) ? ' earned' : ''}">`
+            + `<p class="badge-name">${b.name}</p>`
+            + `<p class="badge-note">${b.note}</p></div>`;
+    });
+    return html + `</div>`;
+  }
+
+  function refreshBadges(announce) {
+    const st = badgeStats();
+    const earned = BADGES.filter(b => b.test(st)).map(b => b.id);
+    const fresh = earned.filter(id => !badgesSeen.includes(id));
+    // A badge no longer earned — a chapter cleared — is forgotten, so it
+    // announces again if the reading comes back.
+    const kept = badgesSeen.filter(id => earned.includes(id));
+    if (fresh.length || kept.length !== badgesSeen.length) {
+      badgesSeen.length = 0;
+      badgesSeen.push(...kept, ...fresh);
+      localStorage.setItem('sj_badges_seen', JSON.stringify(badgesSeen));
+      scheduleCloudSync();
+    }
+    if (announce && fresh.length) {
+      showBadgeFlash(BADGES.find(b => b.id === fresh[0]), fresh.length);
+    }
+    return { stats: st, earned };
+  }
+
+  let badgeFlashTimer;
+  function showBadgeFlash(badge, total) {
+    if (!badge) return;
+    const el = document.getElementById('badge-flash');
+    document.getElementById('bf-name').textContent = badge.name;
+    document.getElementById('bf-note').textContent =
+      total > 1 ? `${badge.note} — and ${total - 1} more` : badge.note;
+    el.classList.remove('show');
+    void el.offsetWidth;
+    el.classList.add('show');
+    if (navigator.vibrate) { try { navigator.vibrate([14, 40, 14]); } catch (e) {} }
+    clearTimeout(badgeFlashTimer);
+    badgeFlashTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  // Run once at startup: a first launch with reading already behind it takes
+  // what it has earned quietly, and afterwards new ones announce themselves.
+  setTimeout(() => refreshBadges(hadBadgeRecord), 0);
 
   // ---------- Returning from a cross-reference ----------
   // Following a related verse was one-way: it moved book and chapter with no
@@ -2204,6 +2456,8 @@
         </div>
         <div class="library-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
+      <p class="book-section">Badges</p>
+      ${badgeSectionHtml()}
     `;
     // Malachi ran straight into Matthew with nothing marking the join.
     BOOKS_66.forEach((book, i) => {
