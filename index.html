@@ -606,7 +606,7 @@
      closed; this one opens from inside Home, which sits at 150 — so at the
      shared drawer z-index of 100 it appeared to do nothing at all. Above the
      tray too, and below the delete confirmation. */
-  #badge-overlay { z-index: 170; }
+  #badge-overlay, #backup-overlay { z-index: 170; }
 
   .bd-group {
     display: flex; align-items: center; gap: 7px;
@@ -753,6 +753,11 @@
     <div class="drawer-handle"></div>
     <div id="chapter-list"></div>
   </div>
+</div>
+
+<!-- Backup drawer -->
+<div class="drawer-overlay" id="backup-overlay">
+  <div class="drawer" id="backup-drawer"></div>
 </div>
 
 <!-- Badge detail drawer -->
@@ -2812,6 +2817,14 @@
         </div>
         <div class="library-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
+      <div class="library-row" id="lib-backup-row">
+        <div class="library-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></div>
+        <div class="library-text">
+          <div class="library-title">Backup</div>
+          <div class="library-subtitle">Export your notes, or restore them</div>
+        </div>
+        <div class="library-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
       ${badgeSectionHtml()}
     `;
     // Malachi ran straight into Matthew with nothing marking the join.
@@ -2841,6 +2854,7 @@
     });
     document.getElementById('lib-saved-row').onclick = () => openSavedBrowser();
     document.getElementById('lib-notes-row').onclick = () => openNotesBrowser();
+    document.getElementById('lib-backup-row').onclick = () => openBackupSheet();
     wireAccountRow();
     showHomePage();
   }
@@ -3183,6 +3197,175 @@
     });
   }
 
+  // ---------- Backup, export and restore ----------
+  // Notes are the only thing in this app that cannot be regenerated. The
+  // text, the commentary and the progress can all be rebuilt; what someone
+  // wrote in the margin exists nowhere else, and it lived in localStorage and
+  // Firestore with no way to get it out.
+  const BACKUP_VERSION = 1;
+
+  function backupPayload() {
+    return {
+      app: 'BibleScroll',
+      version: BACKUP_VERSION,
+      exportedAt: new Date().toISOString(),
+      counts: {
+        notes: countDistinctNotes(),
+        saved: Object.keys(saved).length,
+        versesRead: Object.keys(readVerses).length,
+        daysRead: readDates.length,
+      },
+      notes: notes,
+      saved: saved,
+      readVerses: readVerses,
+      readDates: readDates,
+      openDates: openDates,
+      deleted: tombstones,
+    };
+  }
+
+  function deliverFile(name, text, mime) {
+    const blob = new Blob([text], { type: mime });
+    const file = new File([blob], name, { type: mime });
+    const fallback = () => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      showToast('Saved ' + name);
+    };
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file] }).catch(fallback);
+      return;
+    }
+    fallback();
+  }
+
+  function stamp() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+         + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function exportBackup() {
+    deliverFile('biblescroll-backup-' + stamp() + '.json',
+                JSON.stringify(backupPayload(), null, 2), 'application/json');
+  }
+
+  // The backup file is for the app. This one is for a person: each note with
+  // the verse it was written against, readable in ten years with no app.
+  function exportNotesText() {
+    const starts = [];
+    const seen = new Set();
+    Object.keys(notes).forEach(key => {
+      const entry = getNoteEntry(key);
+      if (entry && !seen.has(entry.startKey)) {
+        seen.add(entry.startKey);
+        starts.push(entry);
+      }
+    });
+    if (!starts.length) { showToast('No notes to export'); return; }
+
+    showToast('Preparing notes...');
+    ensureSearchIndex(() => {
+      const order = b => BOOKS_66.indexOf(b);
+      starts.sort((a, b) => {
+        const A = a.startKey.split(':'), B = b.startKey.split(':');
+        return order(A[0]) - order(B[0]) || (+A[1]) - (+B[1]) || (+A[2]) - (+B[2]);
+      });
+      const out = [
+        'BibleScroll notes',
+        new Date().toDateString(),
+        starts.length + (starts.length === 1 ? ' note' : ' notes'),
+        '', '----------------------------------------', '',
+      ];
+      starts.forEach(entry => {
+        const parts = entry.startKey.split(':');
+        const book = parts[0], c = parseInt(parts[1], 10);
+        const from = parseInt(parts[2], 10);
+        const to = from + (entry.span || 1) - 1;
+        out.push(book + ' ' + c + ':' + from + (to > from ? '-' + to : ''));
+        for (let n = from; n <= to; n++) {
+          const text = verseTextFor({ book: book, c: c, v: n });
+          if (text) out.push('  ' + n + '. ' + text);
+        }
+        out.push('');
+        String(entry.text || '').split('\n').forEach(l => out.push('  ' + l));
+        out.push('', '----------------------------------------', '');
+      });
+      deliverFile('biblescroll-notes-' + stamp() + '.txt', out.join('\n'), 'text/plain');
+    });
+  }
+
+  // Restore merges rather than replaces, so an old backup brought onto a
+  // device that has moved on cannot wipe what is already there. Deletions
+  // travel as deletions, the way sync already handles them, so a note deleted
+  // on purpose does not walk back in with the file.
+  function restoreBackup(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      let data = null;
+      try { data = JSON.parse(reader.result); } catch (e) { data = null; }
+      if (!data || data.app !== 'BibleScroll' || !data.version) {
+        showToast('That file is not a BibleScroll backup');
+        return;
+      }
+      const beforeNotes = countDistinctNotes();
+      const beforeSaved = Object.keys(saved).length;
+      const beforeRead = Object.keys(readVerses).length;
+      Object.assign(saved, data.saved || {});
+      Object.assign(notes, data.notes || {});
+      Object.assign(readVerses, data.readVerses || {});
+      (data.readDates || []).forEach(d => { if (!readDates.includes(d)) readDates.push(d); });
+      (data.openDates || []).forEach(d => { if (!openDates.includes(d)) openDates.push(d); });
+      Object.keys(data.deleted || {}).forEach(k => {
+        const when = data.deleted[k];
+        if (!tombstones[k] || tombstones[k] < when) tombstones[k] = when;
+      });
+      pruneTombstones();
+      applyTombstones();
+      localStorage.setItem('sj_saved', JSON.stringify(saved));
+      localStorage.setItem('sj_notes', JSON.stringify(notes));
+      localStorage.setItem('sj_read', JSON.stringify(readVerses));
+      localStorage.setItem('sj_read_dates', JSON.stringify(readDates));
+      localStorage.setItem('sj_open_dates', JSON.stringify(openDates));
+      localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
+      scheduleCloudSync();
+      refreshBadges(false);
+      const n = countDistinctNotes() - beforeNotes;
+      const sv = Object.keys(saved).length - beforeSaved;
+      const rd = Object.keys(readVerses).length - beforeRead;
+      closeDrawer('backup-overlay');
+      openHome();
+      showToast('Restored: +' + n + (n === 1 ? ' note, +' : ' notes, +')
+              + sv + ' saved, +' + rd + ' verses read', 5000);
+    };
+    reader.onerror = () => showToast('Could not read that file');
+    reader.readAsText(file);
+  }
+
+  function openBackupSheet() {
+    const counts = backupPayload().counts;
+    document.getElementById('backup-drawer').innerHTML =
+        '<div class="drawer-handle"></div>'
+      + '<p class="bd-name">Backup</p>'
+      + '<p class="bd-status">' + counts.notes + (counts.notes === 1 ? ' note' : ' notes')
+      + ' &middot; ' + counts.saved + ' saved &middot; ' + counts.versesRead + ' verses read</p>'
+      + '<p class="bd-about">Notes are the only thing here that cannot be rebuilt '
+      + 'from the app. Keep a copy somewhere that is not this phone.</p>'
+      + '<button class="menu-item" id="bk-json">Save a backup file</button>'
+      + '<button class="menu-item" id="bk-text">Save notes as readable text</button>'
+      + '<button class="menu-item" id="bk-restore">Restore from a backup</button>'
+      + '<input type="file" id="bk-file" accept="application/json,.json" hidden>';
+    document.getElementById('bk-json').onclick = exportBackup;
+    document.getElementById('bk-text').onclick = exportNotesText;
+    const picker = document.getElementById('bk-file');
+    document.getElementById('bk-restore').onclick = () => picker.click();
+    picker.onchange = () => { if (picker.files[0]) restoreBackup(picker.files[0]); };
+    openDrawer('backup-overlay');
+  }
+
   // ---------- Search ----------
   document.getElementById('search-btn').onclick = () => {
     openDrawer('search-overlay');
@@ -3192,7 +3375,6 @@
     setTimeout(() => document.getElementById('search-input').focus(), 100);
   };
 
-  // ---------- Search ----------
   // It used to look only inside the book already open, which was fine when
   // the app held one book: "shepherd" from Jude found nothing. Every book is
   // now searched, from one string per book fetched on the first search — a
