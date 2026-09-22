@@ -969,6 +969,16 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
+  // A Firebase web config is public by design: it names the project so the
+  // SDK knows where to send requests, and it authorises nothing on its own.
+  // Every visitor's browser is handed this file, so there is no version of
+  // this app where these values are hidden. What actually guards the notes
+  // is firestore.rules in this repo — read that, not this.
+  //
+  // Secret scanners flag the apiKey because it matches the shape of a Google
+  // API key. The real chore it points at is restricting that key to this
+  // site's domain in Google Cloud Console, so nobody can spend the project's
+  // quota on other Google APIs with it.
   const firebaseConfig = {
     apiKey: "AIzaSyBIBiVhy2cL2HOVf11i5rJIXE_Uo4LsoJk",
     authDomain: "bible-scroll-app-2aa4a.firebaseapp.com",
@@ -1299,6 +1309,12 @@
     }
   })();
 
+  // This one is a real credential, and a static page cannot hide it: the
+  // browser has to send it to api.scripture.api.bible itself. It only buys
+  // read access to public Bible translations, and the worst case is someone
+  // spending this account's request quota — so it is rotated rather than
+  // protected. Moving it out of reach would mean putting a small proxy in
+  // front of the API and keeping the key there.
   const API_BIBLE_KEY = "mSiigwn6LhcbU2ZwR3nc5";
   const BIBLE_ID_CACHE_KEY = 'sj_bible_ids';
   let bibleIds = load(BIBLE_ID_CACHE_KEY, null);

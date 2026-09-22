@@ -1,0 +1,30 @@
+rules_version = '2';
+
+// The app's Firebase config sits in plain sight in index.html, which is how
+// Firebase web apps work: the API key names the project, it does not grant
+// anything. THIS FILE is the thing that actually decides who can read whose
+// notes, so it belongs in version control next to the code rather than only
+// in a console where nobody can review it.
+//
+// index.html touches exactly one path: users/{uid}, via
+//   firebase.firestore().collection('users').doc(currentUser.uid)
+// so nothing else should be reachable at all.
+//
+// Deploy with:  firebase deploy --only firestore:rules
+// or paste into Firebase console -> Firestore Database -> Rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Signed in, and only your own document. `request.auth != null` on its
+    // own would not be enough — that lets any Google account read any other
+    // reader's notes, which is the failure worth being careful about.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Anything else is not part of this app.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
