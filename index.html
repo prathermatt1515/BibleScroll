@@ -2130,7 +2130,7 @@
   function badgeStats() {
     const done = new Set();
     const complete = new Set();
-    let chapters = 0, verses = 0, versesTotal = 0;
+    let chapters = 0, chaptersTotal = 0, verses = 0, versesTotal = 0;
     BOOKS_66.forEach(book => {
       const counts = CHAPTER_COUNTS[book] || [];
       let full = 0;
@@ -2144,10 +2144,11 @@
         versesTotal += verseCount;
         if (read === verseCount) { done.add(`${book}:${c}`); full++; chapters++; }
       });
+      chaptersTotal += counts.length;
       if (counts.length && full === counts.length) complete.add(book);
     });
     return {
-      done, complete, chapters, verses, versesTotal,
+      done, complete, chapters, chaptersTotal, verses, versesTotal,
       books: complete.size,
       streak: computeStreak(),
       returned: hasReturned(),
@@ -2368,6 +2369,7 @@
       + `<p class="whole-pct">${formatPercent(pct)}</p>`
       + `<div class="plan-bar"><div class="plan-fill" style="width:${Math.min(100, pct)}%;"></div></div>`
       + `<p class="plan-line">${commas(st.verses)} of ${commas(st.versesTotal)} verses`
+      + ` · ${commas(st.chapters)} of ${commas(st.chaptersTotal)} chapters`
       + ` · ${books} of 66 books</p></button>`;
   }
 
@@ -2435,6 +2437,7 @@
     if (badge.headline) {
       status = `${formatPercent(percentOfBible(st))} read · `
              + `${commas(st.verses)} of ${commas(st.versesTotal)} verses · `
+             + `${commas(st.chapters)} of ${commas(st.chaptersTotal)} chapters · `
              + `${parts.filter(x => x.done).length} of ${parts.length} books`;
     } else if (earned) status = 'Earned';
     else if (parts) status = `${parts.filter(x => x.done).length} of ${parts.length}`;
