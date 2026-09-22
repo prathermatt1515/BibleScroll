@@ -1143,6 +1143,7 @@
 
   function switchToBook(book, chapterNum, verseNum) {
     ensureBookLoaded(book, () => {
+      suspendRead();
       state.book = book;
       state.chapter = chapterNum || 1;
       state.verses = BOOK_VERSES[book];
@@ -1152,7 +1153,7 @@
       if (idx > 0) {
         setTimeout(() => { feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' }); loadVisibleText(); updateThumbFromScroll(); refreshRailState(); }, 30);
       }
-      setTimeout(() => { updateThumbFromScroll(); positionBounds(); refreshRailState(); }, 60);
+      setTimeout(() => { updateThumbFromScroll(); positionBounds(); refreshRailState(); resumeRead(); }, 60);
     });
   }
 
@@ -1160,8 +1161,9 @@
     if (c < 1 || c > CHAPTER_COUNTS[state.book].length) return;
     const idx = state.verses.findIndex(v => v.c === c && v.v === (verseNum || 1));
     if (idx < 0) return;
+    suspendRead();
     feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
-    setTimeout(() => { loadVisibleText(); updateChapterLabel(); updateThumbFromScroll(); refreshRailState(); }, 60);
+    setTimeout(() => { loadVisibleText(); updateChapterLabel(); updateThumbFromScroll(); refreshRailState(); resumeRead(); }, 60);
   }
 
   async function getVerseText(idx) {
@@ -1275,6 +1277,56 @@
     chapterFlashTimer = setTimeout(() => el.classList.remove('show'), 1900);
   }
 
+  // Reading used to be recorded only for the verse the scroll settled on, so
+  // a flick that carried past three verses recorded one of them and the
+  // chapter never completed however carefully it had been read. Everything
+  // between the last position and this one passed across the screen, so it
+  // all counts.
+  //
+  // Jumps are not reading: switchToBook and goToChapter clear the anchor so
+  // the landing verse alone is marked, and a gap too large to be a scroll is
+  // treated the same way in case one slips through.
+  let lastReadIdx = null;
+  const READ_FILL_MAX = 40;
+
+  // Navigation is not reading, and during a jump the feed briefly reports the
+  // old scroll offset against the new book's verses — renderFeed asks for the
+  // label before the new position is applied. Marking is suspended across the
+  // whole move and resumes anchored wherever it actually landed.
+  let readSuspended = false;
+
+  function suspendRead() {
+    clearTimeout(scrollTimeout);
+    readSuspended = true;
+    lastReadIdx = null;
+  }
+
+  function resumeRead() {
+    lastReadIdx = currentIndex();
+    readSuspended = false;
+    markReadThrough(lastReadIdx);
+  }
+
+  function markReadThrough(idx) {
+    if (readSuspended) return;
+    const span = lastReadIdx === null ? 0 : Math.abs(idx - lastReadIdx);
+    const jumped = lastReadIdx === null || span > READ_FILL_MAX;
+    const lo = jumped ? idx : Math.min(lastReadIdx, idx);
+    const hi = jumped ? idx : Math.max(lastReadIdx, idx);
+    let changed = false;
+    for (let i = lo; i <= hi; i++) {
+      const verse = state.verses[i];
+      if (!verse) continue;
+      const key = `${state.book}:${verse.c}:${verse.v}`;
+      if (!readVerses[key]) { readVerses[key] = true; changed = true; }
+    }
+    lastReadIdx = idx;
+    if (changed) {
+      localStorage.setItem('sj_read', JSON.stringify(readVerses));
+      scheduleCloudSync();
+    }
+  }
+
   function updateChapterLabel() {
     const idx = currentIndex();
     const v = state.verses[idx];
@@ -1283,12 +1335,7 @@
       document.getElementById('book-name-label').textContent = state.book;
       const chapterChanged = v.c !== state.chapter;
       state.chapter = v.c;
-      const rKey = `${state.book}:${v.c}:${v.v}`;
-      if (!readVerses[rKey]) {
-        readVerses[rKey] = true;
-        localStorage.setItem('sj_read', JSON.stringify(readVerses));
-        scheduleCloudSync();
-      }
+      markReadThrough(idx);
       if (chapterChanged) {
         buildTicks();
         positionBounds();
