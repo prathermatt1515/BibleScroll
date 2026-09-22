@@ -618,10 +618,6 @@
     font-family: Georgia, serif; font-size: 30px; line-height: 1.05;
     color: var(--text-primary); margin: 2px 0 10px;
   }
-  .whole-pct span {
-    font-family: inherit; font-size: 12px; color: var(--text-tertiary);
-    letter-spacing: 0.02em; margin-left: 7px;
-  }
   .plan-card.whole .plan-bar { height: 5px; }
 
   .badge-count { font-size: 11px; color: var(--text-secondary); margin: 0 0 8px; }
@@ -2203,9 +2199,9 @@
       note: 'All thirty-nine books',
       about: 'Thirty-nine books gathered over something like a thousand years — law, chronicle, poetry, proverb and prophecy, by many hands, in two languages. It is the scripture Jesus read and quoted, and the New Testament is largely unreadable without it.' },
 
-    { id: 'whole', icon: 'globe', minutes: 3948, group: 'Structure', name: 'Whole Counsel',
+    { id: 'whole', icon: 'globe', minutes: 3948, group: 'Structure', name: 'Bible Read',
       books: BOOKS_66, note: 'Every book of the Bible', headline: true,
-      about: 'Sixty-six books, 1,189 chapters, 31,102 verses. The name is Paul taking leave of the Ephesian elders in Acts 20: "I have not shunned to declare unto you all the counsel of God" — the whole of it, not the parts that suited him.' },
+      about: 'Sixty-six books, 1,189 chapters, 31,102 verses, and about sixty-six hours of reading. Three chapters a day finishes it inside a year. What is counted here is verses rather than books, so it moves whether or not you finish the one you are in, and it keeps what you have already read if you stop and come back.' },
 
     { id: 'creation', icon: 'sunrise', minutes: 11, group: 'Landmarks', name: 'In the Beginning',
       passages: [['Genesis', 1, 3]], note: 'Genesis 1 to 3',
@@ -2369,7 +2365,7 @@
     return `<button class="plan-card whole${earned ? ' earned' : ''}" data-badge="${b.id}">`
       + `<div class="plan-head"><span class="plan-icon">${planIcon(b.icon)}</span>`
       + `<span class="plan-name">${b.name}</span></div>`
-      + `<p class="whole-pct">${formatPercent(pct)}<span> of the Bible read</span></p>`
+      + `<p class="whole-pct">${formatPercent(pct)}</p>`
       + `<div class="plan-bar"><div class="plan-fill" style="width:${Math.min(100, pct)}%;"></div></div>`
       + `<p class="plan-line">${commas(st.verses)} of ${commas(st.versesTotal)} verses`
       + ` · ${books} of 66 books</p></button>`;
