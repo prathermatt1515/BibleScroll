@@ -258,6 +258,10 @@
   .search-result:last-child { border-bottom: none; }
   .search-result .sr-ref { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
   .search-result .sr-text { font-size: 14px; color: var(--text-primary); }
+  .sr-note {
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-tertiary); margin: 0 0 8px;
+  }
 
   /* Arriving in a new chapter */
   #chapter-flash {
@@ -3182,41 +3186,158 @@
   // ---------- Search ----------
   document.getElementById('search-btn').onclick = () => {
     openDrawer('search-overlay');
-    document.getElementById('search-input').placeholder = `Search ${state.book}, e.g. 1:5 or wisdom`;
+    document.getElementById('search-input').placeholder = 'Search the Bible, e.g. John 3:16 or shepherd';
     document.getElementById('search-input').value = '';
     document.getElementById('search-results').innerHTML = '';
     setTimeout(() => document.getElementById('search-input').focus(), 100);
   };
 
-  document.getElementById('search-input').addEventListener('input', e => {
-    const q = e.target.value.trim().toLowerCase();
-    const results = document.getElementById('search-results');
-    results.innerHTML = '';
-    if (!q) return;
-
-    const refMatch = q.match(/^(?:\w+\s*)?(\d+)[:\s]*(\d+)?$/);
-    let matches = [];
-    if (refMatch) {
-      const c = parseInt(refMatch[1]);
-      const vnum = refMatch[2] ? parseInt(refMatch[2]) : null;
-      matches = state.verses.filter(v => v.c === c && (vnum === null || v.v === vnum));
-    } else {
-      // Twenty-two verses carry no WEB text — the ones that edition omits,
-      // such as Acts 8:37 — and reading it unguarded threw, so a text search
-      // anywhere in Acts returned nothing at all.
-      matches = state.verses.filter(v => (v.kjv || '').toLowerCase().includes(q)
-                                      || (v.web || '').toLowerCase().includes(q));
+  // ---------- Search ----------
+  // It used to look only inside the book already open, which was fine when
+  // the app held one book: "shepherd" from Jude found nothing. Every book is
+  // now searched, from one string per book fetched on the first search — a
+  // regular expression runs over it in a single pass, so nothing is parsed or
+  // lower-cased per keystroke.
+  let searchIndex = null;
+  let searchIndexPending = null;
+  function ensureSearchIndex(then) {
+    if (searchIndex) { then(); return; }
+    if (!searchIndexPending) {
+      searchIndexPending = fetch('data/searchindex.json')
+        .then(r => r.json())
+        .then(j => { searchIndex = j; })
+        .catch(() => { searchIndex = {}; });
     }
-    matches.slice(0, 25).forEach(v => {
+    searchIndexPending.then(then);
+  }
+
+  const escapeRe = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  // "john 3:16" should work from anywhere, and it needs no index at all —
+  // the book list and chapter counts already say whether a reference exists.
+  function resolveReference(q) {
+    const m = q.match(/^([1-3]?\s*[a-z][a-z ]*?)\s*(\d+)(?:[:\s]+(\d+))?$/i);
+    if (!m) return null;
+    const typed = m[1].replace(/\s+/g, ' ').trim().toLowerCase();
+    const book = BOOKS_66.find(b => b.toLowerCase() === typed)
+              || BOOKS_66.find(b => b.toLowerCase().replace(/\s/g, '') === typed.replace(/\s/g, ''))
+              || BOOKS_66.find(b => b.toLowerCase().startsWith(typed) && typed.length >= 3);
+    if (!book) return null;
+    const counts = CHAPTER_COUNTS[book] || [];
+    const c = parseInt(m[2], 10);
+    if (!counts[c - 1]) return null;
+    const v = m[3] ? parseInt(m[3], 10) : 1;
+    return counts[c - 1] >= v ? { book, c, v } : null;
+  }
+
+  function searchAll(q, limit) {
+    const re = new RegExp(escapeRe(q), 'i');
+    const out = [];
+    for (const book of BOOKS_66) {
+      const blob = searchIndex[book];
+      if (!blob) continue;
+      let from = 0;
+      while (out.length < limit) {
+        const hit = blob.slice(from).search(re);
+        if (hit < 0) break;
+        const at = from + hit;
+        const start = blob.lastIndexOf('\n', at) + 1;
+        let end = blob.indexOf('\n', at);
+        if (end < 0) end = blob.length;
+        const [ref, kjv] = blob.slice(start, end).split('\t');
+        const [c, v] = ref.split(':');
+        out.push({ book, c: parseInt(c, 10), v: parseInt(v, 10), text: kjv });
+        from = end + 1;
+        if (from >= blob.length) break;
+      }
+      if (out.length >= limit) break;
+    }
+    return out;
+  }
+
+  // Show the verse itself where it can be had for nothing: from the open book,
+  // or from the index if a previous search already fetched it. Not worth two
+  // megabytes on its own just to preview one reference.
+  function verseTextFor(ref) {
+    if (ref.book === state.book) {
+      const v = state.verses.find(x => x.c === ref.c && x.v === ref.v);
+      if (v) return v.kjv;
+    }
+    const blob = searchIndex && searchIndex[ref.book];
+    if (!blob) return null;
+    const needle = `\n${ref.c}:${ref.v}\t`;
+    const at = blob.startsWith(`${ref.c}:${ref.v}\t`) ? 0 : blob.indexOf(needle);
+    if (at < 0) return null;
+    const start = at === 0 ? 0 : at + 1;
+    let end = blob.indexOf('\n', start);
+    if (end < 0) end = blob.length;
+    return blob.slice(start, end).split('\t')[1] || null;
+  }
+
+  function showResults(rows, note) {
+    const results = document.getElementById('search-results');
+    results.innerHTML = note ? `<p class="sr-note">${note}</p>` : '';
+    rows.forEach(r => {
       const div = document.createElement('div');
       div.className = 'search-result';
-      div.innerHTML = `<div class="sr-ref">${state.book} ${v.c}:${v.v}</div><div class="sr-text">${v.kjv}</div>`;
+      div.innerHTML = `<div class="sr-ref">${r.book} ${r.c}:${r.v}</div>`
+                    + `<div class="sr-text">${r.text}</div>`;
       div.onclick = () => {
         closeDrawer('search-overlay');
-        goToChapter(v.c, v.v);
+        if (r.book === state.book) goToChapter(r.c, r.v);
+        else switchToBook(r.book, r.c, r.v);
       };
       results.appendChild(div);
     });
+  }
+
+  let searchTimer;
+  document.getElementById('search-input').addEventListener('input', e => {
+    const raw = e.target.value.trim();
+    const q = raw.toLowerCase();
+    const results = document.getElementById('search-results');
+    clearTimeout(searchTimer);
+    results.innerHTML = '';
+    if (!q) return;
+
+    // A bare "3:16" still means this book; a named one can go anywhere.
+    const bare = q.match(/^(\d+)(?:[:\s]+(\d+))?$/);
+    if (bare) {
+      const c = parseInt(bare[1], 10);
+      const vnum = bare[2] ? parseInt(bare[2], 10) : null;
+      showResults(state.verses
+        .filter(v => v.c === c && (vnum === null || v.v === vnum))
+        .slice(0, 25)
+        .map(v => ({ book: state.book, c: v.c, v: v.v, text: v.kjv })));
+      return;
+    }
+    const ref = resolveReference(raw);
+    if (ref) {
+      showResults([{ book: ref.book, c: ref.c, v: ref.v,
+                     text: verseTextFor(ref) || 'Go to this verse' }]);
+      return;
+    }
+    if (q.length < 3) return;
+
+    // Matches in the open book come back immediately; the rest follow once
+    // the index is in, so a search never sits on an empty screen.
+    const here = state.verses
+      .filter(v => (v.kjv || '').toLowerCase().includes(q)
+                || (v.web || '').toLowerCase().includes(q))
+      .slice(0, 25)
+      .map(v => ({ book: state.book, c: v.c, v: v.v, text: v.kjv }));
+    if (here.length) showResults(here, searchIndex ? '' : `In ${state.book}`);
+
+    searchTimer = setTimeout(() => {
+      if (!searchIndex && !here.length) showResults([], 'Searching all 66 books…');
+      ensureSearchIndex(() => {
+        if (document.getElementById('search-input').value.trim().toLowerCase() !== q) return;
+        const rows = searchAll(q, 40);
+        showResults(rows, rows.length
+          ? `${rows.length}${rows.length === 40 ? '+' : ''} across the Bible`
+          : 'No matches in any book');
+      });
+    }, 220);
   });
 
   // ---------- Init ----------
