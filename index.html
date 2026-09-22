@@ -521,6 +521,29 @@
   /* Section heads for the Home book list. Not sticky, unlike the picker's:
      #home-page already has a sticky header bar at top 0 and two of them would
      fight for the same strip. */
+  /* Following a related verse changes book and chapter, and without this
+     there is no way back to the verse that sent you. Sits above the tray and
+     under the Home sheet, so it disappears on its own when Home is open. */
+  #return-pill {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(var(--tray-h) + 14px); z-index: 140;
+    display: none; align-items: center; gap: 7px;
+    padding: 9px 16px; border-radius: 999px;
+    background: var(--bg-pill); color: var(--text-primary);
+    border: 0.5px solid var(--border-strong);
+    font-size: 13px; font-family: inherit; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    animation: returnRise 0.22s ease-out;
+  }
+  #return-pill.show { display: inline-flex; }
+  /* "Back to 1 Thessalonians 5:23" would reach the theme button on a narrow
+     phone, so the label gives way rather than the pill growing into it. */
+  #return-pill { max-width: calc(100vw - 130px); }
+  #return-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #return-pill svg { width: 14px; height: 14px; flex-shrink: 0; }
+  @keyframes returnRise { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  @media (prefers-reduced-motion: reduce) { #return-pill { animation: none; } }
+
   .book-section {
     font-size: 13px; font-weight: 500; color: var(--text-secondary);
     margin: 22px 0 4px;
@@ -686,6 +709,12 @@
   <p id="splash-line">Prepare your heart and mind to hear from God the Father.</p>
   <p id="splash-hint">Tap to continue</p>
 </div>
+
+<!-- Way back from a cross-reference -->
+<button id="return-pill" aria-label="Back to where you were">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  <span id="return-label"></span>
+</button>
 
 <nav id="bottom-tray">
   <button class="tray-btn" id="tray-read" aria-label="Read">
@@ -1141,8 +1170,13 @@
     }).catch(() => showToast('Could not load ' + book));
   }
 
-  function switchToBook(book, chapterNum, verseNum) {
+  // Choosing a book or chapter yourself ends the trail: a pill offering to go
+  // back somewhere you deliberately left is noise. Only a cross-reference,
+  // which moves you without being asked to, keeps it.
+  function switchToBook(book, chapterNum, verseNum, opts) {
+    const keepTrail = !!(opts && opts.keepTrail);
     ensureBookLoaded(book, () => {
+      if (!keepTrail) clearRefTrail();
       suspendRead();
       state.book = book;
       state.chapter = chapterNum || 1;
@@ -1847,6 +1881,40 @@
     strongsPending.then(then);
   }
 
+  // ---------- Returning from a cross-reference ----------
+  // Following a related verse was one-way: it moved book and chapter with no
+  // record of where the reader had been. The trail is a stack, so a chain of
+  // references unwinds one step at a time.
+  const refTrail = [];
+
+  function pushRefTrail() {
+    const verse = state.verses[currentIndex()];
+    if (!verse) return;
+    refTrail.push({ book: state.book, c: verse.c, v: verse.v });
+    updateReturnPill();
+  }
+
+  function clearRefTrail() {
+    refTrail.length = 0;
+    updateReturnPill();
+  }
+
+  function updateReturnPill() {
+    const pill = document.getElementById('return-pill');
+    const back = refTrail[refTrail.length - 1];
+    if (!back) { pill.classList.remove('show'); return; }
+    document.getElementById('return-label').textContent =
+      `Back to ${back.book} ${back.c}:${back.v}`;
+    pill.classList.add('show');
+  }
+
+  document.getElementById('return-pill').onclick = () => {
+    const back = refTrail.pop();
+    if (!back) return;
+    updateReturnPill();
+    switchToBook(back.book, back.c, back.v, { keepTrail: true });
+  };
+
   // ---------- Deep study ----------
   function studyKey(idx) { const v = state.verses[idx]; return `${v.c}:${v.v}`; }
 
@@ -1951,7 +2019,9 @@
     drawer.querySelectorAll('.related-link.available').forEach(el => {
       el.onclick = () => {
         closeDrawer('study-overlay');
-        switchToBook(el.dataset.book, parseInt(el.dataset.c), parseInt(el.dataset.v));
+        pushRefTrail();
+        switchToBook(el.dataset.book, parseInt(el.dataset.c), parseInt(el.dataset.v),
+                     { keepTrail: true });
       };
     });
     document.getElementById('sr-save').onclick = () => { document.getElementById('save-btn').click(); document.getElementById('sr-save').classList.toggle('active', saved[key]); };
