@@ -6,25 +6,25 @@ rules_version = '2';
 // notes, so it belongs in version control next to the code rather than only
 // in a console where nobody can review it.
 //
-// index.html touches exactly one path: users/{uid}, via
-//   firebase.firestore().collection('users').doc(currentUser.uid)
-// so nothing else should be reachable at all.
-//
-// Deploy with:  firebase deploy --only firestore:rules
-// or paste into Firebase console -> Firestore Database -> Rules.
+// This matches what is deployed, so `firebase deploy --only firestore:rules`
+// should be a no-op. Keep it that way.
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // index.html touches exactly one path:
+    //   firebase.firestore().collection('users').doc(currentUser.uid)
+    //
     // Signed in, and only your own document. `request.auth != null` on its
     // own would not be enough — that lets any Google account read any other
     // reader's notes, which is the failure worth being careful about.
+    //
+    // Nothing else needs saying: Firestore denies by default, so every path
+    // without an `allow` that evaluates true is already closed. A catch-all
+    // `allow read, write: if false` would add nothing, because matching
+    // rules are OR'd together — a deny cannot take back another rule's
+    // grant, and there is nothing else here to deny.
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Anything else is not part of this app.
-    match /{document=**} {
-      allow read, write: if false;
     }
   }
 }
