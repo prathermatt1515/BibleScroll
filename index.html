@@ -1006,6 +1006,126 @@
     try { return JSON.parse(raw); } catch (e) { return fallback; }
   }
 
+  // ---------- The reading record on the wire ----------
+  // In memory the record is one key per verse, which is what every reader of
+  // it wants. Written out that way it was 31,102 keys: 440 KB, and — because
+  // Firestore indexes every key of a map on its own — 62,204 index entries
+  // against a hard ceiling of 40,000 per document. Sync would have started
+  // failing outright at around 20,000 verses, which is two thirds of the way
+  // to the one thing this app is for.
+  //
+  // So it travels as a bit per verse instead: chapters in order, verses in
+  // order, packed into bytes and base64'd, one string per book. The whole
+  // Bible read is 3,888 bytes across 66 fields — 5 KB and 132 index entries.
+  const READ_BITS_KEY = 'sj_readbits';
+  const READ_LEGACY_KEY = 'sj_read';
+  const readBitOffsets = Object.create(null);
+
+  // Where each chapter's run of bits starts within its book, and how many
+  // bits the book needs in total.
+  function chapterBitOffsets(book) {
+    let off = readBitOffsets[book];
+    if (off) return off;
+    const counts = CHAPTER_COUNTS[book] || [];
+    off = new Array(counts.length);
+    let at = 0;
+    for (let i = 0; i < counts.length; i++) { off[i] = at; at += counts[i]; }
+    off.total = at;
+    readBitOffsets[book] = off;
+    return off;
+  }
+
+  function bytesToBase64(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+  }
+  function base64ToBytes(b64) {
+    if (typeof b64 !== 'string') return null;
+    try {
+      const bin = atob(b64);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    } catch (e) { return null; }
+  }
+
+  // Every key is range-checked on the way out, so a key left behind by an
+  // older build cannot smear a bit onto some other verse.
+  function encodeRead(record) {
+    const perBook = Object.create(null);
+    Object.keys(record).forEach(key => {
+      if (!record[key]) return;
+      const vAt = key.lastIndexOf(':');
+      if (vAt < 1) return;
+      const cAt = key.lastIndexOf(':', vAt - 1);
+      if (cAt < 1) return;
+      const book = key.slice(0, cAt);
+      const counts = CHAPTER_COUNTS[book];
+      if (!counts) return;
+      const c = +key.slice(cAt + 1, vAt);
+      const v = +key.slice(vAt + 1);
+      if (!(c >= 1 && c <= counts.length && v >= 1 && v <= counts[c - 1])) return;
+      const off = chapterBitOffsets(book);
+      let bytes = perBook[book];
+      if (!bytes) bytes = perBook[book] = new Uint8Array(Math.ceil(off.total / 8));
+      const bit = off[c - 1] + v - 1;
+      bytes[bit >> 3] |= 1 << (bit & 7);
+    });
+    // Every book is emitted, including the ones with nothing read. Firestore
+    // merges a map key by key: a book left out of the payload keeps whatever
+    // the document already had, so clearing a book's last chapter would have
+    // left the old bits in the cloud to come back at the next sign-in. An
+    // all-zero string costs a few bytes and says the thing plainly.
+    const out = {};
+    BOOKS_66.forEach(book => {
+      const bytes = perBook[book];
+      out[book] = bytesToBase64(bytes
+        || new Uint8Array(Math.ceil(chapterBitOffsets(book).total / 8)));
+    });
+    return out;
+  }
+
+  // Adds to the record rather than replacing it, because that is what both
+  // callers want: sync and restore both take the union of two histories.
+  function decodeReadInto(record, bits) {
+    if (!bits || typeof bits !== 'object') return 0;
+    let added = 0;
+    Object.keys(bits).forEach(book => {
+      const counts = CHAPTER_COUNTS[book];
+      if (!counts) return;
+      const bytes = base64ToBytes(bits[book]);
+      if (!bytes) return;
+      const off = chapterBitOffsets(book);
+      for (let ci = 0; ci < counts.length; ci++) {
+        const base = off[ci];
+        for (let v = 1; v <= counts[ci]; v++) {
+          const bit = base + v - 1;
+          const byte = bytes[bit >> 3];
+          if (byte === undefined || !(byte & (1 << (bit & 7)))) continue;
+          const key = book + ':' + (ci + 1) + ':' + v;
+          if (!record[key]) { record[key] = true; added++; }
+        }
+      }
+    });
+    return added;
+  }
+
+  // The old shape, still arriving from a version-1 backup file or from a
+  // cloud document written before this change.
+  function mergeLegacyRead(record, legacy) {
+    if (!legacy || typeof legacy !== 'object') return 0;
+    let added = 0;
+    Object.keys(legacy).forEach(k => {
+      if (legacy[k] && !record[k]) { record[k] = true; added++; }
+    });
+    return added;
+  }
+
+  function saveReadRecord() {
+    store(READ_BITS_KEY, JSON.stringify(encodeRead(readVerses)));
+  }
+
   // ---------- State ----------
   const BOOK_VERSES = { James: JAMES_VERSES };
   const BOOK_STUDY = { James: STUDY_DATA };
@@ -1031,7 +1151,7 @@
     store('sj_livecache', JSON.stringify(cache));
   })();
 
-  const readVerses = load('sj_read', {});
+  const readVerses = {};   // filled once CHAPTER_COUNTS is in scope, below
   const saved = load('sj_saved', {});
   const notes = load('sj_notes', {});
 
@@ -1165,6 +1285,20 @@
     Revelation: [20,29,22,11,14,17,17,13,21,11,19,17,18,20,8,21,18,24,21,15,27,21]
   };
 
+  // Reading the record needs the chapter lengths, so this is the first point
+  // it can happen. A record written before the bitmap is converted in place
+  // and the old key dropped, but only once the new one is safely stored.
+  (function loadReadRecord() {
+    const bits = load(READ_BITS_KEY, null);
+    if (bits) { decodeReadInto(readVerses, bits); return; }
+    const legacy = load(READ_LEGACY_KEY, null);
+    if (!legacy) return;
+    mergeLegacyRead(readVerses, legacy);
+    if (store(READ_BITS_KEY, JSON.stringify(encodeRead(readVerses)))) {
+      try { localStorage.removeItem(READ_LEGACY_KEY); } catch (e) {}
+    }
+  })();
+
   const API_BIBLE_KEY = "mSiigwn6LhcbU2ZwR3nc5";
   const BIBLE_ID_CACHE_KEY = 'sj_bible_ids';
   let bibleIds = load(BIBLE_ID_CACHE_KEY, null);
@@ -1186,8 +1320,8 @@
       cloudDocRef().set({
         // readDates carries the streak. It was left out here and only written
         // at sign-in, so a streak built on one device never reached another.
-        saved, notes, readVerses, openDates, readDates, deleted: tombstones,
-        updatedAt: Date.now()
+        saved, notes, readBits: encodeRead(readVerses), openDates, readDates,
+        deleted: tombstones, updatedAt: Date.now()
       }, { merge: true }).then(noteSyncOk).catch(reportSyncError);
     }, 1200);
   }
@@ -1242,7 +1376,8 @@
           const data = snap.data() || {};
           Object.assign(saved, data.saved || {});
           Object.assign(notes, data.notes || {});
-          Object.assign(readVerses, data.readVerses || {});
+          decodeReadInto(readVerses, data.readBits);
+          mergeLegacyRead(readVerses, data.readVerses);
           (data.openDates || []).forEach(d => { if (!openDates.includes(d)) openDates.push(d); });
           (data.readDates || []).forEach(d => { if (!readDates.includes(d)) readDates.push(d); });
           // Take the union of both devices' deletions, then apply it — so a
@@ -1257,12 +1392,21 @@
           store('sj_deleted', JSON.stringify(tombstones));
           store('sj_saved', JSON.stringify(saved));
           store('sj_notes', JSON.stringify(notes));
-          store('sj_read', JSON.stringify(readVerses));
+          saveReadRecord();
           store('sj_open_dates', JSON.stringify(openDates));
           store('sj_read_dates', JSON.stringify(readDates));
-          await cloudDocRef().set({ saved, notes, readVerses, openDates, readDates, deleted: tombstones, updatedAt: Date.now() }, { merge: true });
+          const writeBack = { saved, notes, readBits: encodeRead(readVerses),
+                              openDates, readDates, deleted: tombstones,
+                              updatedAt: Date.now() };
+          // The per-verse map this replaces is what the index-entry ceiling
+          // was counting. Retire it the moment its contents are safely in
+          // the bitmap, or it keeps costing 2 entries per verse forever.
+          if (data.readVerses) writeBack.readVerses = firebase.firestore.FieldValue.delete();
+          await cloudDocRef().set(writeBack, { merge: true });
         } else {
-          await cloudDocRef().set({ saved, notes, readVerses, openDates, readDates, deleted: tombstones, updatedAt: Date.now() });
+          await cloudDocRef().set({ saved, notes, readBits: encodeRead(readVerses),
+                                    openDates, readDates, deleted: tombstones,
+                                    updatedAt: Date.now() });
         }
         noteSyncOk();
         // On a normal launch the opening screen is already greeting them by
@@ -1733,13 +1877,13 @@
     if (readSaveTimer === null) return;
     clearTimeout(readSaveTimer);
     readSaveTimer = null;
-    store('sj_read', JSON.stringify(readVerses));
+    saveReadRecord();
     refreshBadges(true);
   }
   function scheduleReadSave() {
     if (readSaveTimer !== null) clearTimeout(readSaveTimer);
     readSaveTimer = setTimeout(() => { readSaveTimer = null;
-      store('sj_read', JSON.stringify(readVerses));
+      saveReadRecord();
       refreshBadges(true);
     }, 700);
   }
@@ -3419,7 +3563,7 @@
       const key = `${book}:${chapter}:${v}`;
       if (readVerses[key]) { delete readVerses[key]; cleared++; }
     }
-    store('sj_read', JSON.stringify(readVerses));
+    saveReadRecord();
     scheduleCloudSync();
     refreshRailState();
     return cleared;
@@ -3570,7 +3714,7 @@
   // text, the commentary and the progress can all be rebuilt; what someone
   // wrote in the margin exists nowhere else, and it lived in localStorage and
   // Firestore with no way to get it out.
-  const BACKUP_VERSION = 1;
+  const BACKUP_VERSION = 2;
 
   function backupPayload() {
     return {
@@ -3585,7 +3729,9 @@
       },
       notes: notes,
       saved: saved,
-      readVerses: readVerses,
+      // Version 1 wrote a key per verse, which made a 700 KB file out of
+      // what fits in ten. Version 1 files still restore; see below.
+      readBits: encodeRead(readVerses),
       readDates: readDates,
       openDates: openDates,
       deleted: tombstones,
@@ -3684,7 +3830,8 @@
       const beforeRead = Object.keys(readVerses).length;
       Object.assign(saved, data.saved || {});
       Object.assign(notes, data.notes || {});
-      Object.assign(readVerses, data.readVerses || {});
+      decodeReadInto(readVerses, data.readBits);
+      mergeLegacyRead(readVerses, data.readVerses);
       (data.readDates || []).forEach(d => { if (!readDates.includes(d)) readDates.push(d); });
       (data.openDates || []).forEach(d => { if (!openDates.includes(d)) openDates.push(d); });
       Object.keys(data.deleted || {}).forEach(k => {
@@ -3695,7 +3842,7 @@
       applyTombstones();
       store('sj_saved', JSON.stringify(saved));
       store('sj_notes', JSON.stringify(notes));
-      store('sj_read', JSON.stringify(readVerses));
+      saveReadRecord();
       store('sj_read_dates', JSON.stringify(readDates));
       store('sj_open_dates', JSON.stringify(openDates));
       store('sj_deleted', JSON.stringify(tombstones));
