@@ -1911,23 +1911,45 @@
 
     const logo = new Image();
     logo.crossOrigin = 'anonymous';
-    logo.onload = () => drawRest();
-    logo.onerror = () => drawRest();
+    logo.onload = () => ensureRedLetter(drawRest);
+    logo.onerror = () => ensureRedLetter(drawRest);
     logo.src = 'cross.png';
 
     function drawRest() {
       const text = textEl.textContent;
       ctx.font = '48px Georgia, serif';
       ctx.textAlign = 'center';
-      const words = text.split(' ');
-      let lines = [], cur = '';
-      words.forEach(w => {
-        const test = cur ? cur + ' ' + w : w;
-        if (ctx.measureText(test).width > W - 160) { lines.push(cur); cur = w; }
-        else cur = test;
-      });
-      if (cur) lines.push(cur);
-      const lineHeight = 64;
+      // Wrap on index rather than on the words themselves, so each line knows
+      // where it sits in the verse and can be matched against the red mask.
+      const mask = redMask(text, v);
+
+      function wrapAt(size) {
+        ctx.font = size + 'px Georgia, serif';
+        const out = [];
+        let lineStart = 0, lastBreak = -1;
+        for (let i = 0; i <= text.length; i++) {
+          if (i < text.length && text[i] !== ' ') continue;
+          if (ctx.measureText(text.slice(lineStart, i)).width > W - 160 && lastBreak > lineStart) {
+            out.push([lineStart, lastBreak]);
+            lineStart = lastBreak + 1;
+          }
+          lastBreak = i;
+        }
+        if (lineStart < text.length) out.push([lineStart, text.length]);
+        return out;
+      }
+
+      // The longest verses ran past the top of the frame and cut the cross in
+      // half — Esther 8:9 is 528 characters. The type steps down until the
+      // whole block fits instead.
+      let fontSize = 48, lines = wrapAt(fontSize);
+      while (fontSize > 26
+             && 130 + 150 + lines.length * Math.round(fontSize * 4 / 3) + 70 > H - 120) {
+        fontSize -= 4;
+        lines = wrapAt(fontSize);
+      }
+      ctx.font = fontSize + 'px Georgia, serif';
+      const lineHeight = Math.round(fontSize * 4 / 3);
 
       const logoSize = 130;
       // Gap between the cross and the first line of verse text. The text is
@@ -1944,8 +1966,32 @@
       }
       cursorY += logoSize + logoGap;
 
-      ctx.fillStyle = isDark ? '#f5f5f0' : '#1A1A1A';
-      lines.forEach((line, i) => ctx.fillText(line, W / 2, cursorY + i * lineHeight));
+      // Words of Jesus are red on the page, so they are red in the picture
+      // too; a screenshot that dropped the colour would not be the verse the
+      // reader was looking at. Each line is drawn as runs of one colour,
+      // measured first so the whole line still sits centred.
+      const inkPlain = isDark ? '#f5f5f0' : '#1A1A1A';
+      const inkRed = isDark ? '#d4766b' : '#a8332a';
+      ctx.textAlign = 'left';
+      lines.forEach(([from, to], i) => {
+        const runs = [];
+        let at = from;
+        while (at < to) {
+          let end = at;
+          while (end < to && mask[end] === mask[at]) end++;
+          runs.push({ text: text.slice(at, end), red: mask[at] });
+          at = end;
+        }
+        const total = runs.reduce((w, r) => w + ctx.measureText(r.text).width, 0);
+        let x = W / 2 - total / 2;
+        const y = cursorY + i * lineHeight;
+        runs.forEach(r => {
+          ctx.fillStyle = r.red ? inkRed : inkPlain;
+          ctx.fillText(r.text, x, y);
+          x += ctx.measureText(r.text).width;
+        });
+      });
+      ctx.textAlign = 'center';
       cursorY += lines.length * lineHeight;
 
       ctx.font = '28px -apple-system, sans-serif';
@@ -2454,11 +2500,29 @@
   // Spans are character ranges over this verse's own text, built against the
   // exact strings this app ships and checked span by span, so an offset can
   // never land mid-word.
-  function withRedLetters(text, verse) {
+  function redSpansFor(verse) {
     const table = redLetter && redLetter[state.translation];
-    if (!table) return escapeHtml(text);
+    if (!table) return null;
     const spans = (table[state.book] || {})[`${verse.c}:${verse.v}`];
-    if (!spans || !spans.length) return escapeHtml(text);
+    return spans && spans.length ? spans : null;
+  }
+
+  // A boolean per character, which is what the canvas needs: it has to draw
+  // the line in runs of one colour at a time rather than all at once.
+  function redMask(text, verse) {
+    const spans = redSpansFor(verse);
+    const mask = new Array(text.length).fill(false);
+    if (spans) {
+      spans.forEach(([lo, hi]) => {
+        for (let i = Math.max(0, lo); i < Math.min(hi, text.length); i++) mask[i] = true;
+      });
+    }
+    return mask;
+  }
+
+  function withRedLetters(text, verse) {
+    const spans = redSpansFor(verse);
+    if (!spans) return escapeHtml(text);
     let out = '', at = 0;
     spans.forEach(([lo, hi]) => {
       if (lo < at || hi > text.length) return;
