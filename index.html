@@ -584,6 +584,34 @@
   .badge-card.earned .badge-name { color: var(--text-primary); }
   .badge-note { font-size: 11px; color: var(--text-tertiary); margin: 0; line-height: 1.35; }
   .badge-count { font-size: 11px; color: var(--text-secondary); margin: 0 0 8px; }
+  .badge-card { display: block; width: 100%; text-align: left; font-family: inherit; cursor: pointer; }
+  .badge-card:active { background: var(--bg-card); }
+
+  /* Every other drawer opens from the reading view, where the Home sheet is
+     closed; this one opens from inside Home, which sits at 150 — so at the
+     shared drawer z-index of 100 it appeared to do nothing at all. Above the
+     tray too, and below the delete confirmation. */
+  #badge-overlay { z-index: 170; }
+
+  .bd-group {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-tertiary); margin: 0 0 6px;
+  }
+  .bd-name { font-family: Georgia, serif; font-size: 24px; color: var(--text-primary); margin: 0 0 4px; }
+  .bd-status { font-size: 12px; color: var(--text-secondary); margin: 0 0 14px; }
+  .bd-status.earned { color: var(--accent); }
+  .bd-about { font-size: 14px; line-height: 1.6; color: var(--text-primary); margin: 0 0 4px; }
+  .bd-parts { display: flex; flex-direction: column; margin-top: 14px; }
+  .bd-part {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 2px; background: none; border: none;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 14px; font-family: inherit; color: var(--text-secondary);
+    cursor: pointer; text-align: left; width: 100%;
+  }
+  .bd-part:last-child { border-bottom: none; }
+  .bd-part.done { color: var(--text-primary); }
+  .bd-tick { color: var(--accent); font-size: 13px; }
 
   /* Following a related verse changes book and chapter, and without this
      there is no way back to the verse that sent you. Sits above the tray and
@@ -707,6 +735,11 @@
     <div class="drawer-handle"></div>
     <div id="chapter-list"></div>
   </div>
+</div>
+
+<!-- Badge detail drawer -->
+<div class="drawer-overlay" id="badge-overlay">
+  <div class="drawer" id="badge-drawer"></div>
 </div>
 
 <!-- Translation picker drawer -->
@@ -2039,67 +2072,132 @@
   };
   const booksDone = (st, list) => list.every(b => st.complete.has(b));
 
+  // A badge carries the reason it exists. "All twelve minor prophets" says
+  // what to do; it does not say why those twelve belong together, and that is
+  // the part worth reading for. Books and passages are declared once and both
+  // the test and the checklist are derived from them.
   const BADGES = [
-    // Structure — the shape of the book itself.
     { id: 'first-chapter', group: 'Structure', name: 'First Chapter',
-      note: 'Finish a chapter', test: st => st.chapters >= 1 },
-    { id: 'gospels', group: 'Structure', name: 'The Gospels',
-      note: 'Matthew, Mark, Luke and John', test: st => booksDone(st, GOSPELS) },
-    { id: 'law', group: 'Structure', name: 'The Law',
-      note: 'Genesis through Deuteronomy', test: st => booksDone(st, PENTATEUCH) },
-    { id: 'twelve', group: 'Structure', name: 'The Twelve',
-      note: 'All twelve minor prophets', test: st => booksDone(st, MINOR_PROPHETS) },
-    { id: 'paul', group: 'Structure', name: "Paul's Hand",
-      note: 'All thirteen of his letters', test: st => booksDone(st, PAULINE) },
-    { id: 'long-roads', group: 'Structure', name: 'The Long Roads',
-      note: 'Genesis, Psalms, Isaiah, Jeremiah, Ezekiel', test: st => booksDone(st, LONG_ROADS) },
-    { id: 'nt', group: 'Structure', name: 'New Testament',
-      note: 'All twenty-seven books', test: st => booksDone(st, NT_BOOKS) },
-    { id: 'ot', group: 'Structure', name: 'Old Testament',
-      note: 'All thirty-nine books', test: st => booksDone(st, OT_BOOKS) },
+      note: 'Finish a chapter', test: st => st.chapters >= 1,
+      about: 'A chapter counts as read once every verse in it has crossed the screen. The divisions themselves are late — added in the thirteenth century, long after the books were written — but they are how everyone has read ever since.' },
+
+    { id: 'gospels', group: 'Structure', name: 'The Gospels', books: GOSPELS,
+      note: 'Matthew, Mark, Luke and John',
+      about: 'Four accounts of one life, written for different readers. Matthew argues from prophecy for people who knew the Hebrew scriptures, Mark moves at a run and says "immediately" more than forty times, Luke opens by saying he investigated everything from the first, and John explains what the other three report. Reading all four shows where they agree without copying and where one of them alone keeps a detail.' },
+
+    { id: 'law', group: 'Structure', name: 'The Law', books: PENTATEUCH,
+      note: 'Genesis through Deuteronomy',
+      about: 'Five books that were one scroll, running from creation to the edge of a land the man leading them never entered. Everything after assumes you have read it: the prophets are not introducing a case, they are prosecuting the covenant these books set out.' },
+
+    { id: 'twelve', group: 'Structure', name: 'The Twelve', books: MINOR_PROPHETS,
+      note: 'All twelve minor prophets',
+      about: 'In the Hebrew Bible these twelve are one book on one scroll — "minor" means short, not lesser. They span roughly three centuries, from Amos speaking into a prosperous Israel to Malachi addressing a rebuilt Jerusalem that had expected more. Read together they make one long argument about a people who kept their religion and lost their justice, and they end the Old Testament waiting for someone.' },
+
+    { id: 'paul', group: 'Structure', name: "Paul's Hand", books: PAULINE,
+      note: 'All thirteen of his letters',
+      about: 'Thirteen letters, none of them written to be scripture. They are occasional mail answering crises in particular towns — Romans is the most systematic thing he wrote, Philemon is a note about a runaway slave. Taken together they show one man improvising the same gospel into very different rooms.' },
+
+    { id: 'long-roads', group: 'Structure', name: 'The Long Roads', books: LONG_ROADS,
+      note: 'Genesis, Psalms, Isaiah, Jeremiah, Ezekiel',
+      about: 'The five longest books, and between them nearly a third of the Bible. They are where reading plans usually stop, which is the only reason this one is worth marking separately.' },
+
+    { id: 'nt', group: 'Structure', name: 'New Testament', books: NT_BOOKS,
+      note: 'All twenty-seven books',
+      about: 'Twenty-seven documents written inside about seventy years, mostly in Greek by men who spoke Aramaic at home. Four accounts, one history, twenty-one letters and one vision — and no one of them was written knowing it would sit beside the others.' },
+
+    { id: 'ot', group: 'Structure', name: 'Old Testament', books: OT_BOOKS,
+      note: 'All thirty-nine books',
+      about: 'Thirty-nine books gathered over something like a thousand years — law, chronicle, poetry, proverb and prophecy, by many hands, in two languages. It is the scripture Jesus read and quoted, and the New Testament is largely unreadable without it.' },
+
     { id: 'whole', group: 'Structure', name: 'Whole Counsel',
-      note: 'Every book of the Bible', test: st => st.books === 66 },
+      note: 'Every book of the Bible', test: st => st.books === 66,
+      about: 'Sixty-six books, 1,189 chapters, 31,102 verses. The name is Paul taking leave of the Ephesian elders in Acts 20: "I have not shunned to declare unto you all the counsel of God" — the whole of it, not the parts that suited him.' },
 
-    // Landmarks — particular ground, which suits this app more than volume.
     { id: 'creation', group: 'Landmarks', name: 'In the Beginning',
-      note: 'Genesis 1 to 3', test: st => chaptersDone(st, 'Genesis', 1, 3) },
+      passages: [['Genesis', 1, 3]], note: 'Genesis 1 to 3',
+      about: 'Three chapters the rest of the Bible keeps arguing with. Creation stated rather than defended, a garden with one prohibition in it, and the first question anyone asks God — which is a question about what he said.' },
+
     { id: 'psalm119', group: 'Landmarks', name: 'The Long Psalm',
-      note: 'All 176 verses of Psalm 119', test: st => st.done.has('Psalms:119') },
+      passages: [['Psalms', 119, 119]], note: 'All 176 verses of Psalm 119',
+      about: 'The longest chapter in the Bible: twenty-two stanzas, one for each letter of the Hebrew alphabet, every verse of a stanza beginning with that letter. Almost every verse names the law in some form. It is a love poem to it, not a legal brief.' },
+
     { id: 'isaiah53', group: 'Landmarks', name: 'The Suffering Servant',
-      note: 'Isaiah 53', test: st => st.done.has('Isaiah:53') },
+      passages: [['Isaiah', 53, 53]], note: 'Isaiah 53',
+      about: 'Twelve verses written centuries before the crucifixion, describing someone despised, silent under accusation, buried with the rich, and counted among transgressors on purpose. It is the Old Testament passage the New Testament quotes most when it explains what the cross was for.' },
+
     { id: 'sermon', group: 'Landmarks', name: 'On the Mount',
-      note: 'Matthew 5 to 7', test: st => chaptersDone(st, 'Matthew', 5, 7) },
+      passages: [['Matthew', 5, 7]], note: 'Matthew 5 to 7',
+      about: 'The longest stretch of his teaching in one place. It raises the law rather than relaxing it — murder reaching back to anger, adultery to the look — and ends with crowds astonished, because he taught as one having authority and not as the scribes.' },
+
     { id: 'romans8', group: 'Landmarks', name: 'No Condemnation',
-      note: 'Romans 8', test: st => st.done.has('Romans:8') },
+      passages: [['Romans', 8, 8]], note: 'Romans 8',
+      about: 'The chapter Romans has been building toward for seven. It opens with no condemnation and closes with nothing able to separate, and the middle is honest about groaning in between — creation, the believer and the Spirit all doing it.' },
+
     { id: 'love', group: 'Landmarks', name: 'The More Excellent Way',
-      note: '1 Corinthians 13', test: st => st.done.has('1 Corinthians:13') },
+      passages: [['1 Corinthians', 13, 13]], note: '1 Corinthians 13',
+      about: 'Read at weddings, written to a congregation suing one another and fighting over who had the better gift. In that setting "charity suffereth long, and is kind" is not sentiment; it is the correction.' },
+
     { id: 'passion', group: 'Landmarks', name: 'Four Accounts',
+      passages: [['Matthew', 26, 27], ['Mark', 14, 15], ['Luke', 22, 23], ['John', 18, 19]],
       note: 'The passion in all four Gospels',
-      test: st => chaptersDone(st, 'Matthew', 26, 27) && chaptersDone(st, 'Mark', 14, 15)
-                  && chaptersDone(st, 'Luke', 22, 23) && chaptersDone(st, 'John', 18, 19) },
+      about: 'The same two days told four times. Each keeps something the others leave out — Luke alone has the thief promised paradise, John alone records "It is finished" — and reading them one after another is the closest the Bible comes to showing its own witnesses side by side.' },
+
     { id: 'ending', group: 'Landmarks', name: 'All Things New',
-      note: 'Revelation 21 and 22', test: st => chaptersDone(st, 'Revelation', 21, 22) },
+      passages: [['Revelation', 21, 22]], note: 'Revelation 21 and 22',
+      about: 'The Bible ends where it began, with a garden and a tree of life, except now it is a city and the gates are never shut. The last promise is not escape from the world but God moving into it: the tabernacle of God is with men.' },
 
-    // Depth — the study side, which is what this app has that a plain reader does not.
-    { id: 'first-save', group: 'Depth', name: 'Kept',
-      note: 'Save a verse', test: st => st.saved >= 1 },
-    { id: 'first-note', group: 'Depth', name: 'In Your Own Words',
-      note: 'Write a note', test: st => st.notes >= 1 },
-    { id: 'notes-25', group: 'Depth', name: 'Margin Notes',
-      note: 'Twenty-five notes', test: st => st.notes >= 25 },
+    { id: 'first-save', group: 'Depth', name: 'Kept', note: 'Save a verse',
+      test: st => st.saved >= 1, meter: st => [Math.min(st.saved, 1), 1],
+      about: 'Saving marks a verse to come back to. The point of a saved verse is the second reading, not the first.' },
 
-    // Consistency — and one badge for coming back.
-    { id: 'streak-7', group: 'Consistency', name: 'Seven Days',
-      note: 'A week of reading in a row', test: st => st.streak >= 7 },
-    { id: 'streak-30', group: 'Consistency', name: 'Thirty Days',
-      note: 'A month in a row', test: st => st.streak >= 30 },
-    { id: 'streak-100', group: 'Consistency', name: 'Hundred Days',
-      note: 'A hundred in a row', test: st => st.streak >= 100 },
-    { id: 'streak-365', group: 'Consistency', name: 'A Full Year',
-      note: 'Three hundred and sixty-five in a row', test: st => st.streak >= 365 },
-    { id: 'return', group: 'Consistency', name: 'Return',
-      note: 'Come back after a week away', test: st => st.returned },
+    { id: 'first-note', group: 'Depth', name: 'In Your Own Words', note: 'Write a note',
+      test: st => st.notes >= 1, meter: st => [Math.min(st.notes, 1), 1],
+      about: 'Writing something down is the difference between having read a verse and having thought about it. A note can be a question; it does not have to be a conclusion.' },
+
+    { id: 'notes-25', group: 'Depth', name: 'Margin Notes', note: 'Twenty-five notes',
+      test: st => st.notes >= 25, meter: st => [Math.min(st.notes, 25), 25],
+      about: 'Readers have written in the margins for as long as there have been margins, and the notes usually outlive the reason for them. Twenty-five is enough to start seeing what you keep returning to.' },
+
+    { id: 'streak-7', group: 'Consistency', name: 'Seven Days', note: 'A week of reading in a row',
+      test: st => st.streak >= 7, meter: st => [Math.min(st.streak, 7), 7],
+      about: 'A day counts when you have actually read something, not when you have opened the app. Seven is where a habit stops being a decision each morning.' },
+
+    { id: 'streak-30', group: 'Consistency', name: 'Thirty Days', note: 'A month in a row',
+      test: st => st.streak >= 30, meter: st => [Math.min(st.streak, 30), 30],
+      about: 'A month of consecutive days. Long enough that the gap, when it comes, will be a choice rather than an accident.' },
+
+    { id: 'streak-100', group: 'Consistency', name: 'Hundred Days', note: 'A hundred in a row',
+      test: st => st.streak >= 100, meter: st => [Math.min(st.streak, 100), 100],
+      about: 'A hundred days without missing one. At a chapter a day that is most of the New Testament.' },
+
+    { id: 'streak-365', group: 'Consistency', name: 'A Full Year', note: 'Three hundred and sixty-five in a row',
+      test: st => st.streak >= 365, meter: st => [Math.min(st.streak, 365), 365],
+      about: 'Every day for a year. The whole Bible is 1,189 chapters, so a year of three chapters a day is the traditional way through all of it.' },
+
+    { id: 'return', group: 'Consistency', name: 'Return', note: 'Come back after a week away',
+      test: st => st.returned,
+      about: 'The only badge here that a broken streak can earn. Reading stops for all the ordinary reasons and the streak counter has nothing good to say about that; coming back is the part that actually matters, so it is worth marking once.' },
   ];
+
+  // Declaring the books or passages once means the test and the checklist can
+  // never disagree about what a badge is asking for.
+  BADGES.forEach(b => {
+    if (b.books) {
+      b.parts = st => b.books.map(n => ({ label: n, done: st.complete.has(n) }));
+      b.test = b.test || (st => b.books.every(n => st.complete.has(n)));
+    } else if (b.passages) {
+      b.parts = st => {
+        const out = [];
+        b.passages.forEach(([book, from, to]) => {
+          for (let c = from; c <= to; c++) {
+            out.push({ label: `${book} ${c}`, done: st.done.has(`${book}:${c}`) });
+          }
+        });
+        return out;
+      };
+      b.test = b.test || (st => b.parts(st).every(x => x.done));
+    }
+  });
 
   const badgesSeen = JSON.parse(localStorage.getItem('sj_badges_seen') || '[]');
   // A first run with reading already behind it absorbs what it has earned
@@ -2112,11 +2210,53 @@
     let html = `<p class="badge-count">${earned.length} of ${BADGES.length} earned</p>`
              + `<div class="badge-grid">`;
     BADGES.forEach(b => {
-      html += `<div class="badge-card${set.has(b.id) ? ' earned' : ''}">`
+      html += `<button class="badge-card${set.has(b.id) ? ' earned' : ''}" data-badge="${b.id}">`
             + `<p class="badge-name">${b.name}</p>`
-            + `<p class="badge-note">${b.note}</p></div>`;
+            + `<p class="badge-note">${b.note}</p></button>`;
     });
     return html + `</div>`;
+  }
+
+  function openBadgeDetail(id) {
+    const badge = BADGES.find(b => b.id === id);
+    if (!badge) return;
+    const st = badgeStats();
+    const earned = badge.test(st);
+    const parts = badge.parts ? badge.parts(st) : null;
+    const meter = badge.meter ? badge.meter(st) : null;
+
+    let status;
+    if (earned) status = 'Earned';
+    else if (parts) status = `${parts.filter(x => x.done).length} of ${parts.length}`;
+    else if (meter) status = `${meter[0]} of ${meter[1]}`;
+    else status = 'Not yet';
+
+    let html = `<div class="drawer-handle"></div>`
+      + `<p class="bd-group">${badge.group}</p>`
+      + `<p class="bd-name">${badge.name}</p>`
+      + `<p class="bd-status${earned ? ' earned' : ''}">${status}</p>`
+      + `<p class="bd-about">${badge.about}</p>`;
+    if (parts) {
+      html += `<div class="bd-parts">` + parts.map(x =>
+        `<button class="bd-part${x.done ? ' done' : ''}" data-go="${x.label}">`
+        + `<span>${x.label}</span><span class="bd-tick">${x.done ? '✓' : ''}</span></button>`
+      ).join('') + `</div>`;
+    }
+    const drawer = document.getElementById('badge-drawer');
+    drawer.innerHTML = html;
+    // A badge that names what is left to read should be able to take you
+    // there, otherwise the list is only an inventory.
+    drawer.querySelectorAll('.bd-part').forEach(el => {
+      el.onclick = () => {
+        const m = String(el.dataset.go).match(/^(.*?)(?:\s+(\d+))?$/);
+        const book = (m && m[1]) || '';
+        if (!CHAPTER_COUNTS[book]) return;
+        closeDrawer('badge-overlay');
+        hideHomePage();
+        switchToBook(book, m[2] ? parseInt(m[2], 10) : 1, 1);
+      };
+    });
+    openDrawer('badge-overlay');
   }
 
   function refreshBadges(announce) {
@@ -2530,6 +2670,9 @@
     drawer.innerHTML = html;
     drawer.querySelectorAll('.book-row[data-book]').forEach(row => {
       row.onclick = () => openBookDetail(row.dataset.book);
+    });
+    drawer.querySelectorAll('.badge-card[data-badge]').forEach(card => {
+      card.onclick = () => openBadgeDetail(card.dataset.badge);
     });
     document.getElementById('lib-saved-row').onclick = () => openSavedBrowser();
     document.getElementById('lib-notes-row').onclick = () => openNotesBrowser();
