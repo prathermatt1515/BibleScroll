@@ -26,7 +26,7 @@
 <meta property="og:title" content="Bible Scroll">
 <meta property="og:description" content="The whole Bible, one verse at a time — with commentary, the original Hebrew and Greek, and cross references you can follow.">
 <meta property="og:url" content="https://prathermatt1515.github.io/BibleScroll/">
-<meta property="og:image" content="https://prathermatt1515.github.io/BibleScroll/cross.png">
+<meta property="og:image" content="https://prathermatt1515.github.io/BibleScroll/icons/icon-512.png">
 <meta name="twitter:card" content="summary">
 <style>
   :root {
@@ -856,7 +856,7 @@
 <div class="drawer-overlay" id="search-overlay">
   <div class="drawer">
     <div class="drawer-handle"></div>
-    <input id="search-input" placeholder="Search James, e.g. james 1:5 or wisdom" autocomplete="off">
+    <input id="search-input" placeholder="Search the Bible, e.g. ps 23 or lovingkindness" autocomplete="off">
     <div id="search-results"></div>
   </div>
 </div>
@@ -983,6 +983,29 @@
 (function() {
   "use strict";
 
+  // ---------- Storage ----------
+  // Safari in private browsing, and any browser whose quota is full, throws
+  // from setItem. Every write here was bare, so one throw in the middle of
+  // the scroll handler took the reading feed down with it. Losing a write is
+  // survivable; losing the app is not.
+  function store(key, value) {
+    try { localStorage.setItem(key, value); return true; }
+    catch (e) { return false; }
+  }
+  function loadRaw(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? fallback : raw;
+    } catch (e) { return fallback; }
+  }
+  // For the keys that hold JSON. A corrupt value falls back rather than
+  // throwing on the first line of the app.
+  function load(key, fallback) {
+    const raw = loadRaw(key, null);
+    if (raw === null) return fallback;
+    try { return JSON.parse(raw); } catch (e) { return fallback; }
+  }
+
   // ---------- State ----------
   const BOOK_VERSES = { James: JAMES_VERSES };
   const BOOK_STUDY = { James: STUDY_DATA };
@@ -990,12 +1013,12 @@
   const BOOK_CODES = { Genesis: 'GEN', Exodus: 'EXO', Leviticus: 'LEV', Numbers: 'NUM', Deuteronomy: 'DEU', Joshua: 'JOS', Judges: 'JDG', Ruth: 'RUT', '1 Samuel': '1SA', '2 Samuel': '2SA', '1 Kings': '1KI', '2 Kings': '2KI', '1 Chronicles': '1CH', '2 Chronicles': '2CH', Ezra: 'EZR', Nehemiah: 'NEH', Esther: 'EST', Job: 'JOB', Psalms: 'PSA', Proverbs: 'PRO', Ecclesiastes: 'ECC', 'Song of Solomon': 'SNG', Isaiah: 'ISA', Jeremiah: 'JER', Lamentations: 'LAM', Ezekiel: 'EZK', Daniel: 'DAN', Hosea: 'HOS', Joel: 'JOL', Amos: 'AMO', Obadiah: 'OBA', Jonah: 'JON', Micah: 'MIC', Nahum: 'NAM', Habakkuk: 'HAB', Zephaniah: 'ZEP', Haggai: 'HAG', Zechariah: 'ZEC', Malachi: 'MAL', Matthew: 'MAT', Mark: 'MRK', Luke: 'LUK', John: 'JHN', Acts: 'ACT', Romans: 'ROM', '1 Corinthians': '1CO', '2 Corinthians': '2CO', Galatians: 'GAL', Ephesians: 'EPH', Philippians: 'PHP', Colossians: 'COL', '1 Thessalonians': '1TH', '2 Thessalonians': '2TH', '1 Timothy': '1TI', '2 Timothy': '2TI', Titus: 'TIT', Philemon: 'PHM', Hebrews: 'HEB', James: 'JAS', '1 Peter': '1PE', '2 Peter': '2PE', '1 John': '1JN', '2 John': '2JN', '3 John': '3JN', Jude: 'JUD', Revelation: 'REV' };
   const BOOK_FILE_NAMES = { 'Genesis': 'Genesis', 'Exodus': 'Exodus', 'Leviticus': 'Leviticus', 'Numbers': 'Numbers', 'Deuteronomy': 'Deuteronomy', 'Joshua': 'Joshua', 'Judges': 'Judges', 'Ruth': 'Ruth', '1 Samuel': '1Samuel', '2 Samuel': '2Samuel', '1 Kings': '1Kings', '2 Kings': '2Kings', '1 Chronicles': '1Chronicles', '2 Chronicles': '2Chronicles', 'Ezra': 'Ezra', 'Nehemiah': 'Nehemiah', 'Esther': 'Esther', 'Job': 'Job', 'Psalms': 'Psalms', 'Proverbs': 'Proverbs', 'Ecclesiastes': 'Ecclesiastes', 'Song of Solomon': 'SongofSolomon', 'Isaiah': 'Isaiah', 'Jeremiah': 'Jeremiah', 'Lamentations': 'Lamentations', 'Ezekiel': 'Ezekiel', 'Daniel': 'Daniel', 'Hosea': 'Hosea', 'Joel': 'Joel', 'Amos': 'Amos', 'Obadiah': 'Obadiah', 'Jonah': 'Jonah', 'Micah': 'Micah', 'Nahum': 'Nahum', 'Habakkuk': 'Habakkuk', 'Zephaniah': 'Zephaniah', 'Haggai': 'Haggai', 'Zechariah': 'Zechariah', 'Malachi': 'Malachi', 'Matthew': 'Matthew', 'Mark': 'Mark', 'Luke': 'Luke', 'John': 'John', 'Acts': 'Acts', 'Romans': 'Romans', '1 Corinthians': '1Corinthians', '2 Corinthians': '2Corinthians', 'Galatians': 'Galatians', 'Ephesians': 'Ephesians', 'Philippians': 'Philippians', 'Colossians': 'Colossians', '1 Thessalonians': '1Thessalonians', '2 Thessalonians': '2Thessalonians', '1 Timothy': '1Timothy', '2 Timothy': '2Timothy', 'Titus': 'Titus', 'Philemon': 'Philemon', 'Hebrews': 'Hebrews', 'James': 'James', '1 Peter': '1Peter', '2 Peter': '2Peter', '1 John': '1John', '2 John': '2John', '3 John': '3John', 'Jude': 'Jude', 'Revelation': 'Revelation' };
   const state = {
-    translation: localStorage.getItem('sj_translation') || 'kjv',
-    theme: localStorage.getItem('sj_theme') || 'dark',
+    translation: loadRaw('sj_translation', 'kjv'),
+    theme: loadRaw('sj_theme', 'dark'),
     book: 'James',
     chapter: 1,
     verses: JAMES_VERSES,
-    liveTextCache: JSON.parse(localStorage.getItem('sj_livecache') || '{}')
+    liveTextCache: load('sj_livecache', {})
   };
   // Older builds cached live translations under `trans:chapter:verse`, with no
   // book — so every book served whichever book was read first. Those keys are
@@ -1005,19 +1028,19 @@
     const stale = Object.keys(cache).filter(k => k.split(':').length < 4);
     if (!stale.length) return;
     stale.forEach(k => delete cache[k]);
-    localStorage.setItem('sj_livecache', JSON.stringify(cache));
+    store('sj_livecache', JSON.stringify(cache));
   })();
 
-  const readVerses = JSON.parse(localStorage.getItem('sj_read') || '{}');
-  const saved = JSON.parse(localStorage.getItem('sj_saved') || '{}');
-  const notes = JSON.parse(localStorage.getItem('sj_notes') || '{}');
+  const readVerses = load('sj_read', {});
+  const saved = load('sj_saved', {});
+  const notes = load('sj_notes', {});
 
   // Sync merges the cloud copy into the local one, which can add but never
   // remove. Without a record of what was deleted, a deleted note or save is
   // simply re-added from the cloud on the next sign-in. These tombstones are
   // that record: "this key was deleted at this time", synced like everything
   // else, and cleared if the same verse is written again.
-  const tombstones = JSON.parse(localStorage.getItem('sj_deleted') || '{}');
+  const tombstones = load('sj_deleted', {});
   const TOMBSTONE_TTL = 1000 * 60 * 60 * 24 * 180;   // six months
 
   function pruneTombstones() {
@@ -1026,13 +1049,13 @@
     Object.keys(tombstones).forEach(k => {
       if (!(tombstones[k] > cutoff)) { delete tombstones[k]; dropped++; }
     });
-    if (dropped) localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
+    if (dropped) store('sj_deleted', JSON.stringify(tombstones));
   }
   pruneTombstones();
 
   function markDeleted(kind, key) {
     tombstones[kind + ':' + key] = Date.now();
-    localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
+    store('sj_deleted', JSON.stringify(tombstones));
   }
 
   // Writing a verse again undoes its tombstone, so re-saving a note on a verse
@@ -1040,7 +1063,7 @@
   function markAlive(kind, key) {
     if (tombstones[kind + ':' + key]) {
       delete tombstones[kind + ':' + key];
-      localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
+      store('sj_deleted', JSON.stringify(tombstones));
     }
   }
 
@@ -1144,7 +1167,7 @@
 
   const API_BIBLE_KEY = "mSiigwn6LhcbU2ZwR3nc5";
   const BIBLE_ID_CACHE_KEY = 'sj_bible_ids';
-  let bibleIds = JSON.parse(localStorage.getItem(BIBLE_ID_CACHE_KEY) || 'null');
+  let bibleIds = load(BIBLE_ID_CACHE_KEY, null);
 
   document.documentElement.setAttribute('data-theme', state.theme);
 
@@ -1161,7 +1184,9 @@
     clearTimeout(cloudSyncTimer);
     cloudSyncTimer = setTimeout(() => {
       cloudDocRef().set({
-        saved, notes, readVerses, openDates, deleted: tombstones,
+        // readDates carries the streak. It was left out here and only written
+        // at sign-in, so a streak built on one device never reached another.
+        saved, notes, readVerses, openDates, readDates, deleted: tombstones,
         updatedAt: Date.now()
       }, { merge: true }).then(noteSyncOk).catch(reportSyncError);
     }, 1200);
@@ -1229,12 +1254,12 @@
           });
           pruneTombstones();
           applyTombstones();
-          localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
-          localStorage.setItem('sj_saved', JSON.stringify(saved));
-          localStorage.setItem('sj_notes', JSON.stringify(notes));
-          localStorage.setItem('sj_read', JSON.stringify(readVerses));
-          localStorage.setItem('sj_open_dates', JSON.stringify(openDates));
-          localStorage.setItem('sj_read_dates', JSON.stringify(readDates));
+          store('sj_deleted', JSON.stringify(tombstones));
+          store('sj_saved', JSON.stringify(saved));
+          store('sj_notes', JSON.stringify(notes));
+          store('sj_read', JSON.stringify(readVerses));
+          store('sj_open_dates', JSON.stringify(openDates));
+          store('sj_read_dates', JSON.stringify(readDates));
           await cloudDocRef().set({ saved, notes, readVerses, openDates, readDates, deleted: tombstones, updatedAt: Date.now() }, { merge: true });
         } else {
           await cloudDocRef().set({ saved, notes, readVerses, openDates, readDates, deleted: tombstones, updatedAt: Date.now() });
@@ -1260,23 +1285,30 @@
   // The streak used to count days the app was opened, which credited a launch
   // with no reading in it. It counts days a verse was actually read; opens are
   // still recorded, they just do not earn anything.
-  function todayStr(d) { d = d || new Date(); return d.toISOString().slice(0, 10); }
+  // The reader's own calendar day, not UTC. toISOString() rolls over at
+  // midnight GMT, which in the Americas is early evening: an evening reading
+  // and the next morning's landed on the same "day" and the streak lost one.
+  function todayStr(d) {
+    d = d || new Date();
+    const pad = n => (n < 10 ? '0' : '') + n;
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
   function recordOpenToday() {
-    const dates = JSON.parse(localStorage.getItem('sj_open_dates') || '[]');
+    const dates = load('sj_open_dates', []);
     const t = todayStr();
     if (!dates.includes(t)) dates.push(t);
-    localStorage.setItem('sj_open_dates', JSON.stringify(dates));
+    store('sj_open_dates', JSON.stringify(dates));
     scheduleCloudSync();
     return dates;
   }
   const openDates = recordOpenToday();
 
-  const readDates = JSON.parse(localStorage.getItem('sj_read_dates') || '[]');
+  const readDates = load('sj_read_dates', []);
   function recordReadToday() {
     const t = todayStr();
     if (readDates.includes(t)) return;
     readDates.push(t);
-    localStorage.setItem('sj_read_dates', JSON.stringify(readDates));
+    store('sj_read_dates', JSON.stringify(readDates));
   }
 
   // A gap of a week or more that reading came back from. Streaks punish life
@@ -1290,11 +1322,18 @@
     return false;
   }
 
+  // A streak breaks when a day is missed, not the moment a new day starts.
+  // Zeroing it before the day's first verse made every morning look like a
+  // loss and, worse, un-earned the streak badges — which then announced
+  // themselves all over again as soon as the reading resumed.
   function computeStreak() {
     const set = new Set(readDates);
-    let count = 0;
     let d = new Date();
-    if (!set.has(todayStr(d))) return 0;
+    if (!set.has(todayStr(d))) {
+      d.setDate(d.getDate() - 1);
+      if (!set.has(todayStr(d))) return 0;
+    }
+    let count = 0;
     while (set.has(todayStr(d))) {
       count++;
       d.setDate(d.getDate() - 1);
@@ -1434,6 +1473,17 @@
     setTimeout(() => { loadVisibleText(); updateChapterLabel(); updateThumbFromScroll(); refreshRailState(); resumeRead(); }, 60);
   }
 
+  // One entry per verse read in NIV or NLT, and nothing ever removed them.
+  // Read enough and it fills the whole storage quota, which then takes out
+  // the saves and notes stored beside it. Keep a working set, oldest first.
+  const LIVE_CACHE_MAX = 4000;
+  function trimLiveCache() {
+    const keys = Object.keys(state.liveTextCache);
+    if (keys.length <= LIVE_CACHE_MAX) return;
+    keys.slice(0, keys.length - LIVE_CACHE_MAX)
+        .forEach(k => delete state.liveTextCache[k]);
+  }
+
   async function getVerseText(idx) {
     const v = state.verses[idx];
     if (state.translation === 'kjv' || state.translation === 'web') {
@@ -1444,7 +1494,8 @@
     try {
       const text = await fetchLiveVerse(v.c, v.v, state.translation);
       state.liveTextCache[cacheKey] = text;
-      localStorage.setItem('sj_livecache', JSON.stringify(state.liveTextCache));
+      trimLiveCache();
+      store('sj_livecache', JSON.stringify(state.liveTextCache));
       return text;
     } catch (e) {
       return v.kjv + '  (offline fallback — could not reach translation service)';
@@ -1464,7 +1515,7 @@
       if (abbr.includes('NLT') && !ids.nlt) ids.nlt = b.id;
     });
     bibleIds = ids;
-    localStorage.setItem(BIBLE_ID_CACHE_KEY, JSON.stringify(ids));
+    store(BIBLE_ID_CACHE_KEY, JSON.stringify(ids));
     return ids;
   }
 
@@ -1598,12 +1649,34 @@
     const moved = lastReadIdx !== null && idx !== lastReadIdx;
     lastReadIdx = idx;
     if (changed) {
-      localStorage.setItem('sj_read', JSON.stringify(readVerses));
       if (moved) recordReadToday();
-      refreshBadges(true);
+      scheduleReadSave();
       scheduleCloudSync();
     }
   }
+
+  // Writing the record and re-scoring the badges both cost more the more you
+  // have read, and both used to run on every settled verse. They run once the
+  // reading pauses instead, and always before the app can be put away.
+  let readSaveTimer = null;
+  function flushReadSave() {
+    if (readSaveTimer === null) return;
+    clearTimeout(readSaveTimer);
+    readSaveTimer = null;
+    store('sj_read', JSON.stringify(readVerses));
+    refreshBadges(true);
+  }
+  function scheduleReadSave() {
+    if (readSaveTimer !== null) clearTimeout(readSaveTimer);
+    readSaveTimer = setTimeout(() => { readSaveTimer = null;
+      store('sj_read', JSON.stringify(readVerses));
+      refreshBadges(true);
+    }, 700);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushReadSave();
+  });
+  window.addEventListener('pagehide', flushReadSave);
 
   function updateChapterLabel() {
     const idx = currentIndex();
@@ -1829,7 +1902,7 @@
   document.querySelectorAll('#translation-overlay .menu-item').forEach(btn => {
     btn.onclick = () => {
       state.translation = btn.dataset.t;
-      localStorage.setItem('sj_translation', state.translation);
+      store('sj_translation', state.translation);
       updateTranslationPill();
       closeDrawer('translation-overlay');
       document.querySelectorAll('.verse-text').forEach(el => el.textContent = '…');
@@ -1842,7 +1915,7 @@
   document.getElementById('theme-toggle').onclick = () => {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', state.theme);
-    localStorage.setItem('sj_theme', state.theme);
+    store('sj_theme', state.theme);
     renderThemeIcon();
   };
 
@@ -1860,7 +1933,7 @@
     const key = verseKey(idx);
     if (saved[key]) { delete saved[key]; markDeleted('saved', key); showToast('Removed from saved'); }
     else { saved[key] = true; markAlive('saved', key); showToast('Verse saved'); }
-    localStorage.setItem('sj_saved', JSON.stringify(saved));
+    store('sj_saved', JSON.stringify(saved));
     scheduleCloudSync();
     refreshBadges(true);
     refreshRailState();
@@ -1966,7 +2039,7 @@
         if (vv) notes[`${state.book}:${vv.c}:${vv.v}`] = { ref: key };
       }
     }
-    localStorage.setItem('sj_notes', JSON.stringify(notes));
+    store('sj_notes', JSON.stringify(notes));
     scheduleCloudSync();
     closeDrawer('note-overlay');
     showToast('Note saved');
@@ -2196,18 +2269,35 @@
     const done = new Set();
     const complete = new Set();
     let chapters = 0, chaptersTotal = 0, verses = 0, versesTotal = 0;
+    // This used to probe all 31,102 verse slots on every call, and it is
+    // called on every swipe — a stutter you could feel a couple of books in.
+    // Walking the record instead costs one step per verse actually read.
+    // Each key is still range-checked, so one left behind by an older build
+    // cannot inflate the total.
+    const perChapter = Object.create(null);
+    Object.keys(readVerses).forEach(key => {
+      if (!readVerses[key]) return;
+      const vAt = key.lastIndexOf(':');
+      if (vAt < 1) return;
+      const cAt = key.lastIndexOf(':', vAt - 1);
+      if (cAt < 1) return;
+      const counts = CHAPTER_COUNTS[key.slice(0, cAt)];
+      if (!counts) return;
+      const c = +key.slice(cAt + 1, vAt);
+      const v = +key.slice(vAt + 1);
+      if (!(c >= 1 && c <= counts.length && v >= 1 && v <= counts[c - 1])) return;
+      const ck = key.slice(0, vAt);
+      perChapter[ck] = (perChapter[ck] || 0) + 1;
+      verses++;
+    });
     BOOKS_66.forEach(book => {
       const counts = CHAPTER_COUNTS[book] || [];
       let full = 0;
       counts.forEach((verseCount, ci) => {
-        const c = ci + 1;
-        let read = 0;
-        for (let v = 1; v <= verseCount; v++) if (readVerses[`${book}:${c}:${v}`]) read++;
-        // Counted here rather than from the size of the reading record, so a
-        // key left behind by an older build cannot inflate the total.
-        verses += read;
         versesTotal += verseCount;
-        if (read === verseCount) { done.add(`${book}:${c}`); full++; chapters++; }
+        if (perChapter[`${book}:${ci + 1}`] === verseCount) {
+          done.add(`${book}:${ci + 1}`); full++; chapters++;
+        }
       });
       chaptersTotal += counts.length;
       if (counts.length && full === counts.length) complete.add(book);
@@ -2398,10 +2488,10 @@
     }
   });
 
-  const badgesSeen = JSON.parse(localStorage.getItem('sj_badges_seen') || '[]');
+  const badgesSeen = load('sj_badges_seen', []);
   // A first run with reading already behind it absorbs what it has earned
   // without announcing twenty badges at once.
-  const hadBadgeRecord = localStorage.getItem('sj_badges_seen') !== null;
+  const hadBadgeRecord = loadRaw('sj_badges_seen', null) !== null;
 
   // Two sections, because they are two different things. A plan has a scope
   // you choose and work through; a milestone is earned and cannot be aimed at.
@@ -2549,7 +2639,7 @@
     if (fresh.length || kept.length !== badgesSeen.length) {
       badgesSeen.length = 0;
       badgesSeen.push(...kept, ...fresh);
-      localStorage.setItem('sj_badges_seen', JSON.stringify(badgesSeen));
+      store('sj_badges_seen', JSON.stringify(badgesSeen));
       scheduleCloudSync();
     }
     if (announce && fresh.length) {
@@ -3054,14 +3144,12 @@
   function closeTour() {
     tourEl.classList.remove('open');
     tourEl.setAttribute('aria-hidden', 'true');
-    try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) {}
+    store(TOUR_KEY, '1');
   }
 
   // Only on a first run, and never on top of a restored session.
   function maybeOpenTour() {
-    let seen = '1';
-    try { seen = localStorage.getItem(TOUR_KEY); } catch (e) {}
-    if (!seen) openTour();
+    if (!loadRaw(TOUR_KEY, null)) openTour();
   }
 
   document.getElementById('tour-next').onclick = () => {
@@ -3155,7 +3243,7 @@
       const raw = notes[k];
       if (raw && raw.ref === startKey) delete notes[k];
     });
-    localStorage.setItem('sj_notes', JSON.stringify(notes));
+    store('sj_notes', JSON.stringify(notes));
     scheduleCloudSync();
     refreshAllNoteIndicators();
     refreshRailState();
@@ -3164,7 +3252,7 @@
   function deleteSavedAt(key) {
     delete saved[key];
     markDeleted('saved', key);
-    localStorage.setItem('sj_saved', JSON.stringify(saved));
+    store('sj_saved', JSON.stringify(saved));
     scheduleCloudSync();
     refreshRailState();
   }
@@ -3259,7 +3347,7 @@
       const key = `${book}:${chapter}:${v}`;
       if (readVerses[key]) { delete readVerses[key]; cleared++; }
     }
-    localStorage.setItem('sj_read', JSON.stringify(readVerses));
+    store('sj_read', JSON.stringify(readVerses));
     scheduleCloudSync();
     refreshRailState();
     return cleared;
@@ -3533,12 +3621,12 @@
       });
       pruneTombstones();
       applyTombstones();
-      localStorage.setItem('sj_saved', JSON.stringify(saved));
-      localStorage.setItem('sj_notes', JSON.stringify(notes));
-      localStorage.setItem('sj_read', JSON.stringify(readVerses));
-      localStorage.setItem('sj_read_dates', JSON.stringify(readDates));
-      localStorage.setItem('sj_open_dates', JSON.stringify(openDates));
-      localStorage.setItem('sj_deleted', JSON.stringify(tombstones));
+      store('sj_saved', JSON.stringify(saved));
+      store('sj_notes', JSON.stringify(notes));
+      store('sj_read', JSON.stringify(readVerses));
+      store('sj_read_dates', JSON.stringify(readDates));
+      store('sj_open_dates', JSON.stringify(openDates));
+      store('sj_deleted', JSON.stringify(tombstones));
       scheduleCloudSync();
       refreshBadges(false);
       const n = countDistinctNotes() - beforeNotes;
@@ -3605,18 +3693,56 @@
 
   // "john 3:16" should work from anywhere, and it needs no index at all —
   // the book list and chapter counts already say whether a reference exists.
+  // The short forms people actually type, for the books whose abbreviation
+  // is not simply the first letters of the name.
+  const BOOK_ABBREV = {
+    gen: 'Genesis', ex: 'Exodus', exod: 'Exodus', lev: 'Leviticus',
+    num: 'Numbers', deut: 'Deuteronomy', dt: 'Deuteronomy', josh: 'Joshua',
+    judg: 'Judges', jdg: 'Judges', '1sam': '1 Samuel', '2sam': '2 Samuel',
+    '1kgs': '1 Kings', '2kgs': '2 Kings', '1chr': '1 Chronicles',
+    '2chr': '2 Chronicles', neh: 'Nehemiah', est: 'Esther', ps: 'Psalms',
+    pss: 'Psalms', prov: 'Proverbs', prv: 'Proverbs', eccl: 'Ecclesiastes',
+    song: 'Song of Solomon', sos: 'Song of Solomon', isa: 'Isaiah',
+    jer: 'Jeremiah', lam: 'Lamentations', ezek: 'Ezekiel', ezk: 'Ezekiel',
+    dan: 'Daniel', hos: 'Hosea', obad: 'Obadiah', mic: 'Micah',
+    nah: 'Nahum', zeph: 'Zephaniah', hag: 'Haggai', zech: 'Zechariah',
+    mal: 'Malachi', mt: 'Matthew', matt: 'Matthew', mk: 'Mark',
+    mrk: 'Mark', lk: 'Luke', jn: 'John', rom: 'Romans', rm: 'Romans',
+    '1cor': '1 Corinthians', '2cor': '2 Corinthians', gal: 'Galatians',
+    eph: 'Ephesians', phil: 'Philippians', php: 'Philippians',
+    col: 'Colossians', '1thess': '1 Thessalonians',
+    '2thess': '2 Thessalonians', '1tim': '1 Timothy', '2tim': '2 Timothy',
+    phlm: 'Philemon', phm: 'Philemon', heb: 'Hebrews', jas: 'James',
+    '1pet': '1 Peter', '2pet': '2 Peter', '1jn': '1 John', '2jn': '2 John',
+    '3jn': '3 John', rev: 'Revelation'
+  };
+
   function resolveReference(q) {
     const m = q.match(/^([1-3]?\s*[a-z][a-z ]*?)\s*(\d+)(?:[:\s]+(\d+))?$/i);
     if (!m) return null;
     const typed = m[1].replace(/\s+/g, ' ').trim().toLowerCase();
+    const tight = typed.replace(/\s/g, '');
+    // A prefix is only good enough when it names one book. "ph" could be
+    // Philippians or Philemon, so it names neither.
+    const prefixed = BOOKS_66.filter(b => b.toLowerCase().startsWith(typed)
+                                       || b.toLowerCase().replace(/\s/g, '').startsWith(tight));
     const book = BOOKS_66.find(b => b.toLowerCase() === typed)
-              || BOOKS_66.find(b => b.toLowerCase().replace(/\s/g, '') === typed.replace(/\s/g, ''))
-              || BOOKS_66.find(b => b.toLowerCase().startsWith(typed) && typed.length >= 3);
+              || BOOKS_66.find(b => b.toLowerCase().replace(/\s/g, '') === tight)
+              || BOOK_ABBREV[tight]
+              || (prefixed.length === 1 ? prefixed[0] : null);
     if (!book) return null;
     const counts = CHAPTER_COUNTS[book] || [];
-    const c = parseInt(m[2], 10);
+    let c, v;
+    if (m[3]) {
+      c = parseInt(m[2], 10); v = parseInt(m[3], 10);
+    } else if (counts.length === 1) {
+      // Obadiah, Philemon, 2 John, 3 John and Jude have one chapter, so
+      // "Jude 3" is a verse, which is also how anyone writes it.
+      c = 1; v = parseInt(m[2], 10);
+    } else {
+      c = parseInt(m[2], 10); v = 1;
+    }
     if (!counts[c - 1]) return null;
-    const v = m[3] ? parseInt(m[3], 10) : 1;
     return counts[c - 1] >= v ? { book, c, v } : null;
   }
 
@@ -3649,8 +3775,9 @@
   // or from the index if a previous search already fetched it. Not worth two
   // megabytes on its own just to preview one reference.
   function verseTextFor(ref) {
-    if (ref.book === state.book) {
-      const v = state.verses.find(x => x.c === ref.c && x.v === ref.v);
+    const held = ref.book === state.book ? state.verses : BOOK_VERSES[ref.book];
+    if (held) {
+      const v = held.find(x => x.c === ref.c && x.v === ref.v);
       if (v) return v.kjv;
     }
     const blob = searchIndex && searchIndex[ref.book];
@@ -3703,8 +3830,19 @@
     }
     const ref = resolveReference(raw);
     if (ref) {
+      const known = verseTextFor(ref);
       showResults([{ book: ref.book, c: ref.c, v: ref.v,
-                     text: verseTextFor(ref) || 'Go to this verse' }]);
+                     text: known || 'Go to this verse' }]);
+      // The text for every book but the open one lives in the search index,
+      // and this branch never asked for it — so a looked-up reference showed
+      // its name and nothing else until some other search had pulled it in.
+      if (!known) {
+        ensureSearchIndex(() => {
+          if (document.getElementById('search-input').value.trim().toLowerCase() !== q) return;
+          showResults([{ book: ref.book, c: ref.c, v: ref.v,
+                         text: verseTextFor(ref) || 'Go to this verse' }]);
+        });
+      }
       return;
     }
     if (q.length < 3) return;
