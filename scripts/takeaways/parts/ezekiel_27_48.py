@@ -359,7 +359,7 @@ TAKEAWAYS.update({
 TAKEAWAYS.update({
     # ---- Chapter 43 ----
     '43:1': "The tour comes back round to the east gate before anything is said to happen there.",
-    '43:2': "The glory of the God of Israel comes from the way of the east, with a voice like many waters.",
+    '43:2': "The glory arrives from the east, the direction it left by in chapter 10. The exit is being retraced.",
     '43:3': "He names the earlier visions: the one by Chebar, and the one he came to destroy the city with.",
     '43:4': "The glory enters the house by the same east gate it had gone out by before the city fell.",
     '43:5': "The house is filled. Everything measured up to this verse had been measured empty.",
