@@ -492,10 +492,6 @@
   }
   .account-info { flex: 1; min-width: 0; }
   .account-sub-warn { color: #e29b9a; }
-  .build-stamp {
-    text-align: center; font-size: 10px; color: var(--text-tertiary);
-    margin: 22px 0 0; letter-spacing: 0.3px;
-  }
   .account-name { font-size: 14px; font-weight: 500; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .account-sub { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; }
   .account-signout-btn {
@@ -1055,10 +1051,6 @@
     Jude: [25],
     Revelation: [20,29,22,11,14,17,17,13,21,11,19,17,18,20,8,21,18,24,21,15,27,21]
   };
-
-  // Shown at the foot of Home. iOS Safari caches this file hard, so when a
-  // change appears not to have landed this says which copy is running.
-  const BUILD_STAMP = '2026-09-21 21:32 UTC';
 
   const API_BIBLE_KEY = "mSiigwn6LhcbU2ZwR3nc5";
   const BIBLE_ID_CACHE_KEY = 'sj_bible_ids';
@@ -2844,7 +2836,6 @@
         </div>
       </div>`;
     });
-    html += `<p class="build-stamp">Build ${BUILD_STAMP}</p>`;
     drawer.innerHTML = html;
     drawer.querySelectorAll('.book-row[data-book]').forEach(row => {
       row.onclick = () => openBookDetail(row.dataset.book);
