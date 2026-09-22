@@ -3201,7 +3201,11 @@
       const vnum = refMatch[2] ? parseInt(refMatch[2]) : null;
       matches = state.verses.filter(v => v.c === c && (vnum === null || v.v === vnum));
     } else {
-      matches = state.verses.filter(v => v.kjv.toLowerCase().includes(q) || v.web.toLowerCase().includes(q));
+      // Twenty-two verses carry no WEB text — the ones that edition omits,
+      // such as Acts 8:37 — and reading it unguarded threw, so a text search
+      // anywhere in Acts returned nothing at all.
+      matches = state.verses.filter(v => (v.kjv || '').toLowerCase().includes(q)
+                                      || (v.web || '').toLowerCase().includes(q));
     }
     matches.slice(0, 25).forEach(v => {
       const div = document.createElement('div');
