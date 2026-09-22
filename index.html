@@ -1429,9 +1429,12 @@
   }
 
   // ---------- Cross-book loading and navigation ----------
-  function ensureBookLoaded(book, callback) {
+  // `quiet` is for the launch restore, which loads a book nobody asked for
+  // behind the opening screen: a toast there would announce plumbing.
+  function ensureBookLoaded(book, callback, opts) {
+    const quiet = !!(opts && opts.quiet);
     if (BOOK_VERSES[book]) { callback(); return; }
-    showToast(`Loading ${book}…`);
+    if (!quiet) showToast(`Loading ${book}…`);
     const fileName = BOOK_FILE_NAMES[book] || book;
     Promise.all([
       fetch(`data/verses_${fileName}.json`).then(r => r.json()),
@@ -1440,7 +1443,74 @@
       BOOK_VERSES[book] = verses;
       BOOK_STUDY[book] = study;
       callback();
-    }).catch(() => showToast('Could not load ' + book));
+    }).catch(() => { if (!quiet) showToast('Could not load ' + book); });
+  }
+
+  // ---------- Where you left off ----------
+  // A reload dropped you back at James 1:1 however far into the Bible you
+  // were. The place stays on the device rather than in the synced record:
+  // it is where this phone is sitting, not something two of them should
+  // argue over.
+  const PLACE_KEY = 'sj_place';
+  let placeTimer = null;
+
+  function writePlace() {
+    const v = state.verses[currentIndex()];
+    if (!v) return;
+    store(PLACE_KEY, JSON.stringify({ book: state.book, c: v.c, v: v.v }));
+  }
+  function schedulePlace() {
+    if (placeTimer !== null) clearTimeout(placeTimer);
+    placeTimer = setTimeout(() => { placeTimer = null; writePlace(); }, 500);
+  }
+  function flushPlace() {
+    if (placeTimer === null) return;
+    clearTimeout(placeTimer);
+    placeTimer = null;
+    writePlace();
+  }
+
+  // Runs behind the opening screen, so the book arrives before the first tap.
+  // Anything unreadable — a book that no longer exists, a verse past the end
+  // of its chapter — just leaves the feed where it started.
+  function restorePlace() {
+    const p = load(PLACE_KEY, null);
+    if (!p || typeof p.book !== 'string') return;
+    const counts = CHAPTER_COUNTS[p.book];
+    if (!counts) return;
+    const c = p.c, v = p.v;
+    if (!(c >= 1 && c <= counts.length && v >= 1 && v <= counts[c - 1])) return;
+    if (p.book === state.book && c === 1 && v === 1) return;
+    const startedIn = state.book;
+    ensureBookLoaded(p.book, () => {
+      // Psalms and its commentary are five megabytes; on a slow connection
+      // that can land after the reader has already tapped through and gone
+      // somewhere. Restoring then would yank them off the verse they chose,
+      // so if they have moved at all, the restore has missed its moment.
+      if (state.book !== startedIn || feed.scrollTop > 0) return;
+      suspendRead();
+      state.book = p.book;
+      state.chapter = c;
+      state.verses = BOOK_VERSES[p.book];
+      // The chapter flash announces arriving somewhere new. Coming back to
+      // where you already were is not that, and neither is the first verse
+      // the feed renders on its way there — so neither one gets to fire.
+      lastSeenChapter = state.verses[0].c;
+      renderFeed();
+      const idx = state.verses.findIndex(x => x.c === c && x.v === v);
+      if (idx > 0) {
+        setTimeout(() => {
+          lastSeenChapter = c;
+          feed.scrollTo({ top: idx * feed.clientHeight, behavior: 'auto' });
+          loadVisibleText();
+          updateChapterLabel();
+        }, 30);
+      }
+      setTimeout(() => {
+        buildTicks(); positionBounds(); updateThumbFromScroll();
+        refreshRailState(); resumeRead();
+      }, 70);
+    }, { quiet: true });
   }
 
   // Choosing a book or chapter yourself ends the trail: a pill offering to go
@@ -1673,10 +1743,11 @@
       refreshBadges(true);
     }, 700);
   }
+  function flushOnLeaving() { flushReadSave(); flushPlace(); }
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') flushReadSave();
+    if (document.visibilityState === 'hidden') flushOnLeaving();
   });
-  window.addEventListener('pagehide', flushReadSave);
+  window.addEventListener('pagehide', flushOnLeaving);
 
   function updateChapterLabel() {
     const idx = currentIndex();
@@ -1687,6 +1758,7 @@
       const chapterChanged = v.c !== state.chapter;
       state.chapter = v.c;
       markReadThrough(idx);
+      schedulePlace();
       if (chapterChanged) {
         buildTicks();
         positionBounds();
@@ -3870,6 +3942,7 @@
 
   // ---------- Init ----------
   renderFeed();
+  restorePlace();
   setTimeout(() => { updateThumbFromScroll(); positionBounds(); refreshRailState(); }, 100);
   window.addEventListener('resize', positionBounds);
   feed.addEventListener('scroll', () => setTimeout(refreshRailState, 90));
