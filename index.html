@@ -574,18 +574,29 @@
 
   /* Badge grid on Home. Unearned badges stay legible rather than hidden, so
      the list reads as somewhere to go rather than a locked cabinet. */
-  .badge-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px; }
-  .badge-card {
+  .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 0 0 4px; }
+  .plan-card {
+    display: block; width: 100%; text-align: left; font-family: inherit; cursor: pointer;
     background: var(--bg-pill); border: 0.5px solid var(--border);
-    border-radius: 10px; padding: 11px 12px;
+    border-radius: 10px; padding: 12px;
   }
-  .badge-card.earned { border-color: var(--accent-dim); background: var(--bg-card); }
-  .badge-name { font-size: 13px; color: var(--text-secondary); margin: 0 0 3px; }
-  .badge-card.earned .badge-name { color: var(--text-primary); }
-  .badge-note { font-size: 11px; color: var(--text-tertiary); margin: 0; line-height: 1.35; }
+  .plan-card:active { background: var(--bg-card); }
+  .plan-card.earned { border-color: var(--accent-dim); background: var(--bg-card); }
+  .plan-head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .plan-icon { color: var(--text-tertiary); display: flex; flex-shrink: 0; }
+  .plan-card.earned .plan-icon { color: var(--accent); }
+  .plan-icon svg { width: 17px; height: 17px; }
+  .plan-name { font-size: 13px; color: var(--text-secondary); line-height: 1.25; }
+  .plan-card.earned .plan-name { color: var(--text-primary); }
+  /* Progress is the real content of a plan card, so it is the thing drawn
+     rather than decoration around it. */
+  .plan-bar { height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; margin-bottom: 7px; }
+  .plan-fill { height: 100%; background: var(--accent-dim); border-radius: 2px; }
+  .plan-card.earned .plan-fill { background: var(--accent); }
+  .plan-line { font-size: 11px; color: var(--text-tertiary); margin: 0; line-height: 1.35; }
+  .plan-card.mile .plan-head { margin-bottom: 6px; }
+
   .badge-count { font-size: 11px; color: var(--text-secondary); margin: 0 0 8px; }
-  .badge-card { display: block; width: 100%; text-align: left; font-family: inherit; cursor: pointer; }
-  .badge-card:active { background: var(--bg-card); }
 
   /* Every other drawer opens from the reading view, where the Home sheet is
      closed; this one opens from inside Home, which sits at 150 — so at the
@@ -594,9 +605,12 @@
   #badge-overlay { z-index: 170; }
 
   .bd-group {
+    display: flex; align-items: center; gap: 7px;
     font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--text-tertiary); margin: 0 0 6px;
+    color: var(--text-tertiary); margin: 0 0 8px;
   }
+  .bd-icon { display: flex; color: var(--accent); }
+  .bd-icon svg { width: 16px; height: 16px; }
   .bd-name { font-family: Georgia, serif; font-size: 24px; color: var(--text-primary); margin: 0 0 4px; }
   .bd-status { font-size: 12px; color: var(--text-secondary); margin: 0 0 14px; }
   .bd-status.earned { color: var(--accent); }
@@ -2077,111 +2091,154 @@
   // the part worth reading for. Books and passages are declared once and both
   // the test and the checklist are derived from them.
   const BADGES = [
-    { id: 'first-chapter', group: 'Structure', name: 'First Chapter',
+    { id: 'first-chapter', icon: 'page', group: 'Structure', name: 'First Chapter',
       note: 'Finish a chapter', test: st => st.chapters >= 1,
       about: 'A chapter counts as read once every verse in it has crossed the screen. The divisions themselves are late — added in the thirteenth century, long after the books were written — but they are how everyone has read ever since.' },
 
-    { id: 'gospels', group: 'Structure', name: 'The Gospels', books: GOSPELS,
+    { id: 'gospels', icon: 'panes', minutes: 419, group: 'Structure', name: 'The Gospels', books: GOSPELS,
       note: 'Matthew, Mark, Luke and John',
       about: 'Four accounts of one life, written for different readers. Matthew argues from prophecy for people who knew the Hebrew scriptures, Mark moves at a run and says "immediately" more than forty times, Luke opens by saying he investigated everything from the first, and John explains what the other three report. Reading all four shows where they agree without copying and where one of them alone keeps a detail.' },
 
-    { id: 'law', group: 'Structure', name: 'The Law', books: PENTATEUCH,
+    { id: 'law', icon: 'tablets', minutes: 784, group: 'Structure', name: 'The Law', books: PENTATEUCH,
       note: 'Genesis through Deuteronomy',
       about: 'Five books that were one scroll, running from creation to the edge of a land the man leading them never entered. Everything after assumes you have read it: the prophets are not introducing a case, they are prosecuting the covenant these books set out.' },
 
-    { id: 'twelve', group: 'Structure', name: 'The Twelve', books: MINOR_PROPHETS,
+    { id: 'twelve', icon: 'scroll', minutes: 151, group: 'Structure', name: 'The Twelve', books: MINOR_PROPHETS,
       note: 'All twelve minor prophets',
       about: 'In the Hebrew Bible these twelve are one book on one scroll — "minor" means short, not lesser. They span roughly three centuries, from Amos speaking into a prosperous Israel to Malachi addressing a rebuilt Jerusalem that had expected more. Read together they make one long argument about a people who kept their religion and lost their justice, and they end the Old Testament waiting for someone.' },
 
-    { id: 'paul', group: 'Structure', name: "Paul's Hand", books: PAULINE,
+    { id: 'paul', icon: 'letter', minutes: 217, group: 'Structure', name: "Paul's Hand", books: PAULINE,
       note: 'All thirteen of his letters',
       about: 'Thirteen letters, none of them written to be scripture. They are occasional mail answering crises in particular towns — Romans is the most systematic thing he wrote, Philemon is a note about a runaway slave. Taken together they show one man improvising the same gospel into very different rooms.' },
 
-    { id: 'long-roads', group: 'Structure', name: 'The Long Roads', books: LONG_ROADS,
+    { id: 'long-roads', icon: 'road', minutes: 1000, group: 'Structure', name: 'The Long Roads', books: LONG_ROADS,
       note: 'Genesis, Psalms, Isaiah, Jeremiah, Ezekiel',
       about: 'The five longest books, and between them nearly a third of the Bible. They are where reading plans usually stop, which is the only reason this one is worth marking separately.' },
 
-    { id: 'nt', group: 'Structure', name: 'New Testament', books: NT_BOOKS,
+    { id: 'nt', icon: 'book', minutes: 902, group: 'Structure', name: 'New Testament', books: NT_BOOKS,
       note: 'All twenty-seven books',
       about: 'Twenty-seven documents written inside about seventy years, mostly in Greek by men who spoke Aramaic at home. Four accounts, one history, twenty-one letters and one vision — and no one of them was written knowing it would sit beside the others.' },
 
-    { id: 'ot', group: 'Structure', name: 'Old Testament', books: OT_BOOKS,
+    { id: 'ot', icon: 'stack', minutes: 3046, group: 'Structure', name: 'Old Testament', books: OT_BOOKS,
       note: 'All thirty-nine books',
       about: 'Thirty-nine books gathered over something like a thousand years — law, chronicle, poetry, proverb and prophecy, by many hands, in two languages. It is the scripture Jesus read and quoted, and the New Testament is largely unreadable without it.' },
 
-    { id: 'whole', group: 'Structure', name: 'Whole Counsel',
-      note: 'Every book of the Bible', test: st => st.books === 66,
+    { id: 'whole', icon: 'globe', minutes: 3948, group: 'Structure', name: 'Whole Counsel',
+      books: BOOKS_66, note: 'Every book of the Bible',
       about: 'Sixty-six books, 1,189 chapters, 31,102 verses. The name is Paul taking leave of the Ephesian elders in Acts 20: "I have not shunned to declare unto you all the counsel of God" — the whole of it, not the parts that suited him.' },
 
-    { id: 'creation', group: 'Landmarks', name: 'In the Beginning',
+    { id: 'creation', icon: 'sunrise', minutes: 11, group: 'Landmarks', name: 'In the Beginning',
       passages: [['Genesis', 1, 3]], note: 'Genesis 1 to 3',
       about: 'Three chapters the rest of the Bible keeps arguing with. Creation stated rather than defended, a garden with one prohibition in it, and the first question anyone asks God — which is a question about what he said.' },
 
-    { id: 'psalm119', group: 'Landmarks', name: 'The Long Psalm',
+    { id: 'psalm119', icon: 'lines', minutes: 12, group: 'Landmarks', name: 'The Long Psalm',
       passages: [['Psalms', 119, 119]], note: 'All 176 verses of Psalm 119',
       about: 'The longest chapter in the Bible: twenty-two stanzas, one for each letter of the Hebrew alphabet, every verse of a stanza beginning with that letter. Almost every verse names the law in some form. It is a love poem to it, not a legal brief.' },
 
-    { id: 'isaiah53', group: 'Landmarks', name: 'The Suffering Servant',
+    { id: 'isaiah53', icon: 'valley', minutes: 2, group: 'Landmarks', name: 'The Suffering Servant',
       passages: [['Isaiah', 53, 53]], note: 'Isaiah 53',
       about: 'Twelve verses written centuries before the crucifixion, describing someone despised, silent under accusation, buried with the rich, and counted among transgressors on purpose. It is the Old Testament passage the New Testament quotes most when it explains what the cross was for.' },
 
-    { id: 'sermon', group: 'Landmarks', name: 'On the Mount',
+    { id: 'sermon', icon: 'mount', minutes: 13, group: 'Landmarks', name: 'On the Mount',
       passages: [['Matthew', 5, 7]], note: 'Matthew 5 to 7',
       about: 'The longest stretch of his teaching in one place. It raises the law rather than relaxing it — murder reaching back to anger, adultery to the look — and ends with crowds astonished, because he taught as one having authority and not as the scribes.' },
 
-    { id: 'romans8', group: 'Landmarks', name: 'No Condemnation',
+    { id: 'romans8', icon: 'chain', minutes: 5, group: 'Landmarks', name: 'No Condemnation',
       passages: [['Romans', 8, 8]], note: 'Romans 8',
       about: 'The chapter Romans has been building toward for seven. It opens with no condemnation and closes with nothing able to separate, and the middle is honest about groaning in between — creation, the believer and the Spirit all doing it.' },
 
-    { id: 'love', group: 'Landmarks', name: 'The More Excellent Way',
+    { id: 'love', icon: 'heart', minutes: 1, group: 'Landmarks', name: 'The More Excellent Way',
       passages: [['1 Corinthians', 13, 13]], note: '1 Corinthians 13',
       about: 'Read at weddings, written to a congregation suing one another and fighting over who had the better gift. In that setting "charity suffereth long, and is kind" is not sentiment; it is the correction.' },
 
-    { id: 'passion', group: 'Landmarks', name: 'Four Accounts',
+    { id: 'passion', icon: 'cross', minutes: 50, group: 'Landmarks', name: 'Four Accounts',
       passages: [['Matthew', 26, 27], ['Mark', 14, 15], ['Luke', 22, 23], ['John', 18, 19]],
       note: 'The passion in all four Gospels',
       about: 'The same two days told four times. Each keeps something the others leave out — Luke alone has the thief promised paradise, John alone records "It is finished" — and reading them one after another is the closest the Bible comes to showing its own witnesses side by side.' },
 
-    { id: 'ending', group: 'Landmarks', name: 'All Things New',
+    { id: 'ending', icon: 'city', minutes: 7, group: 'Landmarks', name: 'All Things New',
       passages: [['Revelation', 21, 22]], note: 'Revelation 21 and 22',
       about: 'The Bible ends where it began, with a garden and a tree of life, except now it is a city and the gates are never shut. The last promise is not escape from the world but God moving into it: the tabernacle of God is with men.' },
 
-    { id: 'first-save', group: 'Depth', name: 'Kept', note: 'Save a verse',
+    { id: 'first-save', icon: 'bookmark', group: 'Depth', name: 'Kept', note: 'Save a verse',
       test: st => st.saved >= 1, meter: st => [Math.min(st.saved, 1), 1],
       about: 'Saving marks a verse to come back to. The point of a saved verse is the second reading, not the first.' },
 
-    { id: 'first-note', group: 'Depth', name: 'In Your Own Words', note: 'Write a note',
+    { id: 'first-note', icon: 'pen', group: 'Depth', name: 'In Your Own Words', note: 'Write a note',
       test: st => st.notes >= 1, meter: st => [Math.min(st.notes, 1), 1],
       about: 'Writing something down is the difference between having read a verse and having thought about it. A note can be a question; it does not have to be a conclusion.' },
 
-    { id: 'notes-25', group: 'Depth', name: 'Margin Notes', note: 'Twenty-five notes',
+    { id: 'notes-25', icon: 'quill', group: 'Depth', name: 'Margin Notes', note: 'Twenty-five notes',
       test: st => st.notes >= 25, meter: st => [Math.min(st.notes, 25), 25],
       about: 'Readers have written in the margins for as long as there have been margins, and the notes usually outlive the reason for them. Twenty-five is enough to start seeing what you keep returning to.' },
 
-    { id: 'streak-7', group: 'Consistency', name: 'Seven Days', note: 'A week of reading in a row',
+    { id: 'streak-7', icon: 'flame', group: 'Consistency', name: 'Seven Days', note: 'A week of reading in a row',
       test: st => st.streak >= 7, meter: st => [Math.min(st.streak, 7), 7],
       about: 'A day counts when you have actually read something, not when you have opened the app. Seven is where a habit stops being a decision each morning.' },
 
-    { id: 'streak-30', group: 'Consistency', name: 'Thirty Days', note: 'A month in a row',
+    { id: 'streak-30', icon: 'flame', group: 'Consistency', name: 'Thirty Days', note: 'A month in a row',
       test: st => st.streak >= 30, meter: st => [Math.min(st.streak, 30), 30],
       about: 'A month of consecutive days. Long enough that the gap, when it comes, will be a choice rather than an accident.' },
 
-    { id: 'streak-100', group: 'Consistency', name: 'Hundred Days', note: 'A hundred in a row',
+    { id: 'streak-100', icon: 'flame', group: 'Consistency', name: 'Hundred Days', note: 'A hundred in a row',
       test: st => st.streak >= 100, meter: st => [Math.min(st.streak, 100), 100],
       about: 'A hundred days without missing one. At a chapter a day that is most of the New Testament.' },
 
-    { id: 'streak-365', group: 'Consistency', name: 'A Full Year', note: 'Three hundred and sixty-five in a row',
+    { id: 'streak-365', icon: 'flame', group: 'Consistency', name: 'A Full Year', note: 'Three hundred and sixty-five in a row',
       test: st => st.streak >= 365, meter: st => [Math.min(st.streak, 365), 365],
       about: 'Every day for a year. The whole Bible is 1,189 chapters, so a year of three chapters a day is the traditional way through all of it.' },
 
-    { id: 'return', group: 'Consistency', name: 'Return', note: 'Come back after a week away',
+    { id: 'return', icon: 'uturn', group: 'Consistency', name: 'Return', note: 'Come back after a week away',
       test: st => st.returned,
       about: 'The only badge here that a broken streak can earn. Reading stops for all the ordinary reasons and the streak counter has nothing good to say about that; coming back is the part that actually matters, so it is worth marking once.' },
   ];
 
+  // Line icons in the same stroke weight as the rail and the tray. The
+  // reference app this was modelled on uses stock photographs of open Bibles;
+  // against Georgia on near-black with one brown accent they would read as a
+  // different product, so the visual weight goes on the progress instead.
+  const PLAN_ICONS = {
+    page: '<path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5"/>',
+    panes: '<rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/>',
+    tablets: '<path d="M4 8a3 3 0 0 1 3-3h1a3 3 0 0 1 3 3v13H4z"/><path d="M13 8a3 3 0 0 1 3-3h1a3 3 0 0 1 3 3v13h-7z"/>',
+    scroll: '<path d="M7 4h11v13a3 3 0 0 0 3 3H8a3 3 0 0 1-3-3V6"/><path d="M5 6a2 2 0 1 1 4 0v0"/><line x1="10" y1="9" x2="16" y2="9"/><line x1="10" y1="13" x2="16" y2="13"/>',
+    letter: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 8l10 6 10-6"/>',
+    road: '<path d="M8 21c0-6 8-12 8-18"/><path d="M4 21c2-4 4-6 4-10"/>',
+    book: '<path d="M4 4h7a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4z"/><path d="M20 4h-7a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h7z"/>',
+    stack: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/>',
+    sunrise: '<path d="M12 4v4"/><path d="M5.6 10.6l2.1 2.1"/><path d="M18.4 10.6l-2.1 2.1"/><circle cx="12" cy="16" r="4"/><line x1="2" y1="21" x2="22" y2="21"/>',
+    lines: '<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="4" y1="14" x2="16" y2="14"/><line x1="4" y1="18" x2="12" y2="18"/>',
+    valley: '<path d="M3 5v9a7 7 0 0 0 7 7h4"/><path d="M10 12l4 4 4-4"/>',
+    mount: '<path d="M2 20l7-12 4 6 2-3 7 9z"/>',
+    chain: '<path d="M9 13a4 4 0 0 1 0-6l1-1"/><path d="M15 11a4 4 0 0 1 0 6l-1 1"/><line x1="4" y1="20" x2="20" y2="4"/>',
+    heart: '<path d="M20.8 6.6a5 5 0 0 0-7.1 0L12 8.3l-1.7-1.7a5 5 0 1 0-7.1 7.1L12 21l8.8-7.3a5 5 0 0 0 0-7.1z"/>',
+    cross: '<line x1="12" y1="2" x2="12" y2="22"/><line x1="6" y1="8" x2="18" y2="8"/>',
+    city: '<path d="M3 21V10l5-3 5 3v11"/><path d="M13 21V13l4-2 4 2v8"/><line x1="2" y1="21" x2="22" y2="21"/>',
+    bookmark: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+    pen: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    quill: '<path d="M4 20c6-10 10-14 16-16-1 9-5 14-12 16z"/><line x1="4" y1="20" x2="10" y2="14"/>',
+    flame: '<path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 0 1-12 0c0-4 2-6 3-8 1-1.5 2-2.5 3-4z"/>',
+    uturn: '<path d="M4 20V10a5 5 0 0 1 10 0v7"/><path d="M10 14l4 4 4-4"/>',
+  };
+  const planIcon = name => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    + 'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+    + (PLAN_ICONS[name] || PLAN_ICONS.page) + '</svg>';
+
+  // Read at 200 words a minute, counted off the text this app ships rather
+  // than estimated. The whole Bible comes to 66 hours, which is where the
+  // usual figure sits.
+  function readingTime(mins) {
+    if (!mins) return '';
+    if (mins < 60) return 'about ' + mins + ' min';
+    const h = mins / 60;
+    return 'about ' + (h < 10 ? (Math.round(h * 2) / 2 + '').replace('.5', '\u00bd') : Math.round(h)) + ' h';
+  }
+
   // Declaring the books or passages once means the test and the checklist can
   // never disagree about what a badge is asking for.
   BADGES.forEach(b => {
+    b.kind = (b.group === 'Structure' || b.group === 'Landmarks') ? 'plan' : 'milestone';
     if (b.books) {
       b.parts = st => b.books.map(n => ({ label: n, done: st.complete.has(n) }));
       b.test = b.test || (st => b.books.every(n => st.complete.has(n)));
@@ -2204,17 +2261,56 @@
   // without announcing twenty badges at once.
   const hadBadgeRecord = localStorage.getItem('sj_badges_seen') !== null;
 
+  // Two sections, because they are two different things. A plan has a scope
+  // you choose and work through; a milestone is earned and cannot be aimed at.
+  // Calling both "badges" made the first kind look like a trophy cabinet when
+  // it is really a list of somewhere to go next.
+  function planCardHtml(b, st, earned) {
+    const parts = b.parts ? b.parts(st) : null;
+    const have = parts ? parts.filter(x => x.done).length : (earned ? 1 : 0);
+    const need = parts ? parts.length : 1;
+    const unit = b.books ? 'books' : (b.passages ? 'chapters' : '');
+    const pct = need ? Math.round((have / need) * 100) : 0;
+    const scope = unit ? `${have} of ${need} ${unit}` : b.note;
+    const line = earned ? 'Complete'
+      : scope + (b.minutes ? ` · ${readingTime(b.minutes)}` : '');
+    return `<button class="plan-card${earned ? ' earned' : ''}" data-badge="${b.id}">`
+      + `<div class="plan-head"><span class="plan-icon">${planIcon(b.icon)}</span>`
+      + `<span class="plan-name">${b.name}</span></div>`
+      + `<div class="plan-bar"><div class="plan-fill" style="width:${pct}%;"></div></div>`
+      + `<p class="plan-line">${line}</p></button>`;
+  }
+
+  function milestoneCardHtml(b, st, earned) {
+    const meter = b.meter ? b.meter(st) : null;
+    // "0 of 1" tells you nothing; a one-step milestone says what to do.
+    const line = earned ? 'Earned'
+      : (meter && meter[1] > 1 ? `${meter[0]} of ${meter[1]}` : b.note);
+    return `<button class="plan-card mile${earned ? ' earned' : ''}" data-badge="${b.id}">`
+      + `<div class="plan-head"><span class="plan-icon">${planIcon(b.icon)}</span>`
+      + `<span class="plan-name">${b.name}</span></div>`
+      + `<p class="plan-line">${line}</p></button>`;
+  }
+
   function badgeSectionHtml() {
-    const { earned } = refreshBadges(false);
+    const { stats, earned } = refreshBadges(false);
     const set = new Set(earned);
-    let html = `<p class="badge-count">${earned.length} of ${BADGES.length} earned</p>`
-             + `<div class="badge-grid">`;
-    BADGES.forEach(b => {
-      html += `<button class="badge-card${set.has(b.id) ? ' earned' : ''}" data-badge="${b.id}">`
-            + `<p class="badge-name">${b.name}</p>`
-            + `<p class="badge-note">${b.note}</p></button>`;
-    });
-    return html + `</div>`;
+    const plans = BADGES.filter(b => b.kind === 'plan');
+    const miles = BADGES.filter(b => b.kind === 'milestone');
+    const donePlans = plans.filter(b => set.has(b.id)).length;
+    const doneMiles = miles.filter(b => set.has(b.id)).length;
+
+    let html = `<p class="book-section">Reading plans</p>`
+      + `<p class="badge-count">${donePlans} of ${plans.length} complete</p>`
+      + `<div class="plan-grid">`
+      + plans.map(b => planCardHtml(b, stats, set.has(b.id))).join('')
+      + `</div>`;
+    html += `<p class="book-section">Milestones</p>`
+      + `<p class="badge-count">${doneMiles} of ${miles.length} earned</p>`
+      + `<div class="plan-grid">`
+      + miles.map(b => milestoneCardHtml(b, stats, set.has(b.id))).join('')
+      + `</div>`;
+    return html;
   }
 
   function openBadgeDetail(id) {
@@ -2231,10 +2327,12 @@
     else if (meter) status = `${meter[0]} of ${meter[1]}`;
     else status = 'Not yet';
 
+    const extra = badge.minutes ? ` · ${readingTime(badge.minutes)}` : '';
     let html = `<div class="drawer-handle"></div>`
-      + `<p class="bd-group">${badge.group}</p>`
+      + `<p class="bd-group"><span class="bd-icon">${planIcon(badge.icon)}</span>`
+      + `${badge.kind === 'plan' ? 'Reading plan' : 'Milestone'}</p>`
       + `<p class="bd-name">${badge.name}</p>`
-      + `<p class="bd-status${earned ? ' earned' : ''}">${status}</p>`
+      + `<p class="bd-status${earned ? ' earned' : ''}">${status}${extra}</p>`
       + `<p class="bd-about">${badge.about}</p>`;
     if (parts) {
       html += `<div class="bd-parts">` + parts.map(x =>
@@ -2646,7 +2744,6 @@
         </div>
         <div class="library-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
-      <p class="book-section">Badges</p>
       ${badgeSectionHtml()}
     `;
     // Malachi ran straight into Matthew with nothing marking the join.
@@ -2671,7 +2768,7 @@
     drawer.querySelectorAll('.book-row[data-book]').forEach(row => {
       row.onclick = () => openBookDetail(row.dataset.book);
     });
-    drawer.querySelectorAll('.badge-card[data-badge]').forEach(card => {
+    drawer.querySelectorAll('.plan-card[data-badge]').forEach(card => {
       card.onclick = () => openBadgeDetail(card.dataset.badge);
     });
     document.getElementById('lib-saved-row').onclick = () => openSavedBrowser();
