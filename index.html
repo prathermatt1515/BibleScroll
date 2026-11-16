@@ -858,6 +858,27 @@
   .devo-order.lead > p { font-size: 21px; }
   .devo-order.lead > p.rubric { font-size: 16px; }
   .devo-order.lead .devo-passage, .devo-order.lead .slot .all-text, .devo-order.lead .devo-qs li { font-size: 20px; }
+  /* ---------- Catechism memory work ---------- */
+  .ten-modes { display: flex; border: 0.5px solid var(--border-strong); border-radius: 999px; overflow: hidden; }
+  .ten-modes button { background: none; border: none; padding: 6px 12px; font-size: 12px; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+  .ten-modes button.on { background: var(--accent-dim); color: #fff; }
+  .ten-progress { margin: 0 0 14px; }
+  .ten-bar { height: 6px; background: var(--bg-pill); border-radius: 999px; overflow: hidden; }
+  .ten-bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.3s; }
+  .ten-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .ten-text { font-family: Georgia, serif; font-size: 16.5px; line-height: 1.55; color: var(--text-primary); white-space: pre-line; transition: filter 0.2s; }
+  .ten-text.ten-hidden { filter: blur(7px); cursor: pointer; user-select: none; }
+  .ten-q { font-style: italic; font-size: 13.5px; color: var(--text-secondary); margin: 12px 0 6px; }
+  .ten-empty { font-size: 13px; color: var(--text-tertiary); font-style: italic; }
+  .ten-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 8px; }
+  .ten-mem { background: var(--bg-pill); border: 0.5px solid var(--border-strong); border-radius: 999px; padding: 7px 14px; font-size: 13px; color: var(--text-primary); cursor: pointer; font-family: inherit; }
+  .ten-mem.on { border-color: var(--accent); color: var(--accent); }
+  .ten-edit { background: none; border: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; font-family: inherit; padding: 6px; }
+  .ten-ta { width: 100%; box-sizing: border-box; background: var(--bg); color: var(--text-primary); border: 0.5px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; font-size: 16px; line-height: 1.45; font-family: inherit; resize: vertical; }
+  .fam-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; color: var(--text-primary); gap: 8px; word-break: break-all; }
+  .fam-del { background: none; border: none; color: var(--text-secondary); font-size: 12.5px; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+  .fam-add { display: flex; gap: 8px; margin-top: 12px; }
+  .fam-add input { flex: 1; min-width: 0; background: var(--bg); color: var(--text-primary); border: 0.5px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; font-size: 16px; font-family: inherit; }
 </style>
 </head>
 <body>
@@ -1572,6 +1593,10 @@
     if (typeof refreshHomeIfOpen === 'function') refreshHomeIfOpen();
     if (devoOpen && typeof renderDevotion === 'function' && devo.quarters[devo.qid]) renderDevotion();
     if (typeof setSplashWelcome === 'function' && !splashGone) setSplashWelcome();
+    // The family's private catechism wording follows the signed-in account.
+    if (typeof loadFamily === 'function') {
+      loadFamily().then(() => { if (devoOpen && devo.view === 'ten') renderTen(); });
+    }
   });
 
   // ---------- Streak tracking ----------
@@ -4573,6 +4598,7 @@
 
   function renderDevotion() {
     if (devo.view === 'order') return renderOrder();
+    if (devo.view === 'ten') return renderTen();
     const q = devo.quarters[devo.qid];
     const w = q.weeks[devo.week];
     const drawer = document.getElementById('home-content');
@@ -4678,6 +4704,7 @@
         <div class="devo-levels">${levelBtns}</div>
         ${cards || '<p class="devo-msg">Nothing at this level this week.</p>'}
       </div>
+      ${tenEntryCardHtml()}
       <div class="tracker-card">
         <p class="devo-h">Hymn of the season</p>
         ${hymnHtml(w)}
@@ -4697,6 +4724,7 @@
     drawer.querySelectorAll('.devo-levels button').forEach(b => { b.onclick = () => { devoLevel = b.dataset.level; store('sj_devo_level', devoLevel); rerender(); }; });
     drawer.querySelectorAll('.devo-card').forEach(c => { c.onclick = () => c.classList.toggle('flip'); });
     drawer.querySelectorAll('.devo-pray button').forEach(b => { b.onclick = () => { devo.view = 'order'; devo.order = b.dataset.order; renderDevotion(); document.getElementById('home-page').scrollTop = 0; }; });
+    document.getElementById('open-ten').onclick = () => { devo.view = 'ten'; renderTen(); document.getElementById('home-page').scrollTop = 0; };
     const doneBtn = document.getElementById('devo-done');
     if (doneBtn) doneBtn.onclick = () => {
       const now = !devoIsDone(dateS);
@@ -4770,6 +4798,288 @@
     document.getElementById('home-page').scrollTop = 0;
     openDevotion();
   };
+
+
+  // ---------- Catechism memory work: the Ten Commandments ----------
+  // The wording is the family's own: typed or pasted in by them, never
+  // shipped in this public code. Signed out, it stays on this phone. Signed
+  // in, it lives in a private family document (families/{ownerUid}) that only
+  // the owner and the Google accounts they add can read (see firestore.rules).
+  // Memorized check-offs are each person's own and ride along with the
+  // devotion check-offs in their users/{uid} document, keyed 'cat|ten|<id>'.
+  const ORDINALS = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth'];
+  const TEN_ITEMS = ORDINALS.map((o, i) => ({ id: String(i + 1), label: `The ${o} Commandment` }))
+    .concat([{ id: 'close', label: 'The Close of the Commandments' }]);
+  const CPH_TEN_URL = 'https://catechism.cph.org/en/10-commandments.html';
+
+  let catText = load('sj_cat_text', { ten: {}, updatedAt: 0 });
+  if (!catText || typeof catText !== 'object') catText = { ten: {}, updatedAt: 0 };
+  if (!catText.ten || typeof catText.ten !== 'object') catText.ten = {};
+  // family: null (signed out), or { id, owner, ownerEmail, members, exists }.
+  let family = null;
+  let familyState = 'none'; // none | loading | ready | error
+  const cat = { practice: false, pasteOpen: false, pastePreview: null, editing: null, revealed: {}, msg: '' };
+
+  function catEntry(id) {
+    const e = catText.ten[id];
+    return { cmd: (e && typeof e.cmd === 'string') ? e.cmd : '', meaning: (e && typeof e.meaning === 'string') ? e.meaning : '' };
+  }
+  function catHasText() { return TEN_ITEMS.some(it => { const e = catEntry(it.id); return e.cmd || e.meaning; }); }
+
+  // ---- memorized check-offs (per person) ----
+  function memKey(id) { return 'cat|ten|' + id; }
+  function isMemorized(id) { const e = devoChecks[memKey(id)]; return !!(e && e.d); }
+  function setMemorized(id, on) {
+    const k = memKey(id);
+    devoChecks[k] = { d: on ? 1 : 0, t: Date.now() };
+    devoDirty.add(k);
+    store('sj_devo_checks', JSON.stringify(devoChecks));
+    scheduleCloudSync();
+  }
+  function memorizedCount() { return TEN_ITEMS.filter(it => isMemorized(it.id)).length; }
+
+  // ---- paste-all parser ----
+  // Splits a pasted Ten Commandments page (from a website, or typed from a
+  // sheet) at each "The ___ Commandment" heading and the Close, then at
+  // "What does this mean?". Anything it gets wrong can be fixed by hand.
+  function parseTenCommandments(raw) {
+    const text = String(raw || '').replace(/\r/g, '').replace(/[ \t]/g, ' ');
+    const re = /\b(?:the\s+)?(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\s+commandment\b|\b(?:the\s+)?close\s+of\s+the\s+commandments\b/gi;
+    const marks = [];
+    const seen = new Set();
+    let m;
+    while ((m = re.exec(text))) {
+      const id = m[1] ? String(ORDINALS.findIndex(o => o.toLowerCase() === m[1].toLowerCase()) + 1) : 'close';
+      if (seen.has(id)) continue; // a later "read more about the First Commandment" link is not a new section
+      seen.add(id);
+      marks.push({ id, start: m.index, end: re.lastIndex });
+    }
+    const tidy = s => s.split('\n').map(l => l.trim())
+      .filter(l => l && !/^\[?\s*exodus\s+20\s*\]?\.?$/i.test(l) && !/^(read|learn)\s+more\b/i.test(l))
+      .join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    const items = {};
+    marks.forEach((mk, i) => {
+      const chunk = text.slice(mk.end, i + 1 < marks.length ? marks[i + 1].start : text.length);
+      const parts = chunk.split(/what\s+does\s+this\s+mean\s*\??/i);
+      const cmd = tidy(parts[0] || '');
+      const meaning = tidy(parts.slice(1).join(' '));
+      if (cmd || meaning) items[mk.id] = { cmd, meaning };
+    });
+    return items;
+  }
+
+  // ---- storage ----
+  function famRef(id) { return firebase.firestore().collection('families').doc(id); }
+
+  function saveCatText(changedIds) {
+    catText.updatedAt = Date.now();
+    store('sj_cat_text', JSON.stringify(catText));
+    return pushCatText(changedIds);
+  }
+  function pushCatText() {
+    if (!currentUser || !family || familyState !== 'ready') return Promise.resolve(false);
+    const body = { catechism: { ten: catText.ten }, updatedAt: catText.updatedAt };
+    if (family.owner) {
+      Object.assign(body, { owner: currentUser.uid, ownerEmail: (currentUser.email || '').toLowerCase(), members: family.members });
+    }
+    return famRef(family.id).set(body, { merge: true }).then(() => { family.exists = true; return true; })
+      .catch(e => { console.warn('family save failed', e); cat.msg = 'Saved on this phone, but the family copy could not be updated. It will try again next time.'; return false; });
+  }
+
+  function loadFamily() {
+    family = null;
+    if (!currentUser) { familyState = 'none'; return Promise.resolve(); }
+    familyState = 'loading';
+    const uid = currentUser.uid;
+    const email = currentUser.email || '';
+    const adopt = (id, data, owner) => {
+      family = { id, owner, exists: !!data, ownerEmail: (data && data.ownerEmail) || (owner ? email.toLowerCase() : ''), members: (data && Array.isArray(data.members)) ? data.members.slice() : [] };
+      const remote = data && data.catechism && data.catechism.ten;
+      const remoteAt = (data && typeof data.updatedAt === 'number') ? data.updatedAt : 0;
+      if (remote && remoteAt >= (catText.updatedAt || 0)) {
+        catText = { ten: remote, updatedAt: remoteAt };
+        store('sj_cat_text', JSON.stringify(catText));
+      }
+      familyState = 'ready';
+      // This phone has newer wording than the family copy (typed while signed out): send it up.
+      if (catHasText() && (catText.updatedAt || 0) > remoteAt) return pushCatText();
+    };
+    return famRef(uid).get().then(snap => {
+      if (snap.exists) return adopt(uid, snap.data() || {}, true);
+      if (!email) return adopt(uid, null, true);
+      return firebase.firestore().collection('families').where('members', 'array-contains', email).limit(1).get()
+        .then(q => {
+          if (q && !q.empty && q.docs[0].id !== uid) return adopt(q.docs[0].id, q.docs[0].data() || {}, false);
+          return adopt(uid, null, true);
+        });
+    }).catch(e => {
+      console.warn('family load failed', e);
+      family = null;
+      familyState = 'error';
+    });
+  }
+
+  function addFamilyMember(raw) {
+    const email = String(raw || '').trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('That does not look like an email address'); return; }
+    if (!family || !family.owner) return;
+    if (email === (currentUser.email || '').toLowerCase()) { showToast('That is you, already in'); return; }
+    if (family.members.includes(email)) { showToast('Already in the family'); return; }
+    if (family.members.length >= 20) { showToast('A family can have up to 20 people'); return; }
+    family.members.push(email);
+    pushCatText().then(ok => { if (ok) showToast('Added ' + email); renderTen(); });
+  }
+  function removeFamilyMember(email) {
+    if (!family || !family.owner) return;
+    family.members = family.members.filter(m => m !== email);
+    pushCatText().then(() => renderTen());
+  }
+
+  // ---- rendering ----
+  function tenEntryCardHtml() {
+    const n = memorizedCount();
+    return `
+      <div class="tracker-card">
+        <p class="devo-h">Catechism memory work</p>
+        <button class="devo-btn" id="open-ten" style="width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+          <span>The Ten Commandments</span><span style="color:var(--text-secondary);">${n} of ${TEN_ITEMS.length} ›</span>
+        </button>
+      </div>`;
+  }
+
+  function familyCardHtml() {
+    if (!currentUser) {
+      return `<p class="devo-msg">Saved on this phone only. Sign in from the Home tab to share the wording with your family and keep it on all your devices.</p>`;
+    }
+    if (familyState === 'loading') return `<p class="devo-msg">Checking your family’s copy…</p>`;
+    if (familyState === 'error' || !family) {
+      return `<p class="devo-msg">Family sharing could not be reached, so this is saved on this phone for now. If this keeps happening, the Firebase rules for families may not be published yet.</p>
+        <div class="devo-btnrow"><button class="devo-btn" id="fam-retry">Try again</button></div>`;
+    }
+    if (!family.owner) {
+      return `<p class="devo-msg">Shared with you by ${esc(family.ownerEmail || 'your family')}. You can fix the wording; they manage who is in the family.</p>`;
+    }
+    const list = family.members.length
+      ? family.members.map(m => `<div class="fam-row"><span>${esc(m)}</span><button class="fam-del" data-email="${esc(m)}">Remove</button></div>`).join('')
+      : `<p class="devo-msg">Only you so far.</p>`;
+    return `<p class="devo-msg" style="margin-bottom:8px;">Private to the people listed here. They see it after signing in with that Google account.</p>
+      ${list}
+      <div class="fam-add"><input type="email" id="fam-email" placeholder="Add a family member's Google email" autocomplete="off" autocapitalize="off"><button class="devo-btn" id="fam-add-btn" style="flex:0 0 auto; min-width:0;">Add</button></div>`;
+  }
+
+  function renderTen() {
+    const drawer = document.getElementById('home-content');
+    setHomeTitle('The Ten Commandments');
+    const n = memorizedCount();
+    const pct = Math.round(100 * n / TEN_ITEMS.length);
+    const has = catHasText();
+
+    let paste = '';
+    if (cat.pasteOpen) {
+      const prev = cat.pastePreview;
+      const found = prev ? TEN_ITEMS.filter(it => prev[it.id]) : [];
+      const missing = prev ? TEN_ITEMS.filter(it => !prev[it.id]).map(it => it.label.replace(/^The /, '')) : [];
+      paste = `
+        <div class="tracker-card">
+          <p class="devo-h">Paste or type the whole page</p>
+          <p class="devo-msg" style="margin-bottom:8px;">Include the headings (“The First Commandment”) and “What does this mean?” so the app can split it up.</p>
+          <textarea id="ten-paste" class="ten-ta" rows="8" placeholder="The First Commandment&#10;You shall have…&#10;What does this mean?&#10;We should…"></textarea>
+          ${prev ? `<p class="devo-msg" style="margin-top:8px;">Found ${found.length} of ${TEN_ITEMS.length}.${missing.length ? ' Not found: ' + esc(missing.join(', ')) + '.' : ''}${found.length ? ' Saving replaces only the parts found.' : ''}</p>` : ''}
+          <div class="devo-btnrow">
+            <button class="devo-btn" id="ten-paste-cancel">Cancel</button>
+            ${prev && found.length ? '<button class="devo-btn" id="ten-paste-save" style="border-color:var(--accent); color:var(--accent);">Save</button>' : '<button class="devo-btn" id="ten-paste-split">Split it up</button>'}
+          </div>
+        </div>`;
+    }
+
+    const cards = TEN_ITEMS.map(it => {
+      const e = catEntry(it.id);
+      const mem = isMemorized(it.id);
+      if (cat.editing === it.id) {
+        return `<div class="tracker-card ten-card">
+          <div class="ten-label">${esc(it.label)}</div>
+          <textarea class="ten-ta" id="ten-ed-cmd" rows="3" placeholder="${it.id === 'close' ? 'What does God say about all these commandments? …' : 'The commandment'}">${esc(e.cmd)}</textarea>
+          <p class="ten-q">What does this mean?</p>
+          <textarea class="ten-ta" id="ten-ed-meaning" rows="5" placeholder="The meaning">${esc(e.meaning)}</textarea>
+          <div class="devo-btnrow"><button class="devo-btn" id="ten-ed-cancel">Cancel</button><button class="devo-btn" id="ten-ed-save" style="border-color:var(--accent); color:var(--accent);">Save</button></div>
+        </div>`;
+      }
+      const hidden = k => cat.practice && !cat.revealed[it.id + k];
+      const block = (k, txt, empty) => txt
+        ? `<div class="ten-text${hidden(k) ? ' ten-hidden' : ''}" data-reveal="${it.id + k}">${esc(txt)}</div>`
+        : `<div class="ten-empty">${empty}</div>`;
+      return `<div class="tracker-card ten-card">
+        <div class="ten-label">${esc(it.label)}</div>
+        ${block('c', e.cmd, 'No wording yet.')}
+        <p class="ten-q">What does this mean?</p>
+        ${block('m', e.meaning, 'No wording yet.')}
+        <div class="ten-foot">
+          <button class="ten-mem${mem ? ' on' : ''}" data-mem="${it.id}">${mem ? '✓ Memorized' : 'Mark memorized'}</button>
+          <button class="ten-edit" data-edit="${it.id}">Edit</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    drawer.innerHTML = `
+      <div class="devo-order-top">
+        <button class="back-btn" id="ten-back" style="margin:0;">‹ Back to today</button>
+        <div class="ten-modes"><button data-mode="read" class="${cat.practice ? '' : 'on'}">Read</button><button data-mode="practice" class="${cat.practice ? 'on' : ''}">Practice</button></div>
+      </div>
+      <div class="devo-order-name">The Ten Commandments</div>
+      <p class="devo-howto">From Luther’s Small Catechism. ${cat.practice ? 'Say each one, then tap to check yourself.' : 'Your family’s own wording, kept private.'}</p>
+      <div class="ten-progress"><div class="ten-bar"><span style="width:${pct}%"></span></div><div class="devo-msg" style="text-align:center; margin-top:6px;">${n} of ${TEN_ITEMS.length} memorized</div></div>
+      ${cat.msg ? `<p class="devo-fallnote">${esc(cat.msg)}</p>` : ''}
+      ${!has && !cat.pasteOpen ? `<div class="tracker-card"><p class="devo-msg">No wording yet. Paste the whole page at once, or tap Edit on each commandment to type it from your sheet.</p></div>` : ''}
+      <div class="devo-btnrow" style="margin:0 0 14px;">
+        <button class="devo-btn" id="ten-paste-open">${has ? 'Paste again' : 'Paste all'}</button>
+        <a class="devo-btn" href="${CPH_TEN_URL}" target="_blank" rel="noopener">CPH page ↗</a>
+        <button class="devo-btn" id="ten-exodus">Read Exodus 20</button>
+      </div>
+      ${paste}
+      ${cards}
+      <div class="tracker-card"><p class="devo-h">Family</p>${familyCardHtml()}</div>`;
+
+    const q = s => drawer.querySelector(s);
+    q('#ten-back').onclick = () => { devo.view = 'day'; cat.editing = null; cat.pasteOpen = false; cat.msg = ''; setHomeTitle('Family Devotion'); renderDevotion(); document.getElementById('home-page').scrollTop = 0; };
+    drawer.querySelectorAll('.ten-modes button').forEach(b => { b.onclick = () => { cat.practice = b.dataset.mode === 'practice'; cat.revealed = {}; renderTen(); }; });
+    q('#ten-paste-open').onclick = () => { cat.pasteOpen = true; cat.pastePreview = null; cat.editing = null; renderTen(); const t = q('#ten-paste'); if (t) t.focus(); };
+    q('#ten-exodus').onclick = () => { devoOpen = false; hideHomePage(); switchToBook('Exodus', 20, 1); };
+    const cancel = q('#ten-paste-cancel');
+    if (cancel) cancel.onclick = () => { cat.pasteOpen = false; cat.pastePreview = null; cat.pasteDraft = ''; renderTen(); };
+    const ta = q('#ten-paste');
+    if (ta) { ta.value = cat.pasteDraft || ''; ta.oninput = () => { cat.pasteDraft = ta.value; if (cat.pastePreview) { cat.pastePreview = null; renderTen(); q('#ten-paste').focus(); } }; }
+    const split = q('#ten-paste-split');
+    if (split) split.onclick = () => { cat.pasteDraft = ta.value; cat.pastePreview = parseTenCommandments(ta.value); renderTen(); };
+    const psave = q('#ten-paste-save');
+    if (psave) psave.onclick = () => {
+      const prev = cat.pastePreview || {};
+      Object.keys(prev).forEach(id => { catText.ten[id] = prev[id]; });
+      cat.pasteOpen = false; cat.pastePreview = null; cat.pasteDraft = ''; cat.msg = '';
+      saveCatText().then(() => renderTen());
+      showToast('Saved');
+      renderTen();
+    };
+    drawer.querySelectorAll('[data-reveal]').forEach(el => { el.onclick = () => { if (!cat.practice) return; cat.revealed[el.dataset.reveal] = !cat.revealed[el.dataset.reveal]; el.classList.toggle('ten-hidden'); }; });
+    drawer.querySelectorAll('[data-mem]').forEach(b => { b.onclick = () => { const id = b.dataset.mem; setMemorized(id, !isMemorized(id)); renderTen(); }; });
+    drawer.querySelectorAll('[data-edit]').forEach(b => { b.onclick = () => { cat.editing = b.dataset.edit; cat.pasteOpen = false; renderTen(); const t = q('#ten-ed-cmd'); if (t) t.focus(); }; });
+    const edCancel = q('#ten-ed-cancel');
+    if (edCancel) edCancel.onclick = () => { cat.editing = null; renderTen(); };
+    const edSave = q('#ten-ed-save');
+    if (edSave) edSave.onclick = () => {
+      const id = cat.editing;
+      catText.ten[id] = { cmd: q('#ten-ed-cmd').value.trim(), meaning: q('#ten-ed-meaning').value.trim() };
+      cat.editing = null; cat.msg = '';
+      saveCatText().then(() => renderTen());
+      renderTen();
+    };
+    const retry = q('#fam-retry');
+    if (retry) retry.onclick = () => { loadFamily().then(() => renderTen()); renderTen(); };
+    const addBtn = q('#fam-add-btn');
+    if (addBtn) addBtn.onclick = () => addFamilyMember(q('#fam-email').value);
+    const addIn = q('#fam-email');
+    if (addIn) addIn.onkeydown = e => { if (e.key === 'Enter') addFamilyMember(addIn.value); };
+    drawer.querySelectorAll('.fam-del').forEach(b => { b.onclick = () => removeFamilyMember(b.dataset.email); });
+  }
 
   // ---------- Init ----------
   renderFeed();
