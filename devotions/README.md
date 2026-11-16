@@ -18,3 +18,7 @@ The readings are fetched live from Crossway's ESV API. The app keeps to its term
 - At most 8 passages are cached on a device, for at most two weeks, so local storage never nears 500 consecutive verses or half a book.
 - Every ESV passage shows "(ESV)" and the full copyright notice is at the foot of every page that shows ESV text.
 - ESV text is never fed into the main verse-by-verse reader.
+
+If the ESV can't load (offline, Crossway down, or the key refused), the same passage shows from the app's own WEB text, or KJV where WEB is missing, with a note saying why. Each reading carries `ranges` ([book, startChapter, startVerse, endChapter, endVerse], with 999 meaning to the end of the chapter) for this fallback.
+
+The booklet files are saved on the phone after the first load, so the tab opens offline.

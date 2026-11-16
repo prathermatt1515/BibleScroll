@@ -27,7 +27,16 @@
       1,
       26
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Genesis",
+       1,
+       26,
+       1,
+       27
+      ]
+     ]
     },
     {
      "ref": "Matthew 28:18-20",
@@ -38,7 +47,16 @@
       28,
       18
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Matthew",
+       28,
+       18,
+       28,
+       20
+      ]
+     ]
     },
     {
      "ref": "Matthew 3:13-17",
@@ -49,7 +67,16 @@
       3,
       13
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Matthew",
+       3,
+       13,
+       3,
+       17
+      ]
+     ]
     },
     {
      "ref": "John 14:25-26",
@@ -60,7 +87,16 @@
       14,
       25
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "John",
+       14,
+       25,
+       14,
+       26
+      ]
+     ]
     },
     {
      "ref": "Ephesians 1:16-17",
@@ -71,7 +107,16 @@
       1,
       16
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Ephesians",
+       1,
+       16,
+       1,
+       17
+      ]
+     ]
     },
     {
      "ref": "2 Corinthians 13:14",
@@ -82,7 +127,16 @@
       13,
       14
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "2 Corinthians",
+       13,
+       14,
+       13,
+       14
+      ]
+     ]
     }
    ],
    "questions": [
@@ -133,7 +187,16 @@
       26,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Deuteronomy",
+       26,
+       1,
+       26,
+       11
+      ]
+     ]
     },
     {
      "ref": "2 Corinthians 9:6-15",
@@ -144,7 +207,16 @@
       9,
       6
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "2 Corinthians",
+       9,
+       6,
+       9,
+       15
+      ]
+     ]
     },
     {
      "ref": "Luke 17:11-19",
@@ -155,7 +227,16 @@
       17,
       11
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Luke",
+       17,
+       11,
+       17,
+       19
+      ]
+     ]
     },
     {
      "ref": "John 6:47-51",
@@ -166,7 +247,16 @@
       6,
       47
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "John",
+       6,
+       47,
+       6,
+       51
+      ]
+     ]
     },
     {
      "ref": "2 Thessalonians 3:10-12",
@@ -177,7 +267,16 @@
       3,
       10
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "2 Thessalonians",
+       3,
+       10,
+       3,
+       12
+      ]
+     ]
     },
     {
      "ref": "Luke 12:15-21",
@@ -188,7 +287,16 @@
       12,
       15
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Luke",
+       12,
+       15,
+       12,
+       21
+      ]
+     ]
     }
    ],
    "questions": [
@@ -236,7 +344,16 @@
       2,
       4
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Genesis",
+       2,
+       4,
+       2,
+       25
+      ]
+     ]
     },
     {
      "ref": "Psalm 8",
@@ -247,7 +364,16 @@
       8,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Psalms",
+       8,
+       1,
+       8,
+       999
+      ]
+     ]
     },
     {
      "ref": "Genesis 1:1-2:3",
@@ -258,7 +384,16 @@
       1,
       1
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Genesis",
+       1,
+       1,
+       2,
+       3
+      ]
+     ]
     },
     {
      "ref": "Job 38",
@@ -269,7 +404,16 @@
       38,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Job",
+       38,
+       1,
+       38,
+       999
+      ]
+     ]
     },
     {
      "ref": "Ephesians 3:14-15",
@@ -280,7 +424,16 @@
       3,
       14
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Ephesians",
+       3,
+       14,
+       3,
+       15
+      ]
+     ]
     },
     {
      "ref": "Psalm 8:1-9",
@@ -291,7 +444,16 @@
       8,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Psalms",
+       8,
+       1,
+       8,
+       9
+      ]
+     ]
     }
    ],
    "questions": [
@@ -340,7 +502,16 @@
       9,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Genesis",
+       9,
+       1,
+       9,
+       3
+      ]
+     ]
     },
     {
      "ref": "Deuteronomy 8:3-4",
@@ -351,7 +522,16 @@
       8,
       3
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Deuteronomy",
+       8,
+       3,
+       8,
+       4
+      ]
+     ]
     },
     {
      "ref": "Luke 12:22-34",
@@ -362,7 +542,16 @@
       12,
       22
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Luke",
+       12,
+       22,
+       12,
+       34
+      ]
+     ]
     },
     {
      "ref": "Genesis 50:15-21",
@@ -373,7 +562,16 @@
       50,
       15
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Genesis",
+       50,
+       15,
+       50,
+       21
+      ]
+     ]
     },
     {
      "ref": "Acts 12:5-11",
@@ -384,7 +582,16 @@
       12,
       5
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Acts",
+       12,
+       5,
+       12,
+       11
+      ]
+     ]
     },
     {
      "ref": "Psalm 145:15-16",
@@ -395,7 +602,16 @@
       145,
       15
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Psalms",
+       145,
+       15,
+       145,
+       16
+      ]
+     ]
     }
    ],
    "questions": [
@@ -443,7 +659,23 @@
       1,
       19
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Colossians",
+       1,
+       19,
+       1,
+       20
+      ],
+      [
+       "Colossians",
+       2,
+       8,
+       2,
+       10
+      ]
+     ]
     },
     {
      "ref": "Galatians 4:4-5",
@@ -454,7 +686,16 @@
       4,
       4
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Galatians",
+       4,
+       4,
+       4,
+       5
+      ]
+     ]
     },
     {
      "ref": "John 1:1-14",
@@ -465,7 +706,16 @@
       1,
       1
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "John",
+       1,
+       1,
+       1,
+       14
+      ]
+     ]
     },
     {
      "ref": "Philippians 2:5-9",
@@ -476,7 +726,16 @@
       2,
       5
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Philippians",
+       2,
+       5,
+       2,
+       9
+      ]
+     ]
     },
     {
      "ref": "Hebrews 5:5-8",
@@ -487,7 +746,16 @@
       5,
       5
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Hebrews",
+       5,
+       5,
+       5,
+       8
+      ]
+     ]
     },
     {
      "ref": "1 John 4:9-15",
@@ -498,7 +766,16 @@
       4,
       9
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 John",
+       4,
+       9,
+       4,
+       15
+      ]
+     ]
     }
    ],
    "questions": [
@@ -545,7 +822,16 @@
       1,
       26
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Luke",
+       1,
+       26,
+       1,
+       38
+      ]
+     ]
     },
     {
      "ref": "Luke 2:22-38",
@@ -556,7 +842,16 @@
       2,
       22
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Luke",
+       2,
+       22,
+       2,
+       38
+      ]
+     ]
     },
     {
      "ref": "Matthew 1:18-25",
@@ -567,7 +862,16 @@
       1,
       18
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Matthew",
+       1,
+       18,
+       1,
+       25
+      ]
+     ]
     },
     {
      "ref": "Luke 2:1-21",
@@ -578,7 +882,16 @@
       2,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Luke",
+       2,
+       1,
+       2,
+       21
+      ]
+     ]
     },
     {
      "ref": "John 1:1-18",
@@ -589,7 +902,16 @@
       1,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "John",
+       1,
+       1,
+       1,
+       18
+      ]
+     ]
     },
     {
      "ref": "Matthew 2:1-12",
@@ -600,7 +922,16 @@
       2,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Matthew",
+       2,
+       1,
+       2,
+       12
+      ]
+     ]
     }
    ],
    "questions": [],
@@ -670,7 +1001,16 @@
       24,
       39
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Luke",
+       24,
+       39,
+       24,
+       43
+      ]
+     ]
     },
     {
      "ref": "Hebrews 4:14-16",
@@ -681,7 +1021,16 @@
       4,
       14
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Hebrews",
+       4,
+       14,
+       4,
+       16
+      ]
+     ]
     },
     {
      "ref": "Luke 2:41-52",
@@ -692,7 +1041,16 @@
       2,
       41
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Luke",
+       2,
+       41,
+       2,
+       52
+      ]
+     ]
     },
     {
      "ref": "1 Timothy 2:1-5",
@@ -703,7 +1061,16 @@
       2,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Timothy",
+       2,
+       1,
+       2,
+       5
+      ]
+     ]
     },
     {
      "ref": "Matthew 4:2; Mark 4:38; John 11:35",
@@ -714,7 +1081,30 @@
       4,
       2
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Matthew",
+       4,
+       2,
+       4,
+       2
+      ],
+      [
+       "Mark",
+       4,
+       38,
+       4,
+       38
+      ],
+      [
+       "John",
+       11,
+       35,
+       11,
+       35
+      ]
+     ]
     },
     {
      "ref": "Romans 1:1-6",
@@ -725,7 +1115,16 @@
       1,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Romans",
+       1,
+       1,
+       1,
+       6
+      ]
+     ]
     }
    ],
    "questions": [
@@ -772,7 +1171,16 @@
       9,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Matthew",
+       9,
+       1,
+       9,
+       8
+      ]
+     ]
     },
     {
      "ref": "Colossians 1:15-20",
@@ -783,7 +1191,16 @@
       1,
       15
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Colossians",
+       1,
+       15,
+       1,
+       20
+      ]
+     ]
     },
     {
      "ref": "John 2:1-12",
@@ -794,7 +1211,16 @@
       2,
       1
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "John",
+       2,
+       1,
+       2,
+       12
+      ]
+     ]
     },
     {
      "ref": "John 5:25-29",
@@ -805,7 +1231,16 @@
       5,
       25
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "John",
+       5,
+       25,
+       5,
+       29
+      ]
+     ]
     },
     {
      "ref": "Hebrews 1:1-4",
@@ -816,7 +1251,16 @@
       1,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Hebrews",
+       1,
+       1,
+       1,
+       4
+      ]
+     ]
     },
     {
      "ref": "Revelation 5:11-14",
@@ -827,7 +1271,16 @@
       5,
       11
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Revelation",
+       5,
+       11,
+       5,
+       14
+      ]
+     ]
     }
    ],
    "questions": [
@@ -879,7 +1332,16 @@
       2,
       5
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Philippians",
+       2,
+       5,
+       2,
+       8
+      ]
+     ]
     },
     {
      "ref": "Isaiah 53:3",
@@ -890,7 +1352,16 @@
       53,
       3
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Isaiah",
+       53,
+       3,
+       53,
+       3
+      ]
+     ]
     },
     {
      "ref": "Matthew 26:47-56",
@@ -901,7 +1372,16 @@
       26,
       47
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Matthew",
+       26,
+       47,
+       26,
+       56
+      ]
+     ]
     },
     {
      "ref": "John 19:1-3",
@@ -912,7 +1392,16 @@
       19,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "John",
+       19,
+       1,
+       19,
+       3
+      ]
+     ]
     },
     {
      "ref": "John 19:16-18",
@@ -923,7 +1412,16 @@
       19,
       16
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "John",
+       19,
+       16,
+       19,
+       18
+      ]
+     ]
     },
     {
      "ref": "Matthew 27:57-61",
@@ -934,7 +1432,16 @@
       27,
       57
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Matthew",
+       27,
+       57,
+       27,
+       61
+      ]
+     ]
     }
    ],
    "questionsIntro": "Jesus’ state of humiliation is this: though He possessed full divine power, as a man, He did not always or fully use His divine powers.",
@@ -986,7 +1493,16 @@
       3,
       18
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Peter",
+       3,
+       18,
+       3,
+       20
+      ]
+     ]
     },
     {
      "ref": "Luke 24:44-53",
@@ -997,7 +1513,16 @@
       24,
       44
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Luke",
+       24,
+       44,
+       24,
+       53
+      ]
+     ]
     },
     {
      "ref": "Acts 1:1-11",
@@ -1008,7 +1533,16 @@
       1,
       1
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Acts",
+       1,
+       1,
+       1,
+       11
+      ]
+     ]
     },
     {
      "ref": "Philippians 2:9-11",
@@ -1019,7 +1553,16 @@
       2,
       9
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Philippians",
+       2,
+       9,
+       2,
+       11
+      ]
+     ]
     },
     {
      "ref": "Colossians 2:8-15",
@@ -1030,7 +1573,16 @@
       2,
       8
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Colossians",
+       2,
+       8,
+       2,
+       15
+      ]
+     ]
     },
     {
      "ref": "Ephesians 1:20-23",
@@ -1041,7 +1593,16 @@
       1,
       20
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Ephesians",
+       1,
+       20,
+       1,
+       23
+      ]
+     ]
     }
    ],
    "questions": [
@@ -1093,7 +1654,16 @@
       1,
       7
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Revelation",
+       1,
+       7,
+       1,
+       7
+      ]
+     ]
     },
     {
      "ref": "Mark 13:32",
@@ -1104,7 +1674,16 @@
       13,
       32
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Mark",
+       13,
+       32,
+       13,
+       32
+      ]
+     ]
     },
     {
      "ref": "Matthew 25:31-32",
@@ -1115,7 +1694,16 @@
       25,
       31
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Matthew",
+       25,
+       31,
+       25,
+       32
+      ]
+     ]
     },
     {
      "ref": "1 Timothy 4:1",
@@ -1126,7 +1714,16 @@
       4,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Timothy",
+       4,
+       1,
+       4,
+       1
+      ]
+     ]
     },
     {
      "ref": "Luke 21:28",
@@ -1137,7 +1734,16 @@
       21,
       28
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Luke",
+       21,
+       28,
+       21,
+       28
+      ]
+     ]
     },
     {
      "ref": "1 Thessalonians 4:13-18",
@@ -1148,7 +1754,16 @@
       4,
       13
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Thessalonians",
+       4,
+       13,
+       4,
+       18
+      ]
+     ]
     }
    ],
    "questions": [
@@ -1194,7 +1809,16 @@
       6,
       11
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Corinthians",
+       6,
+       11,
+       6,
+       11
+      ]
+     ]
     },
     {
      "ref": "John 16:4-15",
@@ -1205,7 +1829,16 @@
       16,
       4
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "John",
+       16,
+       4,
+       16,
+       15
+      ]
+     ]
     },
     {
      "ref": "Acts 2:1-13",
@@ -1216,7 +1849,16 @@
       2,
       1
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Acts",
+       2,
+       1,
+       2,
+       13
+      ]
+     ]
     },
     {
      "ref": "Acts 2:14-36",
@@ -1227,7 +1869,16 @@
       2,
       14
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Acts",
+       2,
+       14,
+       2,
+       36
+      ]
+     ]
     },
     {
      "ref": "Acts 2:37-41",
@@ -1238,7 +1889,16 @@
       2,
       37
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Acts",
+       2,
+       37,
+       2,
+       41
+      ]
+     ]
     },
     {
      "ref": "Acts 9:1-20",
@@ -1249,7 +1909,16 @@
       9,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Acts",
+       9,
+       1,
+       9,
+       20
+      ]
+     ]
     }
    ],
    "questions": [
@@ -1302,7 +1971,16 @@
       12,
       12
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Corinthians",
+       12,
+       12,
+       12,
+       26
+      ]
+     ]
     },
     {
      "ref": "Ephesians 2:19-22",
@@ -1313,7 +1991,16 @@
       2,
       19
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Ephesians",
+       2,
+       19,
+       2,
+       22
+      ]
+     ]
     },
     {
      "ref": "Ezekiel 37:1-14",
@@ -1324,7 +2011,16 @@
       37,
       1
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Ezekiel",
+       37,
+       1,
+       37,
+       14
+      ]
+     ]
     },
     {
      "ref": "1 Peter 2:9-12",
@@ -1335,7 +2031,16 @@
       2,
       9
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Peter",
+       2,
+       9,
+       2,
+       12
+      ]
+     ]
     },
     {
      "ref": "Romans 16:17-18",
@@ -1346,7 +2051,16 @@
       16,
       17
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Romans",
+       16,
+       17,
+       16,
+       18
+      ]
+     ]
     },
     {
      "ref": "Acts 2:42-47",
@@ -1357,7 +2071,16 @@
       2,
       42
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Acts",
+       2,
+       42,
+       2,
+       47
+      ]
+     ]
     }
    ],
    "questions": [
@@ -1418,7 +2141,16 @@
       24,
       36
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Luke",
+       24,
+       36,
+       24,
+       43
+      ]
+     ]
     },
     {
      "ref": "John 20:19-29",
@@ -1429,7 +2161,16 @@
       20,
       19
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "John",
+       20,
+       19,
+       20,
+       29
+      ]
+     ]
     },
     {
      "ref": "John 11:1-44",
@@ -1440,7 +2181,16 @@
       11,
       1
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "John",
+       11,
+       1,
+       11,
+       44
+      ]
+     ]
     },
     {
      "ref": "1 Corinthians 15:12-49",
@@ -1451,7 +2201,16 @@
       15,
       12
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Corinthians",
+       15,
+       12,
+       15,
+       49
+      ]
+     ]
     },
     {
      "ref": "Job 19:25-27",
@@ -1462,7 +2221,16 @@
       19,
       25
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Job",
+       19,
+       25,
+       19,
+       27
+      ]
+     ]
     },
     {
      "ref": "Philippians 3:20-4:1",
@@ -1473,7 +2241,16 @@
       3,
       20
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Philippians",
+       3,
+       20,
+       4,
+       1
+      ]
+     ]
     }
    ],
    "questions": [
@@ -1515,7 +2292,16 @@
       7,
       7
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Matthew",
+       7,
+       7,
+       7,
+       8
+      ]
+     ]
     },
     {
      "ref": "1 Thessalonians 5:16-18",
@@ -1526,7 +2312,16 @@
       5,
       16
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Thessalonians",
+       5,
+       16,
+       5,
+       18
+      ]
+     ]
     },
     {
      "ref": "Matthew 26:36-46",
@@ -1537,7 +2332,16 @@
       26,
       36
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Matthew",
+       26,
+       36,
+       26,
+       46
+      ]
+     ]
     },
     {
      "ref": "Philippians 4:6",
@@ -1548,7 +2352,16 @@
       4,
       6
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Philippians",
+       4,
+       6,
+       4,
+       6
+      ]
+     ]
     },
     {
      "ref": "Psalm 136:1-3",
@@ -1559,7 +2372,16 @@
       136,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Psalms",
+       136,
+       1,
+       136,
+       3
+      ]
+     ]
     },
     {
      "ref": "James 4:1-3",
@@ -1570,7 +2392,16 @@
       4,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "James",
+       4,
+       1,
+       4,
+       3
+      ]
+     ]
     }
    ],
    "questions": [
@@ -1612,7 +2443,16 @@
       2,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "1 Timothy",
+       2,
+       1,
+       2,
+       2
+      ]
+     ]
     },
     {
      "ref": "Matthew 6:5-8",
@@ -1623,7 +2463,16 @@
       6,
       5
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Matthew",
+       6,
+       5,
+       6,
+       8
+      ]
+     ]
     },
     {
      "ref": "Luke 11:1-4 & Matthew 6:9-13",
@@ -1634,7 +2483,23 @@
       11,
       1
      ],
-     "story": true
+     "story": true,
+     "ranges": [
+      [
+       "Luke",
+       11,
+       1,
+       11,
+       4
+      ],
+      [
+       "Matthew",
+       6,
+       9,
+       6,
+       13
+      ]
+     ]
     },
     {
      "ref": "Luke 18:1-8",
@@ -1645,7 +2510,16 @@
       18,
       1
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Luke",
+       18,
+       1,
+       18,
+       8
+      ]
+     ]
     },
     {
      "ref": "Psalm 50:15",
@@ -1656,7 +2530,16 @@
       50,
       15
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Psalms",
+       50,
+       15,
+       50,
+       15
+      ]
+     ]
     },
     {
      "ref": "Matthew 5:43-48",
@@ -1667,7 +2550,16 @@
       5,
       43
      ],
-     "story": false
+     "story": false,
+     "ranges": [
+      [
+       "Matthew",
+       5,
+       43,
+       5,
+       48
+      ]
+     ]
     }
    ],
    "questions": [

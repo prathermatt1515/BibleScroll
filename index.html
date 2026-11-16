@@ -812,6 +812,8 @@
   .devo-passage { font-family: Georgia, serif; font-size: 16px; line-height: 1.65; color: var(--text-primary); white-space: pre-line; }
   .devo-passage sup { font-family: -apple-system, system-ui, sans-serif; font-size: 10px; color: var(--accent); margin-right: 2px; }
   .devo-passage .esv-tag { font-family: -apple-system, system-ui, sans-serif; font-size: 11px; color: var(--text-tertiary); white-space: nowrap; }
+  .devo-fallnote { font-family: -apple-system, system-ui, sans-serif; font-size: 12.5px; line-height: 1.45; color: var(--text-secondary); background: var(--bg-pill); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; white-space: normal; }
+  .devo-part { font-family: -apple-system, system-ui, sans-serif; font-size: 12px; letter-spacing: 0.04em; color: var(--accent); }
   .devo-msg { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
   .devo-btnrow { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
   .devo-btn {
@@ -1253,6 +1255,10 @@
   const notes = load('sj_notes', {});
   // Family Devotion check-offs: { 'quarter|YYYY-MM-DD': { d: 0|1, t: ms } }.
   const devoChecks = load('sj_devo_checks', {});
+  // Days changed on this device since the last successful sync. Only these
+  // are sent, so a phone holding an older copy cannot overwrite a newer
+  // check mark made on another phone.
+  const devoDirty = new Set();
   let devoOpen = false;
 
   // Sync merges the cloud copy into the local one, which can add but never
@@ -1423,12 +1429,21 @@
     if (!currentUser) return;
     clearTimeout(cloudSyncTimer);
     cloudSyncTimer = setTimeout(() => {
+      const devotion = {};
+      devoDirty.forEach(k => { if (devoChecks[k]) devotion[k] = devoChecks[k]; });
       cloudDocRef().set({
         // readDates carries the streak. It was left out here and only written
         // at sign-in, so a streak built on one device never reached another.
         saved, notes, readBits: encodeRead(readVerses), openDates, readDates,
-        devotion: devoChecks, deleted: tombstones, updatedAt: Date.now()
-      }, { merge: true }).then(noteSyncOk).catch(reportSyncError);
+        devotion, deleted: tombstones, updatedAt: Date.now()
+      }, { merge: true }).then(() => {
+        // Clear only what went out unchanged; a day toggled again while this
+        // write was in flight stays queued for the next one.
+        Object.keys(devotion).forEach(k => {
+          if (devoChecks[k] && devoChecks[k].t === devotion[k].t) devoDirty.delete(k);
+        });
+        noteSyncOk();
+      }).catch(reportSyncError);
     }, 1200);
   }
 
@@ -1510,6 +1525,7 @@
           // the bitmap, or it keeps costing 2 entries per verse forever.
           if (data.readVerses) writeBack.readVerses = firebase.firestore.FieldValue.delete();
           await cloudDocRef().set(writeBack, { merge: true });
+          devoDirty.clear();
         } else {
           await cloudDocRef().set({ saved, notes, readBits: encodeRead(readVerses),
                                     openDates, readDates, devotion: devoChecks,
@@ -4226,6 +4242,7 @@
   const ESV_CACHE_TTL = 1000 * 60 * 60 * 24 * 14;
   const ESV_MAX_PER_MIN = 20;
   const ESV_NOTICE = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
+  const esc = v => escapeHtml(v == null ? '' : String(v));
   const esvRecent = [];
   const esvInFlight = {};
 
@@ -4276,23 +4293,64 @@
   }
 
   function esvHtml(text) {
-    const body = escapeHtml(text)
+    const body = esc(text)
       .replace(/\n{3,}/g, '\n\n')
       .replace(/\[(\d+)\]\s*/g, '<sup>$1</sup>');
     return body + ' <span class="esv-tag">(ESV)</span>';
   }
 
+  // Offline text for the same passage, from the reader's own KJV and WEB
+  // files, for when the ESV cannot be reached (offline, Crossway down, or the
+  // key refused). WEB when every verse has it, otherwise KJV, labelled either way.
+  function loadVersesFor(book) {
+    if (BOOK_VERSES[book]) return Promise.resolve(BOOK_VERSES[book]);
+    const fileName = BOOK_FILE_NAMES[book] || book;
+    return fetch(`data/verses_${fileName}.json`).then(r => { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+  }
+  function offlinePassage(reading) {
+    const ranges = Array.isArray(reading.ranges) ? reading.ranges : [];
+    if (!ranges.length) return Promise.reject(new Error('no ranges'));
+    const inRange = (x, rg) => (x.c > rg[1] || (x.c === rg[1] && x.v >= rg[2])) && (x.c < rg[3] || (x.c === rg[3] && x.v <= rg[4]));
+    return Promise.all(ranges.map(rg => loadVersesFor(rg[0]).then(vs => vs.filter(x => inRange(x, rg)))))
+      .then(parts => {
+        const all = [].concat(...parts);
+        if (!all.length) throw new Error('empty');
+        const useWeb = all.every(x => x.web);
+        const tag = useWeb ? 'WEB' : 'KJV';
+        const html = parts.map((vs, i) => {
+          const head = ranges.length > 1 ? `<span class="devo-part">${esc(ranges[i][0])} ${ranges[i][1]}</span>\n` : '';
+          return head + vs.map((x, j) => {
+            const num = (j > 0 && x.c !== vs[j - 1].c) ? `${x.c}:${x.v}` : x.v;
+            return `<sup>${num}</sup>${esc(useWeb ? x.web : x.kjv)}`;
+          }).join(' ');
+        }).join('\n\n');
+        return { html: html + ` <span class="esv-tag">(${tag})</span>`, tag };
+      });
+  }
+
+  function esvFailReason(e) {
+    const m = (e && e.message) || '';
+    if (m === 'throttled') return 'too many readings were opened in the last minute';
+    if (navigator.onLine === false) return 'you are offline';
+    if (m === 'http 401' || m === 'http 403') return 'Crossway refused the ESV key';
+    return 'Crossway could not be reached';
+  }
+
   function fillPassage(el, reading) {
     if (!el) return;
-    el.innerHTML = '<span class="devo-msg">Loading the reading…</span>';
+    el.innerHTML = '<span class="devo-msg">Loading the reading\u2026</span>';
     fetchEsv(reading.q).then(text => {
       if (el.isConnected) el.innerHTML = esvHtml(text);
     }).catch(e => {
       if (!el.isConnected) return;
-      const why = (e && e.message === 'throttled')
-        ? 'Too many readings opened at once. Give it a minute and try again.'
-        : (navigator.onLine === false ? 'You are offline, so the ESV text cannot load.' : 'The ESV text could not load right now.');
-      el.innerHTML = `<span class="devo-msg">${why} Use “Open in reader” for KJV or WEB, which work offline.</span>`;
+      const why = esvFailReason(e);
+      offlinePassage(reading).then(r => {
+        if (!el.isConnected) return;
+        const name = r.tag === 'WEB' ? 'World English Bible' : 'King James Version';
+        el.innerHTML = `<div class="devo-fallnote">The ESV did not load because ${why}, so this is the ${name}.</div>` + r.html;
+      }).catch(() => {
+        if (el.isConnected) el.innerHTML = `<span class="devo-msg">The reading did not load because ${why}. Try again in a moment, or use \u201cOpen in reader.\u201d</span>`;
+      });
     });
   }
 
@@ -4304,11 +4362,36 @@
   if (devoLevel !== 'all' && !DEVO_LEVELS.includes(devoLevel)) devoLevel = 'all';
   let devoLead = loadRaw('sj_devo_lead', '0') === '1';
 
+  // The booklet files are kept on the phone after the first load, so the
+  // Devotion tab still opens with no connection.
   function devoFetchJson(path) {
+    const key = 'sj_devo_file_' + path;
     return fetch('devotions/' + path, { cache: 'no-cache' }).then(r => {
       if (!r.ok) throw new Error('http ' + r.status);
       return r.json();
+    }).then(json => { store(key, JSON.stringify(json)); return json; })
+      .catch(e => {
+        const saved = load(key, null);
+        if (saved) return saved;
+        throw e;
+      });
+  }
+  // A future booklet file that leaves a field out should show less, not break.
+  function normalizeQuarter(q) {
+    q.title = q.title || ''; q.subtitle = q.subtitle || ''; q.church = q.church || '';
+    q.weeks = (Array.isArray(q.weeks) ? q.weeks : []).filter(w => w && /^\d{4}-\d{2}-\d{2}$/.test(w.start || ''));
+    q.weeks.sort((a, b) => a.start < b.start ? -1 : 1);
+    q.weeks.forEach(w => {
+      w.label = w.label || ''; w.theme = w.theme || ''; w.intro = w.intro || '';
+      w.readings = Array.isArray(w.readings) ? w.readings : [];
+      w.questions = Array.isArray(w.questions) ? w.questions : [];
+      w.catechism = Array.isArray(w.catechism) ? w.catechism : [];
+      w.catechismTitle = w.catechismTitle || '';
+      w.verse = w.verse || { ref: '', text: '' };
+      w.hymn = w.hymn || null;
     });
+    if (!q.weeks.length) throw new Error('no weeks');
+    return q;
   }
   function ensureDevoData() {
     if (devo.loading) return devo.loading;
@@ -4316,7 +4399,7 @@
       devo.index = index; devo.common = common;
       const q = pickQuarter(index.quarters, todayStr());
       return devoFetchJson(q.file).then(data => {
-        devo.quarters[q.id] = data;
+        devo.quarters[q.id] = normalizeQuarter(data);
         devo.qid = q.id;
         jumpDevoToToday();
       });
@@ -4366,6 +4449,7 @@
   function devoIsDone(dateStr) { const e = devoChecks[devoKey(dateStr)]; return !!(e && e.d); }
   function devoSetDone(dateStr, done) {
     devoChecks[devoKey(dateStr)] = { d: done ? 1 : 0, t: Date.now() };
+    devoDirty.add(devoKey(dateStr));
     store('sj_devo_checks', JSON.stringify(devoChecks));
     scheduleCloudSync();
   }
@@ -4381,7 +4465,7 @@
 
   // ---------- Rendering ----------
   function devoDateFor(w, day) { return todayStr(addDays(dateFromStr(w.start), day)); }
-  function devoReading(w, day) { return (day >= 1 && day <= 6) ? w.readings[day - 1] : null; }
+  function devoReading(w, day) { return (day >= 1 && day <= 6) ? (w.readings[day - 1] || null) : null; }
   function devoQuestions(w, day) {
     return (w.dayQuestions && w.dayQuestions[String(day)]) || w.questions || [];
   }
@@ -4396,17 +4480,18 @@
   }
   function questionsHtml(w, day) {
     const qs = devoQuestions(w, day);
-    return (w.questionsIntro ? `<p class="devo-qintro">${escapeHtml(w.questionsIntro)}</p>` : '')
-      + `<ol class="devo-qs">${qs.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ol>`;
+    return (w.questionsIntro ? `<p class="devo-qintro">${esc(w.questionsIntro)}</p>` : '')
+      + `<ol class="devo-qs">${qs.map(x => `<li>${esc(x)}</li>`).join('')}</ol>`;
   }
   function hymnHtml(w) {
+    if (!w.hymn || !w.hymn.title) return '<p class="devo-msg">No hymn listed this week.</p>';
     const url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(w.hymn.title + ' hymn LSB ' + w.hymn.lsb);
-    return `<div style="font-size:15px; color:var(--text-primary);">${escapeHtml(w.hymn.title)} <span style="color:var(--text-secondary);">(LSB ${escapeHtml(w.hymn.lsb)})</span></div>
+    return `<div style="font-size:15px; color:var(--text-primary);">${esc(w.hymn.title)} <span style="color:var(--text-secondary);">(LSB ${esc(w.hymn.lsb)})</span></div>
       <div class="devo-btnrow"><a class="devo-btn" href="${url}" target="_blank" rel="noopener">Listen on YouTube</a></div>`;
   }
   function noticeHtml() {
     const q = devo.quarters[devo.qid];
-    return `<p class="devo-notice">${ESV_NOTICE}<br><br>Devotional material from “${escapeHtml(q.title)}”, ${escapeHtml(q.church)}, for family use.</p>`;
+    return `<p class="devo-notice">${ESV_NOTICE}<br><br>Devotional material from “${esc(q.title)}”, ${esc(q.church)}, for family use.</p>`;
   }
 
   function openDevotion() {
@@ -4434,7 +4519,8 @@
     const dateS = devoDateFor(w, day);
     const d = dateFromStr(dateS);
     const reading = devoReading(w, day);
-    const doneCount = [1, 2, 3, 4, 5, 6].filter(i => devoIsDone(devoDateFor(w, i))).length;
+    const readingDays = [1, 2, 3, 4, 5, 6].filter(i => devoReading(w, i));
+    const doneCount = readingDays.filter(i => devoIsDone(devoDateFor(w, i))).length;
     const thisWeek = todayS >= w.start && todayS <= devoDateFor(w, 6);
 
     let dayChips = '';
@@ -4452,8 +4538,8 @@
       dayCard = `
         <div class="tracker-card">
           <div class="devo-date">${DAYS_LONG[day]}, ${MONTHS_LONG[d.getMonth()]} ${d.getDate()}${reading.story ? '<span class="devo-badge">Sunday School story</span>' : ''}</div>
-          <div class="devo-ref">${escapeHtml(reading.ref)}</div>
-          <div class="devo-title">${escapeHtml(reading.title)}</div>
+          <div class="devo-ref">${esc(reading.ref)}</div>
+          <div class="devo-title">${esc(reading.title)}</div>
           <div class="devo-passage" id="devo-passage"></div>
           <div class="devo-btnrow">
             <button class="devo-btn" id="devo-open-reader">Open in reader</button>
@@ -4465,13 +4551,20 @@
           <p class="devo-h">Questions to discuss</p>
           ${questionsHtml(w, day)}
         </div>`;
+    } else if (day !== 0) {
+      dayCard = `
+        <div class="tracker-card">
+          <div class="devo-date">${DAYS_LONG[day]}, ${MONTHS_LONG[d.getMonth()]} ${d.getDate()}</div>
+          <p class="devo-msg" style="margin-top:8px;">No reading is listed for this day.</p>
+        </div>`;
     } else {
       const wed = w.readings[2];
+      const story = wed ? ` This week\u2019s Sunday School story is ${esc(wed.ref)}, ${esc(wed.title)}, read on Wednesday.` : '';
       dayCard = `
         <div class="tracker-card">
           <div class="devo-date">Sunday, ${MONTHS_LONG[d.getMonth()]} ${d.getDate()}</div>
-          <div class="devo-ref">The Lord’s Day</div>
-          <p class="devo-msg" style="margin-top:8px;">No appointed reading today. Worship together. This week’s Sunday School story is ${escapeHtml(wed.ref)}, ${escapeHtml(wed.title)}, read on Wednesday.</p>
+          <div class="devo-ref">The Lord\u2019s Day</div>
+          <p class="devo-msg" style="margin-top:8px;">No appointed reading today. Worship together.${story}</p>
         </div>`;
     }
 
@@ -4480,18 +4573,18 @@
     const cards = catechismFor(w).map(it => `
       <div class="devo-card">
         <div class="lv">${DEVO_LEVEL_LABEL[it.level] || ''}</div>
-        <div class="cq">${escapeHtml(it.q)}</div>
-        <div class="ca">${escapeHtml(it.a)}</div>
+        <div class="cq">${esc(it.q)}</div>
+        <div class="ca">${esc(it.a)}</div>
         <div class="tap">Tap to check your answer</div>
       </div>`).join('');
 
     const sug = suggestedOrder();
     const html = `
-      <div class="devo-hero"><div class="devo-kicker">${escapeHtml(q.title)}</div><div class="devo-sub">${escapeHtml(q.subtitle)}</div></div>
+      <div class="devo-hero"><div class="devo-kicker">${esc(q.title)}</div><div class="devo-sub">${esc(q.subtitle)}</div></div>
       <div class="devo-weeknav">
         <button id="devo-prev" aria-label="Previous week" ${devo.week === 0 ? 'disabled' : ''}>‹</button>
         <div class="devo-weekmid">
-          <div class="devo-weeklabel">${escapeHtml(w.label)}</div>
+          <div class="devo-weeklabel">${esc(w.label)}</div>
           <div class="devo-weekdates">${weekRangeLabel(w)}</div>
           ${(!thisWeek || devoDateFor(w, day) !== todayS) ? '<button class="devo-today-btn" id="devo-today">Go to today</button>' : ''}
         </div>
@@ -4499,27 +4592,27 @@
       </div>
       <div class="tracker-card">
         <p class="devo-h">This week’s theme</p>
-        <div class="devo-theme-title">${escapeHtml(w.theme)}</div>
-        <div class="devo-intro${devo.introOpen ? ' open' : ''}">${escapeHtml(w.intro)}</div>
+        <div class="devo-theme-title">${esc(w.theme)}</div>
+        <div class="devo-intro${devo.introOpen ? ' open' : ''}">${esc(w.intro)}</div>
         <button class="devo-link" id="devo-intro-toggle">${devo.introOpen ? 'Hide the introduction' : 'Read the week’s introduction'}</button>
       </div>
       <div class="devo-days">${dayChips}</div>
-      <p class="devo-progress">${doneCount} of 6 readings done this week</p>
+      <p class="devo-progress">${doneCount} of ${readingDays.length} readings done this week</p>
       ${dayCard}
       <div class="tracker-card">
         <p class="devo-h">Pray together</p>
-        <p class="devo-topic"><span style="color:var(--text-secondary);">${DAYS_LONG[day]}:</span> ${escapeHtml(devo.common.topics[day])}</p>
-        <div class="devo-pray">${devo.common.orders.map(o => `<button data-order="${o.id}" class="${o.id === sug ? 'suggest' : ''}">${escapeHtml(o.name)}</button>`).join('')}</div>
+        <p class="devo-topic"><span style="color:var(--text-secondary);">${DAYS_LONG[day]}:</span> ${esc(devo.common.topics[day])}</p>
+        <div class="devo-pray">${devo.common.orders.map(o => `<button data-order="${o.id}" class="${o.id === sug ? 'suggest' : ''}">${esc(o.name)}</button>`).join('')}</div>
       </div>
       <div class="tracker-card">
         <p class="devo-h">Verse of the week</p>
-        <div class="devo-ref" style="font-size:15px; margin-bottom:6px;">${escapeHtml(w.verse.ref)}</div>
-        <div class="devo-verse${devo.verseHidden ? ' hidden-practice' : ''}" id="devo-verse">${escapeHtml(w.verse.text)} <span class="esv-tag" style="font-family:-apple-system,system-ui,sans-serif; font-size:11px; color:var(--text-tertiary);">(ESV)</span></div>
+        <div class="devo-ref" style="font-size:15px; margin-bottom:6px;">${esc(w.verse.ref)}</div>
+        <div class="devo-verse${devo.verseHidden ? ' hidden-practice' : ''}" id="devo-verse">${esc(w.verse.text)} <span class="esv-tag" style="font-family:-apple-system,system-ui,sans-serif; font-size:11px; color:var(--text-tertiary);">(ESV)</span></div>
         <button class="devo-link" id="devo-verse-toggle">${devo.verseHidden ? 'Show the verse' : 'Hide it to practice'}</button>
       </div>
       <div class="tracker-card">
         <p class="devo-h">Catechism</p>
-        <div style="font-size:15px; color:var(--text-primary); font-weight:500;">${escapeHtml(w.catechismTitle)}</div>
+        <div style="font-size:15px; color:var(--text-primary); font-weight:500;">${esc(w.catechismTitle)}</div>
         <div class="devo-levels">${levelBtns}</div>
         ${cards || '<p class="devo-msg">Nothing at this level this week.</p>'}
       </div>
@@ -4570,16 +4663,16 @@
       switch (name) {
         case 'hymn': return hymnHtml(w);
         case 'reading':
-          if (!reading) return `<div class="devo-ref" style="font-size:15px;">${escapeHtml(w.verse.ref)}</div><div class="devo-passage">${escapeHtml(w.verse.text)} <span class="esv-tag">(ESV)</span></div><p class="devo-msg" style="margin-top:8px;">No appointed reading on Sunday, so read the verse of the week.</p>`;
-          return `<div class="devo-ref" style="font-size:15px;">${escapeHtml(reading.ref)}</div><div class="devo-title">${escapeHtml(reading.title)}</div>
+          if (!reading) return !w.verse.text ? '<p class="devo-msg">No appointed reading today.</p>' : `<div class="devo-ref" style="font-size:15px;">${esc(w.verse.ref)}</div><div class="devo-passage">${esc(w.verse.text)} <span class="esv-tag">(ESV)</span></div><p class="devo-msg" style="margin-top:8px;">No appointed reading on Sunday, so read the verse of the week.</p>`;
+          return `<div class="devo-ref" style="font-size:15px;">${esc(reading.ref)}</div><div class="devo-title">${esc(reading.title)}</div>
             <div class="devo-passage" id="order-passage"></div>
             <p class="devo-h" style="margin-top:14px;">Discuss</p>${questionsHtml(w, day)}`;
         case 'catechism':
-          return `<div style="font-weight:500; margin-bottom:8px;">${escapeHtml(w.catechismTitle)}</div>` +
-            catechismFor(w).map(it => `<p style="margin:0 0 4px; font-size:13px; color:var(--text-secondary);">${escapeHtml(it.q)}</p><p class="all-text" style="margin:0 0 12px;">${escapeHtml(it.a)}</p>`).join('');
-        case 'creed': return `<div class="all-text">${escapeHtml(devo.common.creed)}</div>`;
-        case 'lordsprayer': return `<div class="all-text">${escapeHtml(devo.common.lordsPrayer)}</div>`;
-        case 'topic': return `<p style="margin:0 0 6px; font-size:15px;">${escapeHtml(devo.common.topics[day])}</p><p class="devo-msg">Then add your own prayers for family, friends, and yourselves.</p>`;
+          return `<div style="font-weight:500; margin-bottom:8px;">${esc(w.catechismTitle)}</div>` +
+            catechismFor(w).map(it => `<p style="margin:0 0 4px; font-size:13px; color:var(--text-secondary);">${esc(it.q)}</p><p class="all-text" style="margin:0 0 12px;">${esc(it.a)}</p>`).join('');
+        case 'creed': return `<div class="all-text">${esc(devo.common.creed)}</div>`;
+        case 'lordsprayer': return `<div class="all-text">${esc(devo.common.lordsPrayer)}</div>`;
+        case 'topic': return `<p style="margin:0 0 6px; font-size:15px;">${esc(devo.common.topics[day])}</p><p class="devo-msg">Then add your own prayers for family, friends, and yourselves.</p>`;
       }
       return '';
     };
@@ -4587,9 +4680,9 @@
     let body = '';
     order.lines.forEach(l => {
       if (l.t === 'slot') {
-        body += `<p class="rubric">${escapeHtml(l.x)}</p><div class="slot">${slot(l.slot)}</div>`;
+        body += `<p class="rubric">${esc(l.x)}</p><div class="slot">${slot(l.slot)}</div>`;
       } else {
-        body += `<p class="${l.t === 'all' ? 'all' : l.t === 'rubric' ? 'rubric' : l.t === 'head' ? 'head' : ''}">${escapeHtml(l.x)}</p>`;
+        body += `<p class="${l.t === 'all' ? 'all' : l.t === 'rubric' ? 'rubric' : l.t === 'head' ? 'head' : ''}">${esc(l.x)}</p>`;
       }
     });
 
@@ -4598,8 +4691,8 @@
         <button class="back-btn" id="order-back" style="margin:0;">‹ Back to today</button>
         <button class="devo-lead${devoLead ? ' on' : ''}" id="order-lead">${devoLead ? 'Large text on' : 'Lead together'}</button>
       </div>
-      <div class="devo-order-name">${escapeHtml(order.name)}</div>
-      <p class="devo-howto">${DAYS_LONG[day]}, ${escapeHtml(w.label)}. ${escapeHtml(devo.common.howTo)}</p>
+      <div class="devo-order-name">${esc(order.name)}</div>
+      <p class="devo-howto">${DAYS_LONG[day]}, ${esc(w.label)}. ${esc(devo.common.howTo)}</p>
       <div class="devo-order${devoLead ? ' lead' : ''}">${body}</div>
       ${noticeHtml()}`;
     if (reading) fillPassage(document.getElementById('order-passage'), reading);
@@ -4610,6 +4703,8 @@
   document.getElementById('tray-devo').onclick = () => {
     showHomePage();
     devo.view = 'day';
+    devo.introOpen = false;
+    if (devo.quarters[devo.qid]) jumpDevoToToday();
     document.getElementById('home-page').scrollTop = 0;
     openDevotion();
   };
