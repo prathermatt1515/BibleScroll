@@ -1244,7 +1244,8 @@
   // unreachable now that the book is part of the key; drop them once.
   (() => {
     const cache = state.liveTextCache;
-    const stale = Object.keys(cache).filter(k => k.split(':').length < 4);
+    // Also drop "(unavailable)" placeholders cached by the old fetch code.
+    const stale = Object.keys(cache).filter(k => k.split(':').length < 4 || cache[k] === '(unavailable)');
     if (!stale.length) return;
     stale.forEach(k => delete cache[k]);
     store('sj_livecache', JSON.stringify(cache));
@@ -1293,12 +1294,34 @@
     }
   }
 
+  // When a save or note was last written. Older data carries no time and
+  // counts as 0, which keeps the old behaviour for it.
+  function savedTime(v) { return typeof v === 'number' ? v : 0; }
+  function noteTime(n) { return n && typeof n === 'object' && typeof n.t === 'number' ? n.t : 0; }
+
+  // Take the other copy's entry only when this device has none or the other
+  // one is at least as new. Plain Object.assign let an older cloud copy
+  // overwrite a note edited on this phone while sync was failing.
+  function mergeNewer(local, remote, timeOf) {
+    if (!remote || typeof remote !== 'object') return;
+    Object.keys(remote).forEach(k => {
+      if (!(k in local) || timeOf(remote[k]) >= timeOf(local[k])) local[k] = remote[k];
+    });
+  }
+
   function applyTombstones() {
     Object.keys(tombstones).forEach(k => {
       const sep = k.indexOf(':');
       const kind = k.slice(0, sep), key = k.slice(sep + 1);
-      if (kind === 'saved') delete saved[key];
-      else if (kind === 'notes') {
+      const when = tombstones[k];
+      // A delete only removes what existed before it. The cloud keeps old
+      // tombstones (a merge write cannot remove them), so without this a note
+      // or save made again on a verse once cleared was wiped at next sign-in.
+      if (kind === 'saved') {
+        if (savedTime(saved[key]) > when) return;
+        delete saved[key];
+      } else if (kind === 'notes') {
+        if (noteTime(notes[key]) > when) return;
         delete notes[key];
         Object.keys(notes).forEach(nk => {
           const raw = notes[nk];
@@ -1414,6 +1437,8 @@
   const API_BIBLE_KEY = "mSiigwn6LhcbU2ZwR3nc5";
   const BIBLE_ID_CACHE_KEY = 'sj_bible_ids';
   let bibleIds = load(BIBLE_ID_CACHE_KEY, null);
+  // Phones that cached an empty answer before the fix above get a fresh lookup.
+  if (bibleIds && !bibleIds.niv && !bibleIds.nlt) bibleIds = null;
 
   document.documentElement.setAttribute('data-theme', state.theme);
 
@@ -1495,8 +1520,8 @@
         const snap = await cloudDocRef().get();
         if (snap.exists) {
           const data = snap.data() || {};
-          Object.assign(saved, data.saved || {});
-          Object.assign(notes, data.notes || {});
+          mergeNewer(saved, data.saved, savedTime);
+          mergeNewer(notes, data.notes, noteTime);
           decodeReadInto(readVerses, data.readBits);
           mergeLegacyRead(readVerses, data.readVerses);
           (data.openDates || []).forEach(d => { if (!openDates.includes(d)) openDates.push(d); });
@@ -1845,6 +1870,9 @@
     const res = await fetch('https://api.scripture.api.bible/v1/bibles', {
       headers: { 'api-key': API_BIBLE_KEY }
     });
+    // A refused or rate-limited call used to be cached as "no Bibles", which
+    // turned NIV and NLT off on this phone for good. Fail now, ask again later.
+    if (!res.ok) throw new Error('bibles ' + res.status);
     const json = await res.json();
     const ids = {};
     (json.data || []).forEach(b => {
@@ -1852,6 +1880,7 @@
       if (abbr.includes('NIV') && !ids.niv) ids.niv = b.id;
       if (abbr.includes('NLT') && !ids.nlt) ids.nlt = b.id;
     });
+    if (!ids.niv && !ids.nlt) throw new Error('no NIV/NLT on this key');
     bibleIds = ids;
     store(BIBLE_ID_CACHE_KEY, JSON.stringify(ids));
     return ids;
@@ -1865,8 +1894,13 @@
     const res = await fetch(`https://api.scripture.api.bible/v1/bibles/${bibleId}/verses/${verseId}?content-type=text&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=false&include-verse-spans=false`, {
       headers: { 'api-key': API_BIBLE_KEY }
     });
+    // Throw rather than return a placeholder: getVerseText caches whatever
+    // comes back, so "(unavailable)" from one bad response stuck for good.
+    if (!res.ok) throw new Error('verse ' + res.status);
     const json = await res.json();
-    return (json.data && json.data.content ? json.data.content.trim() : '(unavailable)');
+    const text = json.data && json.data.content ? json.data.content.trim() : '';
+    if (!text) throw new Error('empty verse');
+    return text;
   }
 
   async function loadVisibleText() {
@@ -1886,7 +1920,10 @@
   function currentIndex() {
     const scrollTop = feed.scrollTop;
     const h = feed.clientHeight;
-    return Math.round(scrollTop / h);
+    // Clamp: mid-way through a book switch the old scroll offset can point
+    // past the end of the new book, and every caller indexes state.verses.
+    if (!h) return 0;
+    return Math.max(0, Math.min(state.verses.length - 1, Math.round(scrollTop / h)));
   }
 
   let lastSeenChapter = 1;
@@ -2272,7 +2309,7 @@
     const idx = currentIndex();
     const key = verseKey(idx);
     if (saved[key]) { delete saved[key]; markDeleted('saved', key); showToast('Removed from saved'); }
-    else { saved[key] = true; markAlive('saved', key); showToast('Verse saved'); }
+    else { saved[key] = Date.now(); markAlive('saved', key); showToast('Verse saved'); }
     store('sj_saved', JSON.stringify(saved));
     scheduleCloudSync();
     refreshBadges(true);
@@ -2305,11 +2342,15 @@
     }
   }
 
-  let noteEditState = { idx: 0, span: 1, maxSpan: 1 };
+  let noteEditState = { idx: 0, span: 1, maxSpan: 1, book: null };
 
   function renderNoteRangeLabel() {
     const idx = noteEditState.idx;
     const startV = state.verses[idx];
+    if (!startV || state.book !== noteEditState.book) { closeDrawer('note-overlay'); return; }
+    // A span restored from a backup or another phone can run past the verses
+    // this book has from here; clamp it instead of reading past the end.
+    noteEditState.span = Math.max(1, Math.min(noteEditState.span, state.verses.length - idx));
     const endV = state.verses[idx + noteEditState.span - 1];
     const label = noteEditState.span === 1
       ? `${state.book} ${startV.c}:${startV.v}`
@@ -2328,6 +2369,7 @@
     const key = verseKey(idx);
     const existing = getNoteEntry(key);
     noteEditState.idx = idx;
+    noteEditState.book = state.book;
     noteEditState.span = existing ? existing.span : 1;
     noteEditState.maxSpan = Math.min(12, state.verses.length - idx);
     document.getElementById('note-textarea').value = existing ? existing.text : '';
@@ -2364,6 +2406,12 @@
   }
 
   document.getElementById('save-note-confirm').onclick = () => {
+    // Never write a note's range against a different book than it was opened on.
+    if (state.book !== noteEditState.book || !state.verses[noteEditState.idx]) {
+      closeDrawer('note-overlay');
+      showToast('The book changed, so the note was not saved. Open it again.');
+      return;
+    }
     const key = document.getElementById('note-textarea').dataset.key;
     const existing = getNoteEntry(key);
     const oldSpan = existing ? existing.span : 0;
@@ -2372,11 +2420,12 @@
     const val = document.getElementById('note-textarea').value.trim();
     if (existing && !val) markDeleted('notes', existing.startKey);
     if (val) {
-      notes[key] = { text: val, span: noteEditState.span };
+      const t = Date.now();
+      notes[key] = { text: val, span: noteEditState.span, t };
       markAlive('notes', key);
       for (let i = 1; i < noteEditState.span; i++) {
         const vv = state.verses[noteEditState.idx + i];
-        if (vv) notes[`${state.book}:${vv.c}:${vv.v}`] = { ref: key };
+        if (vv) notes[`${state.book}:${vv.c}:${vv.v}`] = { ref: key, t };
       }
     }
     store('sj_notes', JSON.stringify(notes));
@@ -3100,10 +3149,11 @@
   }
 
   // ---------- Deep study ----------
-  function studyKey(idx) { const v = state.verses[idx]; return `${v.c}:${v.v}`; }
+  function studyKey(idx) { const v = state.verses[idx]; return v ? `${v.c}:${v.v}` : ''; }
 
   function openStudy(idx) {
     const v = state.verses[idx];
+    if (!v) { closeDrawer('study-overlay'); return; }
     const drawer = document.getElementById('study-drawer');
     drawer.innerHTML = `
       <div class="drawer-handle"></div>
@@ -3114,8 +3164,15 @@
       <button class="menu-item" data-opt="deeper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg>Deeper study</button>
       <button class="menu-item" data-opt="related"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Related verses</button>
     `;
+    // The drawer holds a position in the book that was open when it opened.
+    // If the book has changed since, that position means a different verse
+    // (or none), so close rather than show the wrong study.
+    const openedOn = state.book;
     drawer.querySelectorAll('[data-opt]').forEach(btn => {
-      btn.onclick = () => renderStudyResult(idx, btn.dataset.opt);
+      btn.onclick = () => {
+        if (state.book !== openedOn || !state.verses[idx]) { closeDrawer('study-overlay'); return; }
+        renderStudyResult(idx, btn.dataset.opt);
+      };
     });
     openDrawer('study-overlay');
   }
@@ -3128,6 +3185,7 @@
       return;
     }
     const v = state.verses[idx];
+    if (!v) { closeDrawer('study-overlay'); return; }
     const key = studyKey(idx);
     const data = (BOOK_STUDY[state.book] || {})[key] || {};
     const drawer = document.getElementById('study-drawer');
@@ -3199,7 +3257,11 @@
         <button id="sr-share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
       </div>
     `;
-    document.getElementById('study-back').onclick = () => openStudy(idx);
+    const resultBook = state.book;
+    document.getElementById('study-back').onclick = () => {
+      if (state.book !== resultBook) { closeDrawer('study-overlay'); return; }
+      openStudy(idx);
+    };
     drawer.querySelectorAll('.related-link.available').forEach(el => {
       el.onclick = () => {
         closeDrawer('study-overlay');
@@ -3953,8 +4015,8 @@
       const beforeNotes = countDistinctNotes();
       const beforeSaved = Object.keys(saved).length;
       const beforeRead = Object.keys(readVerses).length;
-      Object.assign(saved, data.saved || {});
-      Object.assign(notes, data.notes || {});
+      mergeNewer(saved, data.saved, savedTime);
+      mergeNewer(notes, data.notes, noteTime);
       decodeReadInto(readVerses, data.readBits);
       mergeLegacyRead(readVerses, data.readVerses);
       (data.readDates || []).forEach(d => { if (!readDates.includes(d)) readDates.push(d); });
