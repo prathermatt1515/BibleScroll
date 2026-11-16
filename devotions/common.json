@@ -1,0 +1,439 @@
+{
+ "howTo": "When more than one person is present, the versicles and responses may be spoken responsively, with one person reading the words in regular type and the others responding with the words in bold type. Prayers that are in bold type are to be prayed by all.",
+ "creed": "I believe in God, the Father Almighty, maker of heaven and earth.\n\nAnd in Jesus Christ, His only Son, our Lord, who was conceived by the Holy Spirit, born of the virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried. He descended into hell. The third day He rose again from the dead. He ascended into heaven and sits at the right hand of God the Father Almighty. From thence He will come to judge the living and the dead.\n\nI believe in the Holy Spirit, the holy Christian Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and the life ✠ everlasting. Amen.",
+ "lordsPrayer": "Our Father who art in heaven, hallowed be Thy name, Thy kingdom come, Thy will be done on earth as it is in heaven; give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. For Thine is the kingdom and the power and the glory forever and ever. Amen.",
+ "topics": [
+  "For the joy of the resurrection among us; for the fruit of faith nourished by the Word and the Sacraments.",
+  "For faith to live in the promises of Holy Baptism; for one’s calling and daily work; for the unemployed; for the salvation and well-being of our neighbors; for schools, colleges, and seminaries; for good government and for peace.",
+  "For deliverance against temptation and evil; for the addicted and despairing, the tortured and oppressed; for those struggling with sin.",
+  "For marriage and family, that husbands and wives, parents and children live in ordered harmony according to the Word of God; for parents who must raise children alone; for our communities and neighborhoods.",
+  "For the Church and her pastors; for teachers, deaconesses, and other church workers; for missionaries and for all who serve the Church; for fruitful and salutary use of the blessed Sacrament of Christ’s body and blood.",
+  "For the preaching of the holy cross of our Lord Jesus Christ and for the spread of His knowledge throughout the whole world; for the persecuted and oppressed; for the sick and dying.",
+  "For faithfulness to the end; for the renewal of those who are withering in the faith or have fallen away; for receptive hearts and minds to God’s Word on the Lord’s Day; for pastors and people as they prepare to administer and receive Christ’s holy gifts."
+ ],
+ "orders": [
+  {
+   "id": "morning",
+   "name": "Morning",
+   "lines": [
+    {
+     "t": "rubric",
+     "x": "The sign of the cross may be made by all in remembrance of their Baptism."
+    },
+    {
+     "t": "leader",
+     "x": "In the name of the Father and of the ✠ Son and of the Holy Spirit."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "leader",
+     "x": "In the morning, O Lord, You hear my voice;"
+    },
+    {
+     "t": "all",
+     "x": "in the morning I prepare a sacrifice for You and watch."
+    },
+    {
+     "t": "leader",
+     "x": "My mouth is filled with Your praise,"
+    },
+    {
+     "t": "all",
+     "x": "and with Your glory all the day."
+    },
+    {
+     "t": "leader",
+     "x": "O Lord, open my lips,"
+    },
+    {
+     "t": "all",
+     "x": "and my mouth will declare Your praise."
+    },
+    {
+     "t": "all",
+     "x": "Glory be to the Father and to the Son and to the Holy Spirit; as it was in the beginning, is now, and will be forever. Amen."
+    },
+    {
+     "t": "slot",
+     "slot": "hymn",
+     "x": "The Hymn of the Season, or another appropriate hymn or psalm, may be sung or spoken."
+    },
+    {
+     "t": "slot",
+     "slot": "reading",
+     "x": "The appointed reading from Propers for Daily Devotion is read and discussed using the accompanying questions."
+    },
+    {
+     "t": "slot",
+     "slot": "catechism",
+     "x": "A portion of the Small or Large Catechism may be read and recited."
+    },
+    {
+     "t": "slot",
+     "slot": "creed",
+     "x": "The Apostles’ Creed is confessed."
+    },
+    {
+     "t": "slot",
+     "slot": "lordsprayer",
+     "x": "Lord’s Prayer"
+    },
+    {
+     "t": "slot",
+     "slot": "topic",
+     "x": "Prayers for others and ourselves"
+    },
+    {
+     "t": "head",
+     "x": "Concluding prayers"
+    },
+    {
+     "t": "leader",
+     "x": "Almighty God, merciful Father, who created and completed all things, on this day when the work of our calling begins anew, we implore You to create its beginning, direct its continuance, and bless its end, that our doings may be preserved from sin, our life sanctified, and our work this day be well pleasing to You; through Jesus Christ, our Lord."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "all",
+     "x": "I thank You, my heavenly Father, through Jesus Christ, Your dear Son, that You have kept me this night from all harm and danger; and I pray that You would keep me this day also from sin and every evil, that all my doings and life may please You. For into Your hands I commend myself, my body and soul, and all things. Let Your holy angel be with me, that the evil foe may have no power over me. Amen."
+    },
+    {
+     "t": "leader",
+     "x": "Let us bless the Lord."
+    },
+    {
+     "t": "all",
+     "x": "Thanks be to God."
+    },
+    {
+     "t": "rubric",
+     "x": "Then go joyfully to your work."
+    }
+   ]
+  },
+  {
+   "id": "noon",
+   "name": "Noon",
+   "lines": [
+    {
+     "t": "rubric",
+     "x": "The sign of the cross may be made by all in remembrance of their Baptism."
+    },
+    {
+     "t": "leader",
+     "x": "In the name of the Father and of the ✠ Son and of the Holy Spirit."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "leader",
+     "x": "Listen to my prayer, O God, do not ignore my plea;"
+    },
+    {
+     "t": "all",
+     "x": "hear me and answer me."
+    },
+    {
+     "t": "leader",
+     "x": "Evening, morning, and noon"
+    },
+    {
+     "t": "all",
+     "x": "I cry out in distress, and He hears my voice."
+    },
+    {
+     "t": "leader",
+     "x": "Cast your cares on the Lord and He will sustain you;"
+    },
+    {
+     "t": "all",
+     "x": "He will never let the righteous fall."
+    },
+    {
+     "t": "all",
+     "x": "Glory be to the Father and to the Son and to the Holy Spirit; as it was in the beginning, is now, and will be forever. Amen."
+    },
+    {
+     "t": "slot",
+     "slot": "hymn",
+     "x": "The Hymn of the Season, or another appropriate hymn or psalm, may be sung or spoken."
+    },
+    {
+     "t": "slot",
+     "slot": "reading",
+     "x": "The appointed reading from Propers for Daily Devotion is read and discussed using the accompanying questions."
+    },
+    {
+     "t": "slot",
+     "slot": "catechism",
+     "x": "A portion of the Small or Large Catechism may be read and recited."
+    },
+    {
+     "t": "leader",
+     "x": "O Lord,"
+    },
+    {
+     "t": "all",
+     "x": "have mercy upon us."
+    },
+    {
+     "t": "leader",
+     "x": "O Christ,"
+    },
+    {
+     "t": "all",
+     "x": "have mercy upon us."
+    },
+    {
+     "t": "leader",
+     "x": "O Lord,"
+    },
+    {
+     "t": "all",
+     "x": "have mercy upon us."
+    },
+    {
+     "t": "slot",
+     "slot": "lordsprayer",
+     "x": "Lord’s Prayer"
+    },
+    {
+     "t": "slot",
+     "slot": "topic",
+     "x": "Prayers for others and ourselves"
+    },
+    {
+     "t": "head",
+     "x": "Concluding prayer (pray one)"
+    },
+    {
+     "t": "leader",
+     "x": "Blessed Lord Jesus Christ, at this hour You hung upon the cross, stretching out Your loving arms to embrace the world in Your death. Grant that all people of the earth may look to You and see their salvation; for Your mercy’s sake we pray."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "rubric",
+     "x": "or"
+    },
+    {
+     "t": "leader",
+     "x": "Heavenly Father, send Your Holy Spirit into our hearts to direct and rule us according to Your will, to comfort us in all our afflictions, to defend us from all error, and to lead us into all truth; through Jesus Christ, our Lord."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "leader",
+     "x": "Let us bless the Lord."
+    },
+    {
+     "t": "all",
+     "x": "Thanks be to God."
+    }
+   ]
+  },
+  {
+   "id": "evening",
+   "name": "Early Evening",
+   "lines": [
+    {
+     "t": "rubric",
+     "x": "The sign of the cross may be made by all in remembrance of their Baptism."
+    },
+    {
+     "t": "leader",
+     "x": "In the name of the Father and of the ✠ Son and of the Holy Spirit."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "rubric",
+     "x": "A candle may be lighted."
+    },
+    {
+     "t": "leader",
+     "x": "Let my prayer rise before You as incense,"
+    },
+    {
+     "t": "all",
+     "x": "the lifting up of my hands as the evening sacrifice."
+    },
+    {
+     "t": "leader",
+     "x": "Joyous light of glory:"
+    },
+    {
+     "t": "all",
+     "x": "of the immortal Father; heavenly, holy, blessed Jesus Christ. We have come to the setting of the sun, and we look to the evening light. We sing to God, the Father, Son, and Holy Spirit: You are worthy of being praised with pure voices forever. O Son of God, O Giver of life: the universe proclaims Your glory."
+    },
+    {
+     "t": "slot",
+     "slot": "hymn",
+     "x": "The Hymn of the Season, or another appropriate hymn or psalm, may be sung or spoken."
+    },
+    {
+     "t": "slot",
+     "slot": "reading",
+     "x": "The appointed reading from Propers for Daily Devotion is read and discussed using the accompanying questions."
+    },
+    {
+     "t": "slot",
+     "slot": "catechism",
+     "x": "A portion of the Small or Large Catechism may be read and recited."
+    },
+    {
+     "t": "slot",
+     "slot": "creed",
+     "x": "The Apostles’ Creed is confessed."
+    },
+    {
+     "t": "slot",
+     "slot": "lordsprayer",
+     "x": "Lord’s Prayer"
+    },
+    {
+     "t": "slot",
+     "slot": "topic",
+     "x": "Prayers for others and ourselves"
+    },
+    {
+     "t": "head",
+     "x": "Concluding prayer"
+    },
+    {
+     "t": "leader",
+     "x": "Lord Jesus, stay with us, for the evening is at hand and the day is past. Be our constant companion on the way, kindle our hearts, and awaken hope among us, that we may recognize You as You are revealed in the Scriptures and in the breaking of the bread. Grant this for Your name’s sake."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "leader",
+     "x": "Let us bless the Lord."
+    },
+    {
+     "t": "all",
+     "x": "Thanks be to God."
+    }
+   ]
+  },
+  {
+   "id": "close",
+   "name": "Close of the Day",
+   "lines": [
+    {
+     "t": "rubric",
+     "x": "The sign of the cross may be made by all in remembrance of their Baptism."
+    },
+    {
+     "t": "leader",
+     "x": "In the name of the Father and of the ✠ Son and of the Holy Spirit."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "leader",
+     "x": "The Lord Almighty grant us a quiet night and peace at the last."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "leader",
+     "x": "It is good to give thanks to the Lord,"
+    },
+    {
+     "t": "all",
+     "x": "to sing praise to Your name, O Most High;"
+    },
+    {
+     "t": "leader",
+     "x": "To herald Your love in the morning,"
+    },
+    {
+     "t": "all",
+     "x": "Your truth at the close of the day."
+    },
+    {
+     "t": "slot",
+     "slot": "hymn",
+     "x": "The Hymn of the Season, or another appropriate hymn or psalm, may be sung or spoken."
+    },
+    {
+     "t": "slot",
+     "slot": "reading",
+     "x": "The appointed reading from Propers for Daily Devotion is read and discussed using the accompanying questions."
+    },
+    {
+     "t": "slot",
+     "slot": "catechism",
+     "x": "A portion of the Small or Large Catechism may be read and recited."
+    },
+    {
+     "t": "slot",
+     "slot": "creed",
+     "x": "The Apostles’ Creed is confessed."
+    },
+    {
+     "t": "all",
+     "x": "Lord, now You let Your servant go in peace; Your word has been fulfilled. My own eyes have seen the salvation which You have prepared in the sight of every people: a light to reveal You to the nations and the glory of Your people Israel. Glory be to the Father and to the Son and to the Holy Spirit; as it was in the beginning, is now, and will be forever. Amen."
+    },
+    {
+     "t": "slot",
+     "slot": "lordsprayer",
+     "x": "Lord’s Prayer"
+    },
+    {
+     "t": "slot",
+     "slot": "topic",
+     "x": "Prayers for others and ourselves"
+    },
+    {
+     "t": "head",
+     "x": "Concluding prayers"
+    },
+    {
+     "t": "leader",
+     "x": "Visit our dwellings, O Lord, and in Your great mercy defend us from all perils and dangers of this night; for the love of Your only Son, our Savior Jesus Christ."
+    },
+    {
+     "t": "all",
+     "x": "Amen."
+    },
+    {
+     "t": "all",
+     "x": "I thank You, my heavenly Father, through Jesus Christ, Your dear Son, that You have graciously kept me this day; and I pray that You would forgive me all my sins where I have done wrong, and graciously keep me this night. For into Your hands I commend myself, my body and soul, and all things. Let Your holy angel be with me, that the evil foe may have no power over me. Amen."
+    },
+    {
+     "t": "leader",
+     "x": "Let us bless the Lord."
+    },
+    {
+     "t": "all",
+     "x": "Thanks be to God."
+    },
+    {
+     "t": "rubric",
+     "x": "Then go to sleep at once and in good cheer."
+    }
+   ]
+  }
+ ]
+}

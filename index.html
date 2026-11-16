@@ -773,6 +773,89 @@
   #toast.show { opacity: 1; }
 
   #screenshot-canvas-holder { position: fixed; top: -9999px; left: -9999px; }
+
+  /* ---------- Family Devotion ---------- */
+  .devo-hero { text-align: center; margin: 2px 0 14px; }
+  .devo-kicker { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+  .devo-sub { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+  .devo-weeknav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .devo-weeknav button {
+    background: var(--bg-pill); border: 0.5px solid var(--border-strong); color: var(--text-primary);
+    width: 36px; height: 36px; border-radius: 999px; font-size: 18px; cursor: pointer; flex-shrink: 0;
+  }
+  .devo-weeknav button:disabled { opacity: 0.3; cursor: default; }
+  .devo-weekmid { text-align: center; flex: 1; }
+  .devo-weeklabel { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+  .devo-weekdates { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .devo-today-btn { background: none; border: none; color: var(--accent); font-size: 12px; cursor: pointer; padding: 4px 0 0; font-family: inherit; }
+  .devo-theme-title { font-family: Georgia, serif; font-size: 19px; line-height: 1.3; color: var(--text-primary); }
+  .devo-intro { display: none; font-size: 14px; line-height: 1.55; color: var(--text-secondary); margin-top: 10px; font-style: italic; }
+  .devo-intro.open { display: block; }
+  .devo-link { background: none; border: none; padding: 8px 0 0; color: var(--accent); font-size: 13px; cursor: pointer; font-family: inherit; }
+  .devo-days { display: flex; justify-content: space-between; gap: 4px; margin: 0 0 6px; }
+  .devo-day {
+    flex: 1; background: var(--bg-card); border: 0.5px solid var(--border-strong); border-radius: 12px;
+    padding: 7px 0 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer;
+    color: var(--text-secondary); font-family: inherit;
+  }
+  .devo-day .dl { font-size: 10.5px; letter-spacing: 0.04em; }
+  .devo-day .dn { font-size: 15px; color: var(--text-primary); }
+  .devo-day .dc { height: 14px; font-size: 11px; color: var(--accent); line-height: 14px; }
+  .devo-day.sel { border-color: var(--accent); background: var(--study-bg); }
+  .devo-day.today .dl { color: var(--accent); font-weight: 600; }
+  .devo-progress { font-size: 12px; color: var(--text-secondary); text-align: center; margin: 0 0 14px; }
+  .devo-h { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); margin: 0 0 8px; }
+  .devo-date { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .devo-badge { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); border: 0.5px solid var(--accent-dim); border-radius: 999px; padding: 2px 8px; }
+  .devo-ref { font-size: 17px; font-weight: 500; color: var(--accent); }
+  .devo-title { font-size: 14px; color: var(--text-secondary); margin: 2px 0 12px; }
+  .devo-passage { font-family: Georgia, serif; font-size: 16px; line-height: 1.65; color: var(--text-primary); white-space: pre-line; }
+  .devo-passage sup { font-family: -apple-system, system-ui, sans-serif; font-size: 10px; color: var(--accent); margin-right: 2px; }
+  .devo-passage .esv-tag { font-family: -apple-system, system-ui, sans-serif; font-size: 11px; color: var(--text-tertiary); white-space: nowrap; }
+  .devo-msg { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .devo-btnrow { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .devo-btn {
+    flex: 1; min-width: 120px; background: var(--bg-pill); border: 0.5px solid var(--border-strong); border-radius: 10px;
+    padding: 10px 12px; font-size: 13px; color: var(--text-primary); cursor: pointer; font-family: inherit; text-align: center; text-decoration: none;
+  }
+  .devo-done { width: 100%; margin-top: 10px; background: var(--accent-dim); color: #fff; border: none; border-radius: 10px; padding: 12px; font-size: 14px; cursor: pointer; font-family: inherit; }
+  .devo-done.is-done { background: var(--bg-pill); color: var(--accent); border: 0.5px solid var(--accent-dim); }
+  .devo-qs { margin: 0; padding-left: 20px; }
+  .devo-qs li { font-size: 14.5px; line-height: 1.5; color: var(--text-primary); margin-bottom: 8px; }
+  .devo-qintro { font-size: 13.5px; line-height: 1.5; color: var(--text-secondary); font-style: italic; margin: 0 0 10px; }
+  .devo-topic { font-size: 14.5px; line-height: 1.55; color: var(--text-primary); margin: 0 0 12px; }
+  .devo-pray { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .devo-pray button { background: var(--bg-pill); border: 0.5px solid var(--border-strong); border-radius: 10px; padding: 11px 8px; color: var(--text-primary); font-size: 13.5px; cursor: pointer; font-family: inherit; }
+  .devo-pray button.suggest { border-color: var(--accent); color: var(--accent); }
+  .devo-verse { font-family: Georgia, serif; font-size: 16px; line-height: 1.6; color: var(--text-primary); }
+  .devo-verse.hidden-practice { filter: blur(6px); user-select: none; }
+  .devo-levels { display: flex; gap: 6px; margin: 4px 0 12px; flex-wrap: wrap; }
+  .devo-levels button { background: var(--bg-pill); border: 0.5px solid var(--border-strong); border-radius: 999px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+  .devo-levels button.on { border-color: var(--accent); color: var(--accent); }
+  .devo-card { border: 0.5px solid var(--border-strong); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; background: var(--bg); }
+  .devo-card .lv { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  .devo-card .cq { font-size: 14.5px; color: var(--text-primary); margin-top: 3px; font-weight: 500; }
+  .devo-card .ca { display: none; font-size: 14px; line-height: 1.55; color: var(--text-primary); margin-top: 8px; white-space: pre-line; }
+  .devo-card .tap { font-size: 11.5px; color: var(--text-tertiary); margin-top: 6px; }
+  .devo-card.flip .ca { display: block; }
+  .devo-card.flip .tap { display: none; }
+  .devo-notice { font-size: 11px; line-height: 1.5; color: var(--text-tertiary); text-align: center; margin: 18px 6px 6px; }
+  /* Prayer order */
+  .devo-order-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .devo-lead { background: var(--bg-pill); border: 0.5px solid var(--border-strong); border-radius: 999px; padding: 6px 12px; font-size: 12px; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+  .devo-lead.on { border-color: var(--accent); color: var(--accent); }
+  .devo-order-name { font-family: Georgia, serif; font-size: 24px; text-align: center; color: var(--text-primary); margin: 10px 0 4px; }
+  .devo-howto { font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); text-align: center; margin: 0 0 18px; }
+  .devo-order > p { margin: 0 0 12px; font-size: 16px; line-height: 1.55; color: var(--text-primary); }
+  .devo-order > p.rubric { font-style: italic; color: var(--text-secondary); font-size: 14px; }
+  .devo-order > p.all { font-weight: 700; }
+  .devo-order > p.head { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 18px; }
+  .devo-order .slot { background: var(--bg-card); border: 0.5px solid var(--border-strong); border-radius: 12px; padding: 12px 14px; margin: -4px 0 16px; }
+  .devo-order .slot .devo-passage { font-size: 16px; }
+  .devo-order .slot .all-text { font-weight: 700; white-space: pre-line; }
+  .devo-order.lead > p { font-size: 21px; }
+  .devo-order.lead > p.rubric { font-size: 16px; }
+  .devo-order.lead .devo-passage, .devo-order.lead .slot .all-text, .devo-order.lead .devo-qs li { font-size: 20px; }
 </style>
 </head>
 <body>
@@ -937,6 +1020,10 @@
   <button class="tray-btn" id="tray-home" aria-label="Home">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
     <span>Home</span>
+  </button>
+  <button class="tray-btn" id="tray-devo" aria-label="Family devotion">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20"/><path d="M6 8h12"/><path d="M8 22h8"/></svg>
+    <span>Devotion</span>
   </button>
   <button class="tray-btn" id="tray-notes" aria-label="Notes">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/><line x1="8" y1="7" x2="15" y2="7"/><line x1="8" y1="11" x2="15" y2="11"/></svg>
@@ -1164,6 +1251,9 @@
   const readVerses = {};   // filled once CHAPTER_COUNTS is in scope, below
   const saved = load('sj_saved', {});
   const notes = load('sj_notes', {});
+  // Family Devotion check-offs: { 'quarter|YYYY-MM-DD': { d: 0|1, t: ms } }.
+  const devoChecks = load('sj_devo_checks', {});
+  let devoOpen = false;
 
   // Sync merges the cloud copy into the local one, which can add but never
   // remove. Without a record of what was deleted, a deleted note or save is
@@ -1337,7 +1427,7 @@
         // readDates carries the streak. It was left out here and only written
         // at sign-in, so a streak built on one device never reached another.
         saved, notes, readBits: encodeRead(readVerses), openDates, readDates,
-        deleted: tombstones, updatedAt: Date.now()
+        devotion: devoChecks, deleted: tombstones, updatedAt: Date.now()
       }, { merge: true }).then(noteSyncOk).catch(reportSyncError);
     }, 1200);
   }
@@ -1396,6 +1486,7 @@
           mergeLegacyRead(readVerses, data.readVerses);
           (data.openDates || []).forEach(d => { if (!openDates.includes(d)) openDates.push(d); });
           (data.readDates || []).forEach(d => { if (!readDates.includes(d)) readDates.push(d); });
+          mergeDevoChecks(data.devotion);
           // Take the union of both devices' deletions, then apply it — so a
           // note deleted anywhere stays deleted everywhere, instead of being
           // resurrected by whichever copy still had it.
@@ -1412,8 +1503,8 @@
           store('sj_open_dates', JSON.stringify(openDates));
           store('sj_read_dates', JSON.stringify(readDates));
           const writeBack = { saved, notes, readBits: encodeRead(readVerses),
-                              openDates, readDates, deleted: tombstones,
-                              updatedAt: Date.now() };
+                              openDates, readDates, devotion: devoChecks,
+                              deleted: tombstones, updatedAt: Date.now() };
           // The per-verse map this replaces is what the index-entry ceiling
           // was counting. Retire it the moment its contents are safely in
           // the bitmap, or it keeps costing 2 entries per verse forever.
@@ -1421,8 +1512,8 @@
           await cloudDocRef().set(writeBack, { merge: true });
         } else {
           await cloudDocRef().set({ saved, notes, readBits: encodeRead(readVerses),
-                                    openDates, readDates, deleted: tombstones,
-                                    updatedAt: Date.now() });
+                                    openDates, readDates, devotion: devoChecks,
+                                    deleted: tombstones, updatedAt: Date.now() });
         }
         noteSyncOk();
         // On a normal launch the opening screen is already greeting them by
@@ -1438,6 +1529,7 @@
       refreshRailState();
     }
     if (typeof refreshHomeIfOpen === 'function') refreshHomeIfOpen();
+    if (devoOpen && typeof renderDevotion === 'function' && devo.quarters[devo.qid]) renderDevotion();
     if (typeof setSplashWelcome === 'function' && !splashGone) setSplashWelcome();
   });
 
@@ -3425,10 +3517,11 @@
   splashEl.addEventListener('click', dismissSplash);
 
   // ---------- Bottom tray ----------
-  // Home, Notes and Saved all live inside the home page; Read is the verse
-  // feed underneath it. The tray marks which of the four you are looking at.
+  // Home, Devotion, Notes and Saved all live inside the home page; Read is the
+  // verse feed underneath it. The tray marks which of the five you are looking at.
   function setTrayActive(which) {
-    ['read', 'home', 'notes', 'saved'].forEach(id => {
+    devoOpen = which === 'devo';
+    ['read', 'home', 'devo', 'notes', 'saved'].forEach(id => {
       const el = document.getElementById('tray-' + id);
       if (el) el.classList.toggle('active', id === which);
     });
@@ -4102,6 +4195,424 @@
       });
     }, 220);
   });
+
+
+  // ---------- Family Devotion ----------
+  // The church's quarterly booklet, "Speaking with One Voice", as a tab. The
+  // booklet's content lives in devotions/: common.json holds what every
+  // quarter shares (the four prayer orders, the Creed, the Lord's Prayer and
+  // the prayer topic for each weekday), and each quarter gets its own file
+  // listed in devotions/index.json. A new booklet is a new file, nothing more.
+  //
+  // Readings show in the ESV, as the booklet does, under Crossway's ESV API
+  // terms (api.esv.org). Each rule is kept here on purpose:
+  //  - Noncommercial use only. This is a free family app.
+  //  - Only the passage someone opens is requested. Nothing is prefetched,
+  //    and every appointed reading is far under the 500 verse / half a book
+  //    ceiling per query.
+  //  - Requests are throttled well below 60 a minute, so the 1,000 an hour
+  //    and 5,000 a day limits are out of reach for a household.
+  //  - The device keeps at most ESV_CACHE_MAX passages, none older than two
+  //    weeks, so local storage never approaches 500 consecutive verses or
+  //    half of any book.
+  //  - Every ESV passage on screen is marked (ESV), and the full copyright
+  //    notice sits at the foot of every page that shows ESV text.
+  // The KJV, WEB, NIV and NLT reader is untouched: "Open in reader" jumps to
+  // the passage there, so ESV is never fed into the verse-by-verse feed,
+  // whose cache would break the storage rule.
+  const ESV_API_KEY = "5acccf796e57882addfdc66081ecabe64c8c6c09";
+  const ESV_CACHE_KEY = 'sj_esv_cache';
+  const ESV_CACHE_MAX = 8;
+  const ESV_CACHE_TTL = 1000 * 60 * 60 * 24 * 14;
+  const ESV_MAX_PER_MIN = 20;
+  const ESV_NOTICE = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
+  const esvRecent = [];
+  const esvInFlight = {};
+
+  function esvCacheLoad() {
+    const c = load(ESV_CACHE_KEY, {});
+    const now = Date.now();
+    let changed = false;
+    Object.keys(c).forEach(k => { if (!c[k] || now - c[k].t > ESV_CACHE_TTL) { delete c[k]; changed = true; } });
+    if (changed) store(ESV_CACHE_KEY, JSON.stringify(c));
+    return c;
+  }
+  function esvCachePut(q, text) {
+    const c = esvCacheLoad();
+    c[q] = { text, t: Date.now() };
+    const keys = Object.keys(c).sort((a, b) => c[b].t - c[a].t);
+    keys.slice(ESV_CACHE_MAX).forEach(k => delete c[k]);
+    store(ESV_CACHE_KEY, JSON.stringify(c));
+  }
+
+  function fetchEsv(q) {
+    const hit = esvCacheLoad()[q];
+    if (hit) return Promise.resolve(hit.text);
+    if (esvInFlight[q]) return esvInFlight[q];
+    const now = Date.now();
+    while (esvRecent.length && now - esvRecent[0] > 60000) esvRecent.shift();
+    if (esvRecent.length >= ESV_MAX_PER_MIN) return Promise.reject(new Error('throttled'));
+    esvRecent.push(now);
+    const params = new URLSearchParams({
+      q, 'include-passage-references': 'false', 'include-verse-numbers': 'true',
+      'include-first-verse-numbers': 'true', 'include-footnotes': 'false',
+      'include-footnote-body': 'false', 'include-headings': 'false',
+      'include-short-copyright': 'false', 'include-copyright': 'false',
+      'include-selahs': 'true', 'indent-paragraphs': '0', 'indent-poetry': 'false'
+    });
+    const p = fetch('https://api.esv.org/v3/passage/text/?' + params.toString(), {
+      headers: { 'Authorization': 'Token ' + ESV_API_KEY }
+    }).then(res => {
+      if (!res.ok) throw new Error('http ' + res.status);
+      return res.json();
+    }).then(json => {
+      const text = (json.passages || []).map(s => s.trim()).filter(Boolean).join('\n\n');
+      if (!text) throw new Error('empty');
+      esvCachePut(q, text);
+      return text;
+    }).finally(() => { delete esvInFlight[q]; });
+    esvInFlight[q] = p;
+    return p;
+  }
+
+  function esvHtml(text) {
+    const body = escapeHtml(text)
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/\[(\d+)\]\s*/g, '<sup>$1</sup>');
+    return body + ' <span class="esv-tag">(ESV)</span>';
+  }
+
+  function fillPassage(el, reading) {
+    if (!el) return;
+    el.innerHTML = '<span class="devo-msg">Loading the reading…</span>';
+    fetchEsv(reading.q).then(text => {
+      if (el.isConnected) el.innerHTML = esvHtml(text);
+    }).catch(e => {
+      if (!el.isConnected) return;
+      const why = (e && e.message === 'throttled')
+        ? 'Too many readings opened at once. Give it a minute and try again.'
+        : (navigator.onLine === false ? 'You are offline, so the ESV text cannot load.' : 'The ESV text could not load right now.');
+      el.innerHTML = `<span class="devo-msg">${why} Use “Open in reader” for KJV or WEB, which work offline.</span>`;
+    });
+  }
+
+  // ---------- Devotion data ----------
+  const devo = { index: null, common: null, quarters: {}, qid: null, week: 0, day: 1, view: 'day', order: null, introOpen: false, verseHidden: false, loading: null };
+  const DEVO_LEVELS = ['pre', '1st', '2nd', '3rd'];
+  const DEVO_LEVEL_LABEL = { pre: 'Pre+', '1st': '1st+', '2nd': '2nd+', '3rd': '3rd+', all: 'Everyone' };
+  let devoLevel = loadRaw('sj_devo_level', 'all');
+  if (devoLevel !== 'all' && !DEVO_LEVELS.includes(devoLevel)) devoLevel = 'all';
+  let devoLead = loadRaw('sj_devo_lead', '0') === '1';
+
+  function devoFetchJson(path) {
+    return fetch('devotions/' + path, { cache: 'no-cache' }).then(r => {
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    });
+  }
+  function ensureDevoData() {
+    if (devo.loading) return devo.loading;
+    devo.loading = Promise.all([devoFetchJson('index.json'), devoFetchJson('common.json')]).then(([index, common]) => {
+      devo.index = index; devo.common = common;
+      const q = pickQuarter(index.quarters, todayStr());
+      return devoFetchJson(q.file).then(data => {
+        devo.quarters[q.id] = data;
+        devo.qid = q.id;
+        jumpDevoToToday();
+      });
+    });
+    devo.loading.catch(() => { devo.loading = null; });
+    return devo.loading;
+  }
+  function pickQuarter(list, today) {
+    const inside = list.find(q => q.start <= today && today <= q.end);
+    if (inside) return inside;
+    const upcoming = list.filter(q => q.start > today).sort((a, b) => a.start < b.start ? -1 : 1)[0];
+    if (upcoming) return upcoming;
+    return list.slice().sort((a, b) => a.end < b.end ? 1 : -1)[0];
+  }
+
+  function dateFromStr(s) { const p = s.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+  function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const DAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function weekRangeLabel(w) {
+    const s = dateFromStr(w.start), e = addDays(s, 6);
+    return s.getMonth() === e.getMonth()
+      ? `${MONTHS[s.getMonth()]} ${s.getDate()} to ${e.getDate()}`
+      : `${MONTHS[s.getMonth()]} ${s.getDate()} to ${MONTHS[e.getMonth()]} ${e.getDate()}`;
+  }
+
+  function jumpDevoToToday() {
+    const q = devo.quarters[devo.qid];
+    if (!q) return;
+    const today = dateFromStr(todayStr());
+    let wi = q.weeks.findIndex(w => { const s = dateFromStr(w.start); return today >= s && today < addDays(s, 7); });
+    if (wi < 0) {
+      wi = today < dateFromStr(q.weeks[0].start) ? 0 : q.weeks.length - 1;
+      devo.day = 1;
+    } else {
+      devo.day = today.getDay();
+    }
+    devo.week = wi;
+  }
+
+  // ---------- Check-offs ----------
+  // One entry per day, `quarter|YYYY-MM-DD`, carrying when it last changed so
+  // that two phones syncing through the same account settle on whichever
+  // touched it last, and an uncheck travels as well as a check does.
+  function devoKey(dateStr) { return devo.qid + '|' + dateStr; }
+  function devoIsDone(dateStr) { const e = devoChecks[devoKey(dateStr)]; return !!(e && e.d); }
+  function devoSetDone(dateStr, done) {
+    devoChecks[devoKey(dateStr)] = { d: done ? 1 : 0, t: Date.now() };
+    store('sj_devo_checks', JSON.stringify(devoChecks));
+    scheduleCloudSync();
+  }
+  function mergeDevoChecks(remote) {
+    if (!remote || typeof remote !== 'object') return;
+    Object.keys(remote).forEach(k => {
+      const r = remote[k];
+      if (!r || typeof r.t !== 'number') return;
+      if (!devoChecks[k] || devoChecks[k].t < r.t) devoChecks[k] = { d: r.d ? 1 : 0, t: r.t };
+    });
+    store('sj_devo_checks', JSON.stringify(devoChecks));
+  }
+
+  // ---------- Rendering ----------
+  function devoDateFor(w, day) { return todayStr(addDays(dateFromStr(w.start), day)); }
+  function devoReading(w, day) { return (day >= 1 && day <= 6) ? w.readings[day - 1] : null; }
+  function devoQuestions(w, day) {
+    return (w.dayQuestions && w.dayQuestions[String(day)]) || w.questions || [];
+  }
+  function suggestedOrder() {
+    const h = new Date().getHours();
+    return h < 11 ? 'morning' : h < 15 ? 'noon' : h < 20 ? 'evening' : 'close';
+  }
+  function catechismFor(w) {
+    if (devoLevel === 'all') return w.catechism;
+    const max = DEVO_LEVELS.indexOf(devoLevel);
+    return w.catechism.filter(it => it.level === 'all' || DEVO_LEVELS.indexOf(it.level) <= max);
+  }
+  function questionsHtml(w, day) {
+    const qs = devoQuestions(w, day);
+    return (w.questionsIntro ? `<p class="devo-qintro">${escapeHtml(w.questionsIntro)}</p>` : '')
+      + `<ol class="devo-qs">${qs.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ol>`;
+  }
+  function hymnHtml(w) {
+    const url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(w.hymn.title + ' hymn LSB ' + w.hymn.lsb);
+    return `<div style="font-size:15px; color:var(--text-primary);">${escapeHtml(w.hymn.title)} <span style="color:var(--text-secondary);">(LSB ${escapeHtml(w.hymn.lsb)})</span></div>
+      <div class="devo-btnrow"><a class="devo-btn" href="${url}" target="_blank" rel="noopener">Listen on YouTube</a></div>`;
+  }
+  function noticeHtml() {
+    const q = devo.quarters[devo.qid];
+    return `<p class="devo-notice">${ESV_NOTICE}<br><br>Devotional material from “${escapeHtml(q.title)}”, ${escapeHtml(q.church)}, for family use.</p>`;
+  }
+
+  function openDevotion() {
+    devoOpen = true;
+    homeIsOpen = false;
+    setTrayActive('devo');
+    setHomeTitle('Family Devotion');
+    const drawer = document.getElementById('home-content');
+    if (!devo.quarters[devo.qid]) {
+      drawer.innerHTML = '<p class="loading-dots">Loading the devotion…</p>';
+      ensureDevoData().then(() => { if (devoOpen) renderDevotion(); })
+        .catch(() => { if (devoOpen) drawer.innerHTML = '<p class="study-body" style="text-align:center;">The devotion could not load. Check your connection and tap Devotion again.</p>'; });
+      return;
+    }
+    renderDevotion();
+  }
+
+  function renderDevotion() {
+    if (devo.view === 'order') return renderOrder();
+    const q = devo.quarters[devo.qid];
+    const w = q.weeks[devo.week];
+    const drawer = document.getElementById('home-content');
+    const todayS = todayStr();
+    const day = devo.day;
+    const dateS = devoDateFor(w, day);
+    const d = dateFromStr(dateS);
+    const reading = devoReading(w, day);
+    const doneCount = [1, 2, 3, 4, 5, 6].filter(i => devoIsDone(devoDateFor(w, i))).length;
+    const thisWeek = todayS >= w.start && todayS <= devoDateFor(w, 6);
+
+    let dayChips = '';
+    for (let i = 0; i < 7; i++) {
+      const ds = devoDateFor(w, i);
+      const dd = dateFromStr(ds);
+      const check = i === 0 ? '' : (devoIsDone(ds) ? '✓' : '');
+      dayChips += `<button class="devo-day${i === day ? ' sel' : ''}${ds === todayS ? ' today' : ''}" data-day="${i}">
+        <span class="dl">${DAYS_LONG[i].slice(0, 3).toUpperCase()}</span><span class="dn">${dd.getDate()}</span><span class="dc">${check}</span></button>`;
+    }
+
+    let dayCard;
+    if (reading) {
+      const done = devoIsDone(dateS);
+      dayCard = `
+        <div class="tracker-card">
+          <div class="devo-date">${DAYS_LONG[day]}, ${MONTHS_LONG[d.getMonth()]} ${d.getDate()}${reading.story ? '<span class="devo-badge">Sunday School story</span>' : ''}</div>
+          <div class="devo-ref">${escapeHtml(reading.ref)}</div>
+          <div class="devo-title">${escapeHtml(reading.title)}</div>
+          <div class="devo-passage" id="devo-passage"></div>
+          <div class="devo-btnrow">
+            <button class="devo-btn" id="devo-open-reader">Open in reader</button>
+            <a class="devo-btn" href="https://www.esv.org/${encodeURI(reading.q.replace(/\s+/g, '+'))}/" target="_blank" rel="noopener">esv.org</a>
+          </div>
+          <button class="devo-done${done ? ' is-done' : ''}" id="devo-done">${done ? '✓ Done for today' : 'Mark this reading done'}</button>
+        </div>
+        <div class="tracker-card">
+          <p class="devo-h">Questions to discuss</p>
+          ${questionsHtml(w, day)}
+        </div>`;
+    } else {
+      const wed = w.readings[2];
+      dayCard = `
+        <div class="tracker-card">
+          <div class="devo-date">Sunday, ${MONTHS_LONG[d.getMonth()]} ${d.getDate()}</div>
+          <div class="devo-ref">The Lord’s Day</div>
+          <p class="devo-msg" style="margin-top:8px;">No appointed reading today. Worship together. This week’s Sunday School story is ${escapeHtml(wed.ref)}, ${escapeHtml(wed.title)}, read on Wednesday.</p>
+        </div>`;
+    }
+
+    const levelBtns = ['all'].concat(DEVO_LEVELS).map(l =>
+      `<button data-level="${l}" class="${devoLevel === l ? 'on' : ''}">${DEVO_LEVEL_LABEL[l]}</button>`).join('');
+    const cards = catechismFor(w).map(it => `
+      <div class="devo-card">
+        <div class="lv">${DEVO_LEVEL_LABEL[it.level] || ''}</div>
+        <div class="cq">${escapeHtml(it.q)}</div>
+        <div class="ca">${escapeHtml(it.a)}</div>
+        <div class="tap">Tap to check your answer</div>
+      </div>`).join('');
+
+    const sug = suggestedOrder();
+    const html = `
+      <div class="devo-hero"><div class="devo-kicker">${escapeHtml(q.title)}</div><div class="devo-sub">${escapeHtml(q.subtitle)}</div></div>
+      <div class="devo-weeknav">
+        <button id="devo-prev" aria-label="Previous week" ${devo.week === 0 ? 'disabled' : ''}>‹</button>
+        <div class="devo-weekmid">
+          <div class="devo-weeklabel">${escapeHtml(w.label)}</div>
+          <div class="devo-weekdates">${weekRangeLabel(w)}</div>
+          ${(!thisWeek || devoDateFor(w, day) !== todayS) ? '<button class="devo-today-btn" id="devo-today">Go to today</button>' : ''}
+        </div>
+        <button id="devo-next" aria-label="Next week" ${devo.week === q.weeks.length - 1 ? 'disabled' : ''}>›</button>
+      </div>
+      <div class="tracker-card">
+        <p class="devo-h">This week’s theme</p>
+        <div class="devo-theme-title">${escapeHtml(w.theme)}</div>
+        <div class="devo-intro${devo.introOpen ? ' open' : ''}">${escapeHtml(w.intro)}</div>
+        <button class="devo-link" id="devo-intro-toggle">${devo.introOpen ? 'Hide the introduction' : 'Read the week’s introduction'}</button>
+      </div>
+      <div class="devo-days">${dayChips}</div>
+      <p class="devo-progress">${doneCount} of 6 readings done this week</p>
+      ${dayCard}
+      <div class="tracker-card">
+        <p class="devo-h">Pray together</p>
+        <p class="devo-topic"><span style="color:var(--text-secondary);">${DAYS_LONG[day]}:</span> ${escapeHtml(devo.common.topics[day])}</p>
+        <div class="devo-pray">${devo.common.orders.map(o => `<button data-order="${o.id}" class="${o.id === sug ? 'suggest' : ''}">${escapeHtml(o.name)}</button>`).join('')}</div>
+      </div>
+      <div class="tracker-card">
+        <p class="devo-h">Verse of the week</p>
+        <div class="devo-ref" style="font-size:15px; margin-bottom:6px;">${escapeHtml(w.verse.ref)}</div>
+        <div class="devo-verse${devo.verseHidden ? ' hidden-practice' : ''}" id="devo-verse">${escapeHtml(w.verse.text)} <span class="esv-tag" style="font-family:-apple-system,system-ui,sans-serif; font-size:11px; color:var(--text-tertiary);">(ESV)</span></div>
+        <button class="devo-link" id="devo-verse-toggle">${devo.verseHidden ? 'Show the verse' : 'Hide it to practice'}</button>
+      </div>
+      <div class="tracker-card">
+        <p class="devo-h">Catechism</p>
+        <div style="font-size:15px; color:var(--text-primary); font-weight:500;">${escapeHtml(w.catechismTitle)}</div>
+        <div class="devo-levels">${levelBtns}</div>
+        ${cards || '<p class="devo-msg">Nothing at this level this week.</p>'}
+      </div>
+      <div class="tracker-card">
+        <p class="devo-h">Hymn of the season</p>
+        ${hymnHtml(w)}
+      </div>
+      ${noticeHtml()}`;
+    drawer.innerHTML = html;
+    if (reading) fillPassage(document.getElementById('devo-passage'), reading);
+
+    const rerender = () => renderDevotion();
+    document.getElementById('devo-prev').onclick = () => { if (devo.week > 0) { devo.week--; devo.day = 1; devo.introOpen = false; rerender(); } };
+    document.getElementById('devo-next').onclick = () => { if (devo.week < q.weeks.length - 1) { devo.week++; devo.day = 1; devo.introOpen = false; rerender(); } };
+    const todayBtn = document.getElementById('devo-today');
+    if (todayBtn) todayBtn.onclick = () => { jumpDevoToToday(); rerender(); };
+    document.getElementById('devo-intro-toggle').onclick = () => { devo.introOpen = !devo.introOpen; rerender(); };
+    document.getElementById('devo-verse-toggle').onclick = () => { devo.verseHidden = !devo.verseHidden; rerender(); };
+    drawer.querySelectorAll('.devo-day').forEach(b => { b.onclick = () => { devo.day = +b.dataset.day; rerender(); }; });
+    drawer.querySelectorAll('.devo-levels button').forEach(b => { b.onclick = () => { devoLevel = b.dataset.level; store('sj_devo_level', devoLevel); rerender(); }; });
+    drawer.querySelectorAll('.devo-card').forEach(c => { c.onclick = () => c.classList.toggle('flip'); });
+    drawer.querySelectorAll('.devo-pray button').forEach(b => { b.onclick = () => { devo.view = 'order'; devo.order = b.dataset.order; renderDevotion(); document.getElementById('home-page').scrollTop = 0; }; });
+    const doneBtn = document.getElementById('devo-done');
+    if (doneBtn) doneBtn.onclick = () => {
+      const now = !devoIsDone(dateS);
+      devoSetDone(dateS, now);
+      if (now) showToast('Reading marked done');
+      rerender();
+    };
+    const openBtn = document.getElementById('devo-open-reader');
+    if (openBtn) openBtn.onclick = () => {
+      devoOpen = false;
+      hideHomePage();
+      switchToBook(reading.start[0], reading.start[1], reading.start[2]);
+    };
+  }
+
+  function renderOrder() {
+    const q = devo.quarters[devo.qid];
+    const w = q.weeks[devo.week];
+    const day = devo.day;
+    const reading = devoReading(w, day);
+    const order = devo.common.orders.find(o => o.id === devo.order) || devo.common.orders[0];
+    const drawer = document.getElementById('home-content');
+    setHomeTitle(order.name);
+
+    const slot = (name) => {
+      switch (name) {
+        case 'hymn': return hymnHtml(w);
+        case 'reading':
+          if (!reading) return `<div class="devo-ref" style="font-size:15px;">${escapeHtml(w.verse.ref)}</div><div class="devo-passage">${escapeHtml(w.verse.text)} <span class="esv-tag">(ESV)</span></div><p class="devo-msg" style="margin-top:8px;">No appointed reading on Sunday, so read the verse of the week.</p>`;
+          return `<div class="devo-ref" style="font-size:15px;">${escapeHtml(reading.ref)}</div><div class="devo-title">${escapeHtml(reading.title)}</div>
+            <div class="devo-passage" id="order-passage"></div>
+            <p class="devo-h" style="margin-top:14px;">Discuss</p>${questionsHtml(w, day)}`;
+        case 'catechism':
+          return `<div style="font-weight:500; margin-bottom:8px;">${escapeHtml(w.catechismTitle)}</div>` +
+            catechismFor(w).map(it => `<p style="margin:0 0 4px; font-size:13px; color:var(--text-secondary);">${escapeHtml(it.q)}</p><p class="all-text" style="margin:0 0 12px;">${escapeHtml(it.a)}</p>`).join('');
+        case 'creed': return `<div class="all-text">${escapeHtml(devo.common.creed)}</div>`;
+        case 'lordsprayer': return `<div class="all-text">${escapeHtml(devo.common.lordsPrayer)}</div>`;
+        case 'topic': return `<p style="margin:0 0 6px; font-size:15px;">${escapeHtml(devo.common.topics[day])}</p><p class="devo-msg">Then add your own prayers for family, friends, and yourselves.</p>`;
+      }
+      return '';
+    };
+
+    let body = '';
+    order.lines.forEach(l => {
+      if (l.t === 'slot') {
+        body += `<p class="rubric">${escapeHtml(l.x)}</p><div class="slot">${slot(l.slot)}</div>`;
+      } else {
+        body += `<p class="${l.t === 'all' ? 'all' : l.t === 'rubric' ? 'rubric' : l.t === 'head' ? 'head' : ''}">${escapeHtml(l.x)}</p>`;
+      }
+    });
+
+    drawer.innerHTML = `
+      <div class="devo-order-top">
+        <button class="back-btn" id="order-back" style="margin:0;">‹ Back to today</button>
+        <button class="devo-lead${devoLead ? ' on' : ''}" id="order-lead">${devoLead ? 'Large text on' : 'Lead together'}</button>
+      </div>
+      <div class="devo-order-name">${escapeHtml(order.name)}</div>
+      <p class="devo-howto">${DAYS_LONG[day]}, ${escapeHtml(w.label)}. ${escapeHtml(devo.common.howTo)}</p>
+      <div class="devo-order${devoLead ? ' lead' : ''}">${body}</div>
+      ${noticeHtml()}`;
+    if (reading) fillPassage(document.getElementById('order-passage'), reading);
+    document.getElementById('order-back').onclick = () => { devo.view = 'day'; setHomeTitle('Family Devotion'); renderDevotion(); document.getElementById('home-page').scrollTop = 0; };
+    document.getElementById('order-lead').onclick = () => { devoLead = !devoLead; store('sj_devo_lead', devoLead ? '1' : '0'); renderOrder(); };
+  }
+
+  document.getElementById('tray-devo').onclick = () => {
+    showHomePage();
+    devo.view = 'day';
+    document.getElementById('home-page').scrollTop = 0;
+    openDevotion();
+  };
 
   // ---------- Init ----------
   renderFeed();
